@@ -1,0 +1,112 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Booking Confirmation</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header {
+            text-align: center;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+
+            .header h1 {
+                color: #e63946;
+                margin: 0;
+                padding: 0;
+            }
+
+        .content {
+            padding: 20px 0;
+        }
+
+        .booking-details {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 15px 0;
+        }
+
+            .booking-details p {
+                margin: 5px 0;
+            }
+
+        .qr-code {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .button {
+            display: inline-block;
+            background-color: #e63946;
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            margin-top: 15px;
+        }
+
+        .footer {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            font-size: 12px;
+            color: #777;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Cinema Booking Ticket</h1>
+            <p>Booking Confirmation</p>
+        </div>
+        <div class="content">
+            <h2>Your Booking is Confirmed!</h2>
+            <p>Hello {{UserName}},</p>
+            <p>Thank you for booking with us. Below are the details of your reservation:</p>
+
+            <div class="booking-details">
+                <p><strong>Booking Code:</strong> {{BookingCode}}</p>
+                <p><strong>Movie:</strong> {{MovieTitle}}</p>
+                <p><strong>Date & Time:</strong> {{ShowTime}}</p>
+                <p><strong>Seats:</strong> {{Seats}}</p>
+                <p><strong>Total Amount:</strong> {{TotalAmount}}</p>
+            </div>
+
+            <p>Please arrive at least 15 minutes before the show starts. Present this email or your booking code at the counter to collect your tickets.</p>
+
+            <!--<div class="qr-code">
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data={{BookingCode}}" alt="QR Code">
+                <p>Scan this QR code at the cinema</p>
+            </div>-->
+
+            <p>Looking forward to welcoming you!</p>
+
+            <p>CinemaBookingTicket Team</p>
+        </div>
+        <div class="footer">
+            <p>© {{CurrentYear}} CinemaBookingTicket. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>

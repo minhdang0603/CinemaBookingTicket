@@ -1,0 +1,93 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Welcome to CinemaBookingTicket</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header {
+            text-align: center;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+
+            .header h1 {
+                color: #e63946;
+                margin: 0;
+                padding: 0;
+            }
+
+        .content {
+            padding: 20px 0;
+        }
+
+        .button {
+            display: inline-block;
+            background-color: #e63946;
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            margin-top: 15px;
+        }
+
+        .footer {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            font-size: 12px;
+            color: #777;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Cinema Booking Ticket</h1>
+            <p>The best cinema experience</p>
+        </div>
+        <div class="content">
+            <h2>Welcome to CinemaBookingTicket!</h2>
+            <p>Hello {{UserName}},</p>
+            <p>Thank you for registering with CinemaBookingTicket! We're thrilled to have you join our community of movie lovers.</p>
+
+            <p>With your new account, you can:</p>
+            <ul>
+                <li>Browse our extensive collection of the latest movies</li>
+                <li>Book your preferred seats in advance</li>
+                <li>Enjoy special member discounts and promotions</li>
+                <li>Rate and review movies you've watched</li>
+            </ul>
+
+            <p>Ready to start your cinema experience?</p>
+            <a href="#" class="button">Explore Movies</a>
+
+            <p>If you have any questions or need assistance, please don't hesitate to contact our support team.</p>
+
+            <p>Enjoy the show!</p>
+            <p>CinemaBookingTicket Team</p>
+        </div>
+        <div class="footer">
+            <p>© {{CurrentYear}} CinemaBookingTicket. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>

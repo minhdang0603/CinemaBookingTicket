@@ -1,10 +1,15 @@
 
 using System.Text;
 using CinemaBookingTicket_API.Data.Models;
+using CinemaBookingTicket_API.Repository;
+using CinemaBookingTicket_API.Repository.IRepository;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using brevo_csharp.Client;
+using CinemaBookingTicket_API.Services;
+using CinemaBookingTicket_API.Services.IServices;
 
 namespace CinemaBookingTicket_API
 {
@@ -13,6 +18,8 @@ namespace CinemaBookingTicket_API
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+
+            Configuration.Default.ApiKey.Add("api-key", builder.Configuration.GetValue<string>("BrevoApi:ApiKey"));
 
             // Add services to the container.
             builder.Services.AddControllers();
@@ -23,6 +30,9 @@ namespace CinemaBookingTicket_API
             // Register Identity services
             builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>();
+
+            builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+            builder.Services.AddTransient<IEmailService, BrevoEmailService>();
 
             builder.Services.AddResponseCaching();
 
