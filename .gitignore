@@ -41,6 +41,9 @@ bld/
 [Ll]og/
 [Ll]ogs/
 
+# Entity Framework Migrations
+**/Migrations/
+
 # .NET Core
 project.lock.json
 project.fragment.lock.json
