@@ -19,7 +19,7 @@ namespace CinemaBookingTicket_API.DTO
 
             public APIResponseBuilder()
             {
-                
+                _response = new APIResponse<TBuilder>();
             }
 
             public APIResponseBuilder<TBuilder> WithStatusCode(HttpStatusCode statusCode)

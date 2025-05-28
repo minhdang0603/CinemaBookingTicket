@@ -11,6 +11,7 @@ using CinemaBookingTicket_API.Services.IServices;
 using CinemaBookingTicket_API.Repositories;
 using CinemaBookingTicket_API.Repositories.IRepositories;
 using CinemaBookingTicket_API.Middlewares;
+using CinemaBookingTicket_API.Exceptions;
 
 namespace CinemaBookingTicket_API
 {
@@ -24,7 +25,9 @@ namespace CinemaBookingTicket_API
 
             // Add services to the container.
             builder.Services.AddControllers();
+
             builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+            builder.Services.AddProblemDetails();
 
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -76,6 +79,9 @@ namespace CinemaBookingTicket_API
 
             var app = builder.Build();
 
+            app.UseExceptionHandler();
+
+
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
@@ -83,13 +89,13 @@ namespace CinemaBookingTicket_API
                 app.UseSwaggerUI();
             }
 
-            app.UseExceptionHandler();
-
             app.UseAuthentication();
             app.UseAuthorization();
 
 
             app.MapControllers();
+
+            app.MapGet("/", () => { throw new BaseException("hello"); });
 
             app.Run();
         }

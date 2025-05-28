@@ -1,6 +1,6 @@
 ﻿using System.Net;
 
-namespace CinemaBookingTicket_API
+namespace CinemaBookingTicket_API.Exceptions
 {
     public class BaseException : Exception
     {

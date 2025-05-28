@@ -1,5 +1,6 @@
 ﻿using System.Net;
 using CinemaBookingTicket_API.DTO;
+using CinemaBookingTicket_API.Exceptions;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -30,7 +31,6 @@ namespace CinemaBookingTicket_API.Middlewares
             {
                 httpContext.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
                 response.StatusCode = HttpStatusCode.InternalServerError;
-                response.ErrorMessages = "Internal Server Error. Please try again later.";
             }
             _logger.LogError(exception, exception.Message);
             await httpContext.Response.WriteAsJsonAsync(response, cancellationToken).ConfigureAwait(false);
