@@ -1,4 +1,4 @@
-﻿namespace CinemaBookingTicket_API.Repository.IRepository
+﻿namespace CinemaBookingTicket_API.Repositories.IRepositories
 {
     public interface IUnitOfWork
     {

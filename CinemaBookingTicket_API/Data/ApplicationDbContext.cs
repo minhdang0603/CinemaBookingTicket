@@ -168,7 +168,6 @@ public partial class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             entity.Property(e => e.IsActive).HasDefaultValue(true);
             entity.Property(e => e.Language).HasMaxLength(100);
             entity.Property(e => e.LastUpdatedAt).HasDefaultValueSql("(getdate())");
-            entity.Property(e => e.OriginalTitle).HasMaxLength(300);
             entity.Property(e => e.PosterUrl).HasMaxLength(500);
             entity.Property(e => e.Status)
                 .HasMaxLength(20)
@@ -259,6 +258,10 @@ public partial class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             entity.HasIndex(e => new { e.MovieId, e.ScreenId }, "IX_ShowTimes_Movie_Screen");
 
             entity.HasIndex(e => e.ShowDate, "IX_ShowTimes_ShowDate");
+
+            entity.HasIndex(e => new { e.MovieId, e.ScreenId, e.ShowDate, e.StartTime })
+              .HasDatabaseName("UK_ShowTimes_Movie_Screen_Date_Time")
+              .IsUnique();
 
             entity.Property(e => e.BasePrice).HasColumnType("decimal(10, 2)");
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");

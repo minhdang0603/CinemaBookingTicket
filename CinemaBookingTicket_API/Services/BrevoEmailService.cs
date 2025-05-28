@@ -74,31 +74,6 @@ namespace CinemaBookingTicket_API.Services
             await SendEmailAsync(receiverEmail, subject, htmlMessage);
         }
 
-        public async Task SendPaymentConfirmationAsync(string receiverEmail, string userName, string bookingCode, decimal amount)
-        {
-            string subject = $"Payment Confirmation for Booking #{bookingCode}";
-
-            string htmlMessage = GetEmailTemplate("PaymentConfirmation")
-                .Replace("{{UserName}}", userName)
-                .Replace("{{BookingCode}}", bookingCode)
-                .Replace("{{Amount}}", amount.ToString("N0") + " VND")
-                .Replace("{{PaymentDate}}", DateTime.Now.ToString("dd/MM/yyyy HH:mm"))
-                .Replace("{{CurrentYear}}", DateTime.Now.Year.ToString());
-
-            await SendEmailAsync(receiverEmail, subject, htmlMessage);
-        }
-
-        public async Task SendPasswordResetEmailAsync(string receiverEmail, string resetUrl)
-        {
-            string subject = "Reset Your Password";
-
-            string htmlMessage = GetEmailTemplate("PasswordReset")
-                .Replace("{{ResetUrl}}", resetUrl)
-                .Replace("{{CurrentYear}}", DateTime.Now.Year.ToString());
-
-            await SendEmailAsync(receiverEmail, subject, htmlMessage);
-        }
-
         private string GetEmailTemplate(string templateName)
         {
             string templatePath = Path.Combine(Directory.GetCurrentDirectory(), "EmailTemplates", $"{templateName}.html");

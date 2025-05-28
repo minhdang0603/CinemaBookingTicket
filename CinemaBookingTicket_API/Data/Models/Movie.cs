@@ -9,8 +9,6 @@ public partial class Movie
 
     public string Title { get; set; } = null!;
 
-    public string? OriginalTitle { get; set; }
-
     public string Director { get; set; } = null!;
 
     public string Cast { get; set; } = null!;

@@ -84,7 +84,7 @@ namespace CinemaBookingTicket_Web.Services
             {
                 var dto = new APIResponse
                 {
-                    ErrorMessages = new List<string> { Convert.ToString(e.Message) },
+                    ErrorMessages = Convert.ToString(e.Message),
                     IsSuccess = false
                 };
                 var res = JsonConvert.SerializeObject(dto);

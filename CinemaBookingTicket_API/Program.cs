@@ -1,8 +1,6 @@
 
 using System.Text;
 using CinemaBookingTicket_API.Data.Models;
-using CinemaBookingTicket_API.Repository;
-using CinemaBookingTicket_API.Repository.IRepository;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -10,6 +8,9 @@ using Microsoft.IdentityModel.Tokens;
 using brevo_csharp.Client;
 using CinemaBookingTicket_API.Services;
 using CinemaBookingTicket_API.Services.IServices;
+using CinemaBookingTicket_API.Repositories;
+using CinemaBookingTicket_API.Repositories.IRepositories;
+using CinemaBookingTicket_API.Middlewares;
 
 namespace CinemaBookingTicket_API
 {
@@ -23,6 +24,7 @@ namespace CinemaBookingTicket_API
 
             // Add services to the container.
             builder.Services.AddControllers();
+            builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -80,6 +82,8 @@ namespace CinemaBookingTicket_API
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
+
+            app.UseExceptionHandler();
 
             app.UseAuthentication();
             app.UseAuthorization();

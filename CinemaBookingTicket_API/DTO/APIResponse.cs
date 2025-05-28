@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using brevo_csharp.Client;
 
 namespace CinemaBookingTicket_API.DTO
 {
@@ -6,7 +7,49 @@ namespace CinemaBookingTicket_API.DTO
     {
         public HttpStatusCode StatusCode { get; set; }
         public bool IsSuccess { get; set; } = true;
-        public List<string> ErrorMessages { get; set; }
+        public string ErrorMessages { get; set; }
         public T Result { get; set; }
+        private APIResponse() { }
+
+        public static APIResponseBuilder<T> Builder() => new APIResponseBuilder<T>();
+
+        public class APIResponseBuilder<TBuilder> where TBuilder : class
+        {
+            private readonly APIResponse<TBuilder> _response;
+
+            public APIResponseBuilder()
+            {
+                
+            }
+
+            public APIResponseBuilder<TBuilder> WithStatusCode(HttpStatusCode statusCode)
+            {
+                _response.StatusCode = statusCode;
+                return this;
+            }
+
+            public APIResponseBuilder<TBuilder> WithSuccess(bool isSuccess)
+            {
+                _response.IsSuccess = isSuccess;
+                return this;
+            }
+
+            public APIResponseBuilder<TBuilder> WithErrorMessages(string errorMessages)
+            {
+                _response.ErrorMessages = errorMessages;
+                return this;
+            }
+
+            public APIResponseBuilder<TBuilder> WithResult(TBuilder result)
+            {
+                _response.Result = result;
+                return this;
+            }
+
+            public APIResponse<TBuilder> Build()
+            {
+                return _response;
+            }
+        }
     }
 }

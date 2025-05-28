@@ -1,10 +1,10 @@
 ﻿using System.Linq.Expressions;
 using System.Linq;
 using CinemaBookingTicket_API.Data.Models;
-using CinemaBookingTicket_API.Repository.IRepository;
 using Microsoft.EntityFrameworkCore;
+using CinemaBookingTicket_API.Repositories.IRepositories;
 
-namespace CinemaBookingTicket_API.Repository
+namespace CinemaBookingTicket_API.Repositories
 {
     public class Repository<T> : IRepository<T> where T : class
     {
