@@ -2,12 +2,13 @@
 
 namespace CinemaBookingTicket_API.Exceptions
 {
-    public class BaseException : Exception
+    public class Error
     {
+        public string Message { get; set; }
         public HttpStatusCode StatusCode { get; set; }
-
-        public BaseException(string message, HttpStatusCode statusCode = HttpStatusCode.InternalServerError) : base(message)
+        public Error(string message, HttpStatusCode statusCode)
         {
+            Message = message;
             StatusCode = statusCode;
         }
     }

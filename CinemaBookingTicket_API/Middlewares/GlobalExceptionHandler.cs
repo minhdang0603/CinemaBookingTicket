@@ -21,10 +21,12 @@ namespace CinemaBookingTicket_API.Middlewares
             var response = APIResponse<object>.Builder()
                 .WithSuccess(false)
                 .Build();
-            if (exception is BaseException e)
+            if (exception is AppException e)
             {
-                httpContext.Response.StatusCode = (int)e.StatusCode;
-                response.StatusCode = e.StatusCode;
+                // If the exception is a BaseException, we can extract the error details
+                Error error = e.Error;
+                httpContext.Response.StatusCode = (int)error.StatusCode;
+                response.StatusCode = error.StatusCode;
                 response.ErrorMessages = e.Message;
             }
             else

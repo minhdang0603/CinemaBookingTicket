@@ -12,6 +12,9 @@ using CinemaBookingTicket_API.Repositories;
 using CinemaBookingTicket_API.Repositories.IRepositories;
 using CinemaBookingTicket_API.Middlewares;
 using CinemaBookingTicket_API.Exceptions;
+using Microsoft.AspNetCore.Authorization;
+using CinemaBookingTicket_API.DTO;
+using System.Net;
 
 namespace CinemaBookingTicket_API
 {
@@ -61,6 +64,34 @@ namespace CinemaBookingTicket_API
                         //ValidIssuer = builder.Configuration.GetValue<string>("JwtSettings:ValidIssuer"),
                         //ValidAudience = builder.Configuration.GetValue<string>("JwtSettings:ValidAudience")
                     };
+
+                    option.Events = new JwtBearerEvents
+                    {
+                        OnChallenge = context =>
+                        {
+                            context.HandleResponse();
+                            context.HttpContext.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                            context.HttpContext.Response.ContentType = "application/json";
+                            var response = APIResponse<object>.Builder()
+                                .WithStatusCode(HttpStatusCode.Unauthorized)
+                                .WithErrorMessages("Authentication failed")
+                                .WithSuccess(false)
+                                .Build();
+                            return context.HttpContext.Response.WriteAsJsonAsync(response);
+                        },
+                        OnForbidden = context =>
+                        {
+                            context.HttpContext.Response.StatusCode = StatusCodes.Status403Forbidden;
+                            context.HttpContext.Response.ContentType = "application/json";
+                            var response = APIResponse<object>.Builder()
+                                .WithStatusCode(HttpStatusCode.Forbidden)
+                                .WithErrorMessages("You do not have permission to access this resource.")
+                                .WithSuccess(false)
+                                .Build();
+                            return context.HttpContext.Response.WriteAsJsonAsync(response);
+                        }
+                    };
+                    
                 });
 
 
@@ -92,10 +123,9 @@ namespace CinemaBookingTicket_API
             app.UseAuthentication();
             app.UseAuthorization();
 
-
             app.MapControllers();
 
-            app.MapGet("/", () => { throw new BaseException("hello"); });
+            app.MapGet("/", () => { throw new AppException(ErrorCodes.UserAlreadyExists("email")); });
 
             app.Run();
         }
