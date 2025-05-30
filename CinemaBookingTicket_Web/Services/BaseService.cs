@@ -1,4 +1,4 @@
-﻿using CinemaBookingTicket_Utility;
+﻿using Utility;
 using System.Net.Http.Headers;
 using System.Text;
 using CinemaBookingTicket_Web.Models;
@@ -34,13 +34,13 @@ namespace CinemaBookingTicket_Web.Services
                 }
                 switch (apiRequest.ApiType)
                 {
-                    case SD.ApiType.POST:
+                    case Constant.ApiType.POST:
                         message.Method = HttpMethod.Post;
                         break;
-                    case SD.ApiType.PUT:
+                    case Constant.ApiType.PUT:
                         message.Method = HttpMethod.Put;
                         break;
-                    case SD.ApiType.DELETE:
+                    case Constant.ApiType.DELETE:
                         message.Method = HttpMethod.Delete;
                         break;
                     default:

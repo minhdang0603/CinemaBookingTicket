@@ -1,13 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.13.35913.81 d17.13
+VisualStudioVersion = 17.13.35913.81
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CinemaBookingTicket_API", "CinemaBookingTicket_API\CinemaBookingTicket_API.csproj", "{A4A51223-05F4-4F32-845B-9544B4F00775}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "API", "CinemaBookingTicket_API\API.csproj", "{A4A51223-05F4-4F32-845B-9544B4F00775}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CinemaBookingTicket_Web", "CinemaBookingTicket_Web\CinemaBookingTicket_Web.csproj", "{7DADE193-F77E-4241-A81D-E2D08B26BA29}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Web", "CinemaBookingTicket_Web\Web.csproj", "{7DADE193-F77E-4241-A81D-E2D08B26BA29}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CinemaBookingTicket_Utility", "CinemaBookingTicket_Utility\CinemaBookingTicket_Utility.csproj", "{444DE821-B1A6-45C4-B1B8-D96A3F6BF9C0}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Utility", "Utility\Utility.csproj", "{7C693C66-AAAC-400D-8EAD-CF0F17804722}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,10 +23,10 @@ Global
 		{7DADE193-F77E-4241-A81D-E2D08B26BA29}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7DADE193-F77E-4241-A81D-E2D08B26BA29}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7DADE193-F77E-4241-A81D-E2D08B26BA29}.Release|Any CPU.Build.0 = Release|Any CPU
-		{444DE821-B1A6-45C4-B1B8-D96A3F6BF9C0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{444DE821-B1A6-45C4-B1B8-D96A3F6BF9C0}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{444DE821-B1A6-45C4-B1B8-D96A3F6BF9C0}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{444DE821-B1A6-45C4-B1B8-D96A3F6BF9C0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7C693C66-AAAC-400D-8EAD-CF0F17804722}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7C693C66-AAAC-400D-8EAD-CF0F17804722}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7C693C66-AAAC-400D-8EAD-CF0F17804722}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7C693C66-AAAC-400D-8EAD-CF0F17804722}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

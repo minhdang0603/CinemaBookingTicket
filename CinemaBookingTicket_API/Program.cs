@@ -15,6 +15,7 @@ using CinemaBookingTicket_API.Exceptions;
 using Microsoft.AspNetCore.Authorization;
 using CinemaBookingTicket_API.DTO;
 using System.Net;
+using CinemaBookingTicket_API.Data.DbInitializer;
 
 namespace CinemaBookingTicket_API
 {
@@ -56,6 +57,7 @@ namespace CinemaBookingTicket_API
                 .AddEntityFrameworkStores<ApplicationDbContext>();
 
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+            builder.Services.AddScoped<IDbInitializer, DbInitializer>();
             builder.Services.AddTransient<IEmailService, BrevoEmailService>();
 
             builder.Services.AddResponseCaching();
@@ -139,11 +141,22 @@ namespace CinemaBookingTicket_API
             app.UseAuthentication();
             app.UseAuthorization();
 
+            SeedDatabase();
+
             app.MapControllers();
 
             app.MapGet("/", () => { throw new AppException(ErrorCodes.UserAlreadyExists("email")); });
 
             app.Run();
+
+            void SeedDatabase()
+            {
+                using (var scope = app.Services.CreateScope())
+                {
+                    scope.ServiceProvider.GetRequiredService<IDbInitializer>().Initialize();
+                }
+            }
         }
+        
     }
 }
