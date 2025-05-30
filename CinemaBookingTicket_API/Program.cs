@@ -1,4 +1,3 @@
-
 using System.Text;
 using CinemaBookingTicket_API.Data.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;

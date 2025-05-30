@@ -92,6 +92,8 @@
                     .HasForeignKey(d => d.SeatId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_BookingDetails_Seats");
+
+                entity.HasIndex(e => new { e.BookingId, e.SeatId }, "UK_BookingDetails_Booking_Seat").IsUnique();
             });
 
             modelBuilder.Entity<Concession>(entity =>
@@ -147,6 +149,8 @@
                 entity.HasOne(d => d.ConcessionOrder).WithMany(p => p.ConcessionOrderDetails)
                     .HasForeignKey(d => d.ConcessionOrderId)
                     .HasConstraintName("FK_ConcessionOrderDetails_Orders");
+
+                entity.HasIndex(e => new { e.ConcessionOrderId, e.ConcessionId }, "UK_ConcessionOrderDetails_Order_Concession").IsUnique();
             });
 
             modelBuilder.Entity<Genre>(entity =>
