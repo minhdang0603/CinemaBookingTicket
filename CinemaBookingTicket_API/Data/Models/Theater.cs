@@ -11,17 +11,11 @@ public partial class Theater
 
     public string Address { get; set; } = null!;
 
-    public string? Phone { get; set; }
-
-    public string? Email { get; set; }
-
     public TimeOnly? OpeningTime { get; set; }
 
     public TimeOnly? ClosingTime { get; set; }
 
     public string? Description { get; set; }
-
-    public string? ImageUrl { get; set; }
 
     public int ProvinceId { get; set; }
 

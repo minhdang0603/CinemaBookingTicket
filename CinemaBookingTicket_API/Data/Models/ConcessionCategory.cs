@@ -11,8 +11,6 @@ public partial class ConcessionCategory
 
     public string? Description { get; set; }
 
-    public int DisplayOrder { get; set; }
-
     public bool IsActive { get; set; }
 
     public virtual ICollection<Concession> Concessions { get; set; } = new List<Concession>();

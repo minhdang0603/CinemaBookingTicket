@@ -9,8 +9,6 @@ public partial class Booking
 
     public string BookingCode { get; set; } = null!;
 
-    public string? UserId { get; set; }
-
     public int ShowTimeId { get; set; }
 
     public DateTime BookingDate { get; set; }
@@ -29,7 +27,9 @@ public partial class Booking
 
     public virtual ICollection<ConcessionOrder> ConcessionOrders { get; set; } = new List<ConcessionOrder>();
 
-    public virtual ICollection<Payment> Payments { get; set; } = new List<Payment>();
+    public virtual Payment Payment { get; set; }
+
+    public virtual ApplicationUser ApplicationUser { get; set; }
 
     public virtual ShowTime ShowTime { get; set; } = null!;
 }
