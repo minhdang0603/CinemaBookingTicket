@@ -11,7 +11,7 @@ namespace CinemaBookingTicket_API.Repositories
         private readonly ApplicationDbContext _context;
         internal DbSet<T> dbSet;
 
-        public Repository(ApplicationDbContext context, DbSet<T> dbSet)
+        public Repository(ApplicationDbContext context)
         {
             _context = context;
             this.dbSet = _context.Set<T>();
@@ -77,6 +77,12 @@ namespace CinemaBookingTicket_API.Repositories
         public async Task RemoveAsync(T entity)
         {
             dbSet.Remove(entity);
+        }
+
+        public Task<T> UpdateAsync(T entity)
+        {
+            dbSet.Update(entity);
+            return Task.FromResult(entity);
         }
     }
 }
