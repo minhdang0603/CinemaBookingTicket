@@ -1,11 +1,10 @@
-﻿
-Microsoft Visual Studio Solution File, Format Version 12.00
+﻿Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.13.35913.81
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "API", "CinemaBookingTicket_API\API.csproj", "{A4A51223-05F4-4F32-845B-9544B4F00775}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "API", "API\API.csproj", "{A4A51223-05F4-4F32-845B-9544B4F00775}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Web", "CinemaBookingTicket_Web\Web.csproj", "{7DADE193-F77E-4241-A81D-E2D08B26BA29}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Web", "Web\Web.csproj", "{7DADE193-F77E-4241-A81D-E2D08B26BA29}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Utility", "Utility\Utility.csproj", "{7C693C66-AAAC-400D-8EAD-CF0F17804722}"
 EndProject
@@ -30,8 +29,5 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {8C2D9B9E-4A7D-43B3-9B6B-8412AA61F710}
 	EndGlobalSection
 EndGlobal
