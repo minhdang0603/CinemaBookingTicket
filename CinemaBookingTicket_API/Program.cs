@@ -12,7 +12,7 @@ using CinemaBookingTicket_API.Repositories.IRepositories;
 using CinemaBookingTicket_API.Middlewares;
 using CinemaBookingTicket_API.Exceptions;
 using Microsoft.AspNetCore.Authorization;
-using CinemaBookingTicket_API.DTO;
+using CinemaBookingTicket_API.DTOs;
 using System.Net;
 using CinemaBookingTicket_API.Data.DbInitializer;
 
@@ -34,8 +34,10 @@ namespace CinemaBookingTicket_API
             // Add services to the container.
             builder.Services.AddControllers();
 
+
             builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
             builder.Services.AddProblemDetails();
+            builder.Services.AddAutoMapper(typeof(MappingConfig));
 
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));

@@ -1,5 +1,5 @@
 ﻿using System.Net;
-using CinemaBookingTicket_API.DTO;
+using CinemaBookingTicket_API.DTOs;
 using CinemaBookingTicket_API.Exceptions;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;

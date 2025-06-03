@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace CinemaBookingTicket_API.Data.Models;
+﻿namespace CinemaBookingTicket_API.Data.Models;
 
 public partial class Movie
 {
@@ -18,10 +15,6 @@ public partial class Movie
     public int Duration { get; set; }
 
     public DateOnly ReleaseDate { get; set; }
-
-    public string? Country { get; set; }
-
-    public string? Language { get; set; }
 
     public string? AgeRating { get; set; }
 

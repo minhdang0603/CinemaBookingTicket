@@ -1,7 +1,7 @@
 ﻿using System.Net;
 using brevo_csharp.Client;
 
-namespace CinemaBookingTicket_API.DTO
+namespace CinemaBookingTicket_API.DTOs
 {
     public class APIResponse<T> where T : class
     {

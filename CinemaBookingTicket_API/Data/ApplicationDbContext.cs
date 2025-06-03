@@ -171,12 +171,10 @@
                 entity.Property(e => e.AgeRating).HasMaxLength(10);
                 entity.Property(e => e.BackgroundUrl).HasMaxLength(500);
                 entity.Property(e => e.Cast).HasMaxLength(1000);
-                entity.Property(e => e.Country).HasMaxLength(100);
                 entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
                 entity.Property(e => e.Description).HasMaxLength(2000);
                 entity.Property(e => e.Director).HasMaxLength(200);
                 entity.Property(e => e.IsActive).HasDefaultValue(true);
-                entity.Property(e => e.Language).HasMaxLength(100);
                 entity.Property(e => e.LastUpdatedAt).HasDefaultValueSql("(getdate())");
                 entity.Property(e => e.PosterUrl).HasMaxLength(500);
                 entity.Property(e => e.Status)
