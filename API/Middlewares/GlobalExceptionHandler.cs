@@ -33,8 +33,8 @@ namespace API.Middlewares
             {
                 httpContext.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
                 response.StatusCode = HttpStatusCode.InternalServerError;
+                response.ErrorMessages = "An unexpected error occurred. Please try again later.";
             }
-            _logger.LogError(exception, exception.Message);
             await httpContext.Response.WriteAsJsonAsync(response, cancellationToken).ConfigureAwait(false);
             return true;
 
