@@ -11,9 +11,10 @@ namespace API.Services
         private readonly IConfiguration _configuration;
         private readonly ILogger<BrevoEmailService> _logger;
 
-        public BrevoEmailService(IConfiguration configuration)
+        public BrevoEmailService(IConfiguration configuration, ILogger<BrevoEmailService> logger)
         {
             _configuration = configuration;
+            _logger = logger;
         }
 
         public async Task SendEmailAsync(string receiverEmail, string subject, string htmlMessage)
