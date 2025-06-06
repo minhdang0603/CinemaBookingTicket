@@ -4,7 +4,7 @@ using API.DTOs.Response;
 using AutoMapper;
 using Utility;
 
-namespace API;
+namespace API.Configurations;
 
 public class MappingConfig : Profile
 {
