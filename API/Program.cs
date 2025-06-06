@@ -58,8 +58,9 @@ namespace API
                 .AddEntityFrameworkStores<ApplicationDbContext>();
 
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-            builder.Services.AddScoped<IDbInitializer, DbInitializer>();
             builder.Services.AddTransient<IEmailService, BrevoEmailService>();
+            builder.Services.AddScoped<IDbInitializer, DbInitializer>();
+            builder.Services.AddScoped<IAuthService, AuthService>();
 
             builder.Services.AddResponseCaching();
 
@@ -158,6 +159,6 @@ namespace API
                 }
             }
         }
-        
+
     }
 }
