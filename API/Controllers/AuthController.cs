@@ -23,7 +23,6 @@ public class AuthController : ControllerBase
     {
         var response = await _authService.LoginAsync(loginRequest);
 
-
         return Ok(APIResponse<LoginResponseDTO>.Builder()
             .WithResult(response)
             .WithStatusCode(HttpStatusCode.OK)

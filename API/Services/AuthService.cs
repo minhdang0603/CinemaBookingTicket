@@ -10,6 +10,7 @@ using API.Services.IServices;
 using AutoMapper;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
+using Utility;
 
 namespace API.Services;
 
@@ -62,31 +63,6 @@ public class AuthService : IAuthService
         };
     }
 
-    private async Task<string> GenerateJwtToken(ApplicationUser user, DateTime expiration)
-    {
-        var roles = await _userManager.GetRolesAsync(user);
-        var claims = new List<Claim>
-        {
-            new Claim(ClaimTypes.NameIdentifier, user.Id),
-            new Claim(ClaimTypes.Email, user.Email),
-            new Claim(ClaimTypes.Name, user.UserName),
-            new Claim(ClaimTypes.Role, roles.FirstOrDefault() ?? string.Empty)
-        };
-
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
-        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256Signature);
-
-        var token = new JwtSecurityToken(
-            issuer: issuer,
-            audience: audience,
-            claims: claims,
-            expires: expiration,
-            signingCredentials: creds
-        );
-
-        return new JwtSecurityTokenHandler().WriteToken(token);
-    }
-
     public async Task<LoginResponseDTO> RegisterAsync(UserCreateDTO userCreateDTO)
     {
         // Check if user already exists
@@ -112,7 +88,7 @@ public class AuthService : IAuthService
             throw new AppException(ErrorCodes.UserCreationFailed());
         }
 
-        await _userManager.AddToRoleAsync(user, "User");
+        await _userManager.AddToRoleAsync(user, Constant.Role_Customer);
 
         // Send confirmation email
         await _emailService.SendWelcomeEmailAsync(user.Email, user.Name);
@@ -123,5 +99,32 @@ public class AuthService : IAuthService
             Expiration = DateTime.UtcNow.AddMinutes(tokenExpirationInMinutes),
             User = _mapper.Map<UserDTO>(user)
         };
+    }
+
+    private async Task<string> GenerateJwtToken(ApplicationUser user, DateTime expiration)
+    {
+        var roles = await _userManager.GetRolesAsync(user);
+        var tokenHandler = new JwtSecurityTokenHandler();
+        var key = Encoding.UTF8.GetBytes(secretKey);
+
+        var claims = new List<Claim>
+        {
+            new Claim(ClaimTypes.NameIdentifier, user.Id),
+            new Claim(ClaimTypes.Name, user.Email.ToString()),
+            new Claim(ClaimTypes.Role, roles.FirstOrDefault()),
+        };
+
+        var tokenDescriptor = new SecurityTokenDescriptor
+        {
+            Subject = new ClaimsIdentity(claims),
+            Expires = expiration,
+            Issuer = issuer,
+            Audience = audience,
+            SigningCredentials = new(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+        };
+
+        var token = tokenHandler.CreateToken(tokenDescriptor);
+
+        return new JwtSecurityTokenHandler().WriteToken(token);
     }
 }

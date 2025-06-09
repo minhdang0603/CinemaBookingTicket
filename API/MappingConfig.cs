@@ -38,5 +38,6 @@ public class MappingConfig : Profile
                 .ForMember(dest => dest.LastUpdatedAt, opt => opt.MapFrom(src =>
                     DateTime.Now));
         CreateMap<ApplicationUser, UserDTO>();
+        CreateMap<UserUpdateDTO, ApplicationUser>();
     }
 }

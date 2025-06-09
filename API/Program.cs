@@ -61,6 +61,7 @@ namespace API
             builder.Services.AddTransient<IEmailService, BrevoEmailService>();
             builder.Services.AddScoped<IDbInitializer, DbInitializer>();
             builder.Services.AddScoped<IAuthService, AuthService>();
+            builder.Services.AddScoped<IUserService, UserService>();
 
             builder.Services.AddResponseCaching();
 
@@ -78,9 +79,11 @@ namespace API
                     option.TokenValidationParameters = new TokenValidationParameters()
                     {
                         ValidateIssuerSigningKey = true,
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(key)),
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key)),
                         ValidateIssuer = false,
                         ValidateAudience = false,
+                        ValidateLifetime = true,
+                        ClockSkew = TimeSpan.Zero,
                         //ValidIssuer = builder.Configuration.GetValue<string>("JwtSettings:ValidIssuer"),
                         //ValidAudience = builder.Configuration.GetValue<string>("JwtSettings:ValidAudience")
                     };
