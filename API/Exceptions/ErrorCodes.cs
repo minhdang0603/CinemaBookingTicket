@@ -11,6 +11,8 @@ namespace API.Exceptions
         public static Error MovieAlreadyExists(string title) => new($"The movie with title = {title} already exists", HttpStatusCode.Conflict);
         public static Error InvalidCredentials() => new("Invalid email or password.", HttpStatusCode.Unauthorized);
         public static Error UnauthorizedAccess() => new("You do not have permission to access this resource.", HttpStatusCode.Forbidden);
+        public static Error BookingNotFound(int bookingId) => new($"The booking with id = {bookingId} was not found", HttpStatusCode.NotFound);
+        public static Error PaymentNotFound(int bookingId) => new($"The payment of booking with id = {bookingId} was not found", HttpStatusCode.NotFound);
         public static Error UserCreationFailed() => new("User creation failed. Please try again.", HttpStatusCode.InternalServerError);
         public static Error InternalServerError(string message = "An unexpected error occurred. Please try again later.")
             => new(message, HttpStatusCode.InternalServerError);

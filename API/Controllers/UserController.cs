@@ -47,7 +47,7 @@ public class UserController : ControllerBase
     }
 
     [HttpPut("{id:guid}")]
-    [Authorize]
+    [Authorize(Roles = Constant.Role_Admin)]
     public async Task<ActionResult<APIResponse<UserDTO>>> UpdateUserDetails(Guid id, [FromBody] UserUpdateDTO updateUserRequest)
     {
         if (id.ToString() != updateUserRequest.UserId)
@@ -58,6 +58,24 @@ public class UserController : ControllerBase
                 .WithSuccess(false)
                 .Build());
         }
+
+        var updatedUser = await _userService.UpdateUserDetailsAsync(updateUserRequest);
+
+        return Ok(APIResponse<UserDTO>.Builder()
+            .WithResult(updatedUser)
+            .WithStatusCode(HttpStatusCode.OK)
+            .Build());
+    }
+
+    [HttpPut("profile")]
+    public async Task<ActionResult<APIResponse<UserDTO>>> UpdateProfile([FromBody] UserUpdateDTO updateUserRequest)
+    {
+        // Get current user ID from claims
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                      ?? throw new AppException(ErrorCodes.UnauthorizedAccess());
+
+        // Ensure the user ID in the request matches the current user's ID
+        updateUserRequest.UserId = userId;
 
         var updatedUser = await _userService.UpdateUserDetailsAsync(updateUserRequest);
 

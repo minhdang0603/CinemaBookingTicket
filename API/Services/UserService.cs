@@ -67,15 +67,6 @@ public class UserService : IUserService
 
     public async Task<UserDTO> UpdateUserDetailsAsync(UserUpdateDTO updateUserRequest)
     {
-        // Check current user and admin access
-        var currentUserId = _httpContextAccessor.HttpContext?.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        var isAdmin = _httpContextAccessor.HttpContext?.User.IsInRole(Constant.Role_Admin) ?? false;
-
-        if (!isAdmin && currentUserId != updateUserRequest.UserId)
-        {
-            throw new AppException(ErrorCodes.UnauthorizedAccess());
-        }
-
         var user = await _userManager.Users.FirstOrDefaultAsync(u => u.Id == updateUserRequest.UserId)
                             ?? throw new AppException(ErrorCodes.UserNotFound(updateUserRequest.UserId));
 

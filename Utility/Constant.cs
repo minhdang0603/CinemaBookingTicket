@@ -28,5 +28,13 @@ namespace Utility
 
         public const string Movie_Status_ComingSoon = "coming soon";
         public const string Movie_Status_NowShowing = "now showing";
+
+        public const string Payment_Status_Pending = "pending";
+        public const string Payment_Status_Completed = "completed";
+        public const string Payment_Status_Failed = "failed";
+
+        public const string Booking_Status_Pending = "pending";
+        public const string Booking_Status_Confirmed = "confirmed";
+        public const string Booking_Status_Cancelled = "cancelled";
     }
 }

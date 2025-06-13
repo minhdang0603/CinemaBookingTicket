@@ -35,9 +35,9 @@ public class AuthService : IAuthService
         _mapper = mapper;
         _dbContext = dbContext;
         _emailService = emailService;
-        secretKey = _configuration.GetValue<string>("JwtSettings:Secret");
-        issuer = _configuration.GetValue<string>("JwtSettings:ValidIssuer");
-        audience = _configuration.GetValue<string>("JwtSettings:ValidAudience");
+        secretKey = _configuration.GetValue<string>("JwtSettings:Secret") ?? "";
+        issuer = _configuration.GetValue<string>("JwtSettings:ValidIssuer") ?? "";
+        audience = _configuration.GetValue<string>("JwtSettings:ValidAudience") ?? "";
         tokenExpirationInMinutes = _configuration.GetValue<int>("JwtSettings:DurationInMinutes");
     }
 
@@ -47,11 +47,13 @@ public class AuthService : IAuthService
         var user = _dbContext.Users.SingleOrDefault(u => u.Email.ToLower() == loginRequest.Email.ToLower());
 
         var isValid = await _userManager.CheckPasswordAsync(user, loginRequest.Password);
+
         if (user == null || !isValid)
         {
             throw new AppException(ErrorCodes.InvalidCredentials());
         }
 
+        // Generate JWT token
         var expiration = DateTime.UtcNow.AddMinutes(tokenExpirationInMinutes);
         var token = await GenerateJwtToken(user, expiration);
 
