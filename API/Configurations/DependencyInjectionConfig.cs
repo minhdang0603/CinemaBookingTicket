@@ -14,6 +14,7 @@ namespace API.Configurations
             services.AddScoped<IDbInitializer, DbInitializer>();
             services.AddTransient<IEmailService, BrevoEmailService>();
             services.AddScoped<IGenreService, GenreService>();
+            services.AddScoped<IMovieService, MovieService>();
         }
     }
 }

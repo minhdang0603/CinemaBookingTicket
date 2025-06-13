@@ -2,6 +2,8 @@ using API.Configurations;
 using API.Data.DbInitializer;
 using API.Exceptions;
 using API.Middlewares;
+using API.Services.IServices;
+using API.Services;
 using brevo_csharp.Client;
 
 namespace API
