@@ -60,7 +60,7 @@ namespace API
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
             builder.Services.AddScoped<IDbInitializer, DbInitializer>();
             builder.Services.AddTransient<IEmailService, BrevoEmailService>();
-
+                
             builder.Services.AddResponseCaching();
 
             var key = builder.Configuration.GetValue<string>("JwtSettings:Secret");
