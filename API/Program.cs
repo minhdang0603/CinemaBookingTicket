@@ -39,6 +39,10 @@ namespace API
             builder.Services.AddProblemDetails();
             builder.Services.AddAutoMapper(typeof(MappingConfig));
 
+            // Booking
+            builder.Services.AddScoped<IBookingRepository, BookingRepository>();
+            builder.Services.AddScoped<IBookingService, BookingService>();
+
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 

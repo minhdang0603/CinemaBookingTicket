@@ -39,5 +39,15 @@ public class MappingConfig : Profile
                     DateTime.Now));
         CreateMap<ApplicationUser, UserDTO>();
         CreateMap<UserUpdateDTO, ApplicationUser>();
+
+        CreateMap<Booking, BookingHistoryDTO>()
+                .ForMember(dest => dest.MovieTitle, opt => opt.MapFrom(src => src.ShowTime.Movie.Title))
+                .ForMember(dest => dest.MoviePoster, opt => opt.MapFrom(src => src.ShowTime.Movie.PosterUrl))
+                .ForMember(dest => dest.TheaterName, opt => opt.MapFrom(src => src.ShowTime.Screen.Theater.Name))
+                .ForMember(dest => dest.TicketCount, opt => opt.MapFrom(src => src.BookingDetails.Count));
+
+        CreateMap<Booking, BookingDetailDTO>();
+        CreateMap<BookingDetail, BookedSeatDTO>();
+        CreateMap<Payment, PaymentDTO>();
     }
 }
