@@ -12,19 +12,11 @@ public partial class Payment
 
     public decimal Amount { get; set; }
 
-    public string PaymentMethod { get; set; } = null!;
-
     public DateTime PaymentDate { get; set; }
 
     public string PaymentStatus { get; set; } = null!;
 
-    public string? SessionId { get; set; }
-
-    public string? PaymentIntentId { get; set; }
-
     public string? OrderCode { get; set; }
-
-    public string? PaymentGateway { get; set; }
 
     public decimal? RefundAmount { get; set; }
 
@@ -33,6 +25,18 @@ public partial class Payment
     public DateTime CreatedAt { get; set; }
 
     public DateTime LastUpdatedAt { get; set; }
+
+    public string? TransactionId { get; set; }
+
+    public string? BankCode { get; set; }
+
+    public string? BankTransactionNo { get; set; }
+
+    public string? CardType { get; set; }
+
+    public string? ResponseCode { get; set; }
+
+    public string? SecureHash { get; set; }
 
     public virtual Booking? Booking { get; set; }
 }

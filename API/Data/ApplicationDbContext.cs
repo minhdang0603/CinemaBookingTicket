@@ -70,32 +70,32 @@ public partial class ApplicationDbContext : IdentityDbContext<ApplicationUser>
                 .HasConstraintName("FK_Bookings_ShowTimes");
         });
 
-    modelBuilder.Entity<Booking>()
-        .HasOne(b => b.Payment)
-        .WithOne(p => p.Booking)
-        .HasForeignKey<Payment>(p => p.BookingId)
-        .HasConstraintName("FK_Payments_Bookings")
-        .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<Booking>()
+            .HasOne(b => b.Payment)
+            .WithOne(p => p.Booking)
+            .HasForeignKey<Payment>(p => p.BookingId)
+            .HasConstraintName("FK_Payments_Bookings")
+            .OnDelete(DeleteBehavior.Cascade);
 
 
-    modelBuilder.Entity<BookingDetail>(entity =>
-        {
-            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
-            entity.Property(e => e.LastUpdatedAt).HasDefaultValueSql("(getdate())");
-            entity.Property(e => e.SeatName).HasMaxLength(10);
-            entity.Property(e => e.SeatPrice).HasColumnType("decimal(10, 2)");
+        modelBuilder.Entity<BookingDetail>(entity =>
+            {
+                entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
+                entity.Property(e => e.LastUpdatedAt).HasDefaultValueSql("(getdate())");
+                entity.Property(e => e.SeatName).HasMaxLength(10);
+                entity.Property(e => e.SeatPrice).HasColumnType("decimal(10, 2)");
 
-            entity.HasOne(d => d.Booking).WithMany(p => p.BookingDetails)
-                .HasForeignKey(d => d.BookingId)
-                .HasConstraintName("FK_BookingDetails_Bookings");
+                entity.HasOne(d => d.Booking).WithMany(p => p.BookingDetails)
+                    .HasForeignKey(d => d.BookingId)
+                    .HasConstraintName("FK_BookingDetails_Bookings");
 
-            entity.HasOne(d => d.Seat).WithMany(p => p.BookingDetails)
-                .HasForeignKey(d => d.SeatId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_BookingDetails_Seats");
+                entity.HasOne(d => d.Seat).WithMany(p => p.BookingDetails)
+                    .HasForeignKey(d => d.SeatId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_BookingDetails_Seats");
 
-            entity.HasIndex(e => new { e.BookingId, e.SeatId }, "UK_BookingDetails_Booking_Seat").IsUnique();
-        });
+                entity.HasIndex(e => new { e.BookingId, e.SeatId }, "UK_BookingDetails_Booking_Seat").IsUnique();
+            });
 
         modelBuilder.Entity<Concession>(entity =>
         {
@@ -199,8 +199,6 @@ public partial class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             entity.Property(e => e.LastUpdatedAt).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.OrderCode).HasMaxLength(100);
             entity.Property(e => e.PaymentDate).HasDefaultValueSql("(getdate())");
-            entity.Property(e => e.PaymentGateway).HasMaxLength(50);
-            entity.Property(e => e.PaymentMethod).HasMaxLength(50);
             entity.Property(e => e.PaymentStatus)
                 .HasMaxLength(20)
                 .HasDefaultValue("Pending");
