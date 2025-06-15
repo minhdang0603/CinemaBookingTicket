@@ -16,6 +16,7 @@ using API.DTOs;
 using System.Net;
 using API.Data.DbInitializer;
 
+
 namespace API
 {
     public class Program
@@ -44,8 +45,8 @@ namespace API
             builder.Services.AddScoped<IBookingService, BookingService>();
 
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-
+             options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+            builder.Services.AddScoped<IDbInitializer, DbInitializer>();
             // Register Identity services
             builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
             {
@@ -65,6 +66,7 @@ namespace API
             builder.Services.AddTransient<IEmailService, BrevoEmailService>();
 
             builder.Services.AddResponseCaching();
+
 
             var key = builder.Configuration.GetValue<string>("JwtSettings:Secret");
 
