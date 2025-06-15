@@ -1,4 +1,5 @@
 using API.Data.Models;
+using API.DTOs;
 using API.DTOs.Request;
 using API.DTOs.Response;
 using AutoMapper;
@@ -37,5 +38,22 @@ public class MappingConfig : Profile
         CreateMap<GenreUpdateDTO, Genre>()
                 .ForMember(dest => dest.LastUpdatedAt, opt => opt.MapFrom(src => 
                     DateTime.Now));
+
+        CreateMap<ProvinceCreateDTO, Province>();
+        CreateMap<Province, ProvinceDTO>();
+        CreateMap<ProvinceUpdateDTO, Province>();
+
+        CreateMap<Theater, TheaterDTO>();
+        CreateMap<TheaterCreateDTO, Theater>();
+        CreateMap<TheaterUpdateDTO, Theater>();
+
+        CreateMap<ScreenCreateDTO, Screen>()
+    .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => DateTime.Now))
+    .ForMember(dest => dest.LastUpdatedAt, opt => opt.MapFrom(src => DateTime.Now))
+    .ForMember(dest => dest.IsActive, opt => opt.MapFrom(src => true));
+
+        CreateMap<ScreenUpdateDTO, Screen>()
+            .ForMember(dest => dest.LastUpdatedAt, opt => opt.MapFrom(src => DateTime.Now));
     }
+
 }

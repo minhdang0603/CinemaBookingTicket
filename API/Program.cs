@@ -32,7 +32,12 @@ namespace API
             Configuration.Default.ApiKey.Add("api-key", builder.Configuration.GetValue<string>("BrevoApi:ApiKey"));
 
             // Add services to the container.
-            builder.Services.AddControllers();
+            builder.Services.AddControllers()
+                     .AddJsonOptions(options =>
+                {
+         options.JsonSerializerOptions.Converters.Add(new TimeOnlyJsonConverter());
+               });
+
 
 
             builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
@@ -60,6 +65,12 @@ namespace API
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
             builder.Services.AddScoped<IDbInitializer, DbInitializer>();
             builder.Services.AddTransient<IEmailService, BrevoEmailService>();
+            builder.Services.AddScoped<IProvinceService, ProvinceService>();
+            builder.Services.AddScoped<ITheaterService, TheaterService>();
+            builder.Services.AddScoped<IScreenRepository, ScreenRepository>();
+            builder.Services.AddScoped<IScreenService, ScreenService>();
+
+
 
             builder.Services.AddResponseCaching();
 
@@ -157,7 +168,9 @@ namespace API
                     scope.ServiceProvider.GetRequiredService<IDbInitializer>().Initialize();
                 }
             }
+            
+
         }
-        
+
     }
 }
