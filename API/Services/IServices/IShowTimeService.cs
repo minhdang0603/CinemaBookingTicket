@@ -1,14 +1,15 @@
-using API.DTOs.Request;
+﻿using API.DTOs.Request;
 using API.DTOs.Response;
-using API.Data.Models;
 
-namespace API.Repositories.IRepositories
+namespace API.Services.IServices
 {
-    public interface IShowTimeRepository : IRepository<ShowTime>
+    public interface IShowTimeService
     {
         Task<List<ShowTimeDTO>> GetAllShowTimesAsync();
         Task<(List<ShowTimeDTO> Added, List<string> Errors)> AddShowTimesAsync(List<ShowTimeCreateDTO> newShowTimes);
         Task<(ShowTimeDTO? Updated, string? Error)> UpdateShowTimeAsync(int id, ShowTimeUpdateDTO dto);
         Task<bool> DeleteShowTimeAsync(int id);
+
     }
+
 }

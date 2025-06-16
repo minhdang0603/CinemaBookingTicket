@@ -37,5 +37,6 @@ public class MappingConfig : Profile
         CreateMap<GenreUpdateDTO, Genre>()
                 .ForMember(dest => dest.LastUpdatedAt, opt => opt.MapFrom(src => 
                     DateTime.Now));
+        CreateMap<ShowTime, ShowTimeDTO>();
     }
 }
