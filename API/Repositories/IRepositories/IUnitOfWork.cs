@@ -1,4 +1,5 @@
 ﻿using API.Repositories.IRepositories;
+using Microsoft.EntityFrameworkCore.Storage;
 
 namespace API.Repositories.IRepositories
 {
@@ -20,7 +21,13 @@ namespace API.Repositories.IRepositories
         ISeatRepository Seat { get; }
         ISeatTypeRepository SeatType { get; }
         IShowTimeRepository ShowTime { get; }
-        
+
         Task SaveAsync();
+
+        Task<IDbContextTransaction> BeginTransactionAsync();
+
+        Task RollbackAsync();
+
+        Task CommitAsync();
     }
 }

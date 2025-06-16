@@ -16,6 +16,8 @@ public partial class Seat
 
     public int SeatTypeId { get; set; }
 
+    public bool IsAvailable { get; set; }
+
     public bool IsActive { get; set; }
 
     public DateTime CreatedAt { get; set; }

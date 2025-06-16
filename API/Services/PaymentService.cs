@@ -22,8 +22,7 @@ public class PaymentService : IPaymentService
     private readonly string _vnpayUrl;
     private readonly string _vnpayIpnUrl;
 
-    public PaymentService(IConfiguration configuration, IUnitOfWork unitOfWork, IMapper mapper,
-        PaymentIntentService paymentIntentService)
+    public PaymentService(IConfiguration configuration, IUnitOfWork unitOfWork, IMapper mapper)
     {
         _configuration = configuration;
         _unitOfWork = unitOfWork;

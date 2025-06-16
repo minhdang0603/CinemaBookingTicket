@@ -53,7 +53,7 @@ public class UserController : ControllerBase
         if (id.ToString() != updateUserRequest.UserId)
         {
             return BadRequest(APIResponse<UserDTO>.Builder()
-                .WithErrorMessages("User ID mismatch.")
+                .WithErrorMessages(new List<string> { "User ID mismatch." })
                 .WithStatusCode(HttpStatusCode.BadRequest)
                 .WithSuccess(false)
                 .Build());

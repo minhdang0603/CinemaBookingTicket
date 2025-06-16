@@ -11,7 +11,7 @@ namespace Web.Services
     public class BaseService : IBaseService
     {
         public APIResponse responseModel { get; set; }
-        private IHttpClientFactory httpClient {  get; set; }
+        private IHttpClientFactory httpClient { get; set; }
 
         public BaseService(IHttpClientFactory httpClient)
         {
@@ -84,7 +84,7 @@ namespace Web.Services
             {
                 var dto = new APIResponse
                 {
-                    ErrorMessages = Convert.ToString(e.Message),
+                    ErrorMessages = new List<string> { Convert.ToString(e.Message) },
                     IsSuccess = false
                 };
                 var res = JsonConvert.SerializeObject(dto);

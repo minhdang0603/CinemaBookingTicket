@@ -27,13 +27,13 @@ namespace API.Middlewares
                 Error error = e.Error;
                 httpContext.Response.StatusCode = (int)error.StatusCode;
                 response.StatusCode = error.StatusCode;
-                response.ErrorMessages = e.Message;
+                response.ErrorMessages = new List<string> { e.Message };
             }
             else
             {
                 httpContext.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
                 response.StatusCode = HttpStatusCode.InternalServerError;
-                response.ErrorMessages = "An unexpected error occurred. Please try again later.";
+                response.ErrorMessages = new List<string> { "An unexpected error occurred. Please try again later." };
             }
             await httpContext.Response.WriteAsJsonAsync(response, cancellationToken).ConfigureAwait(false);
             return true;
