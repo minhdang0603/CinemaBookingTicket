@@ -23,7 +23,7 @@ public class MovieService : IMovieService
     }
 
 
-    public async Task CreateMovieAsync(MovieCreateDTO movieCreateDTO)
+    public async Task<MovieDTO> CreateMovieAsync(MovieCreateDTO movieCreateDTO)
     {
         if (movieCreateDTO == null)
         {
@@ -39,28 +39,30 @@ public class MovieService : IMovieService
 
         var movie = _mapper.Map<Movie>(movieCreateDTO);
         await _unitOfWork.Movie.CreateAsync(movie);
-
+        await _unitOfWork.SaveAsync();
         if (movieCreateDTO.GenreIds != null && movieCreateDTO.GenreIds.Any())
         {
             foreach (var genreId in movieCreateDTO.GenreIds)
             {
                 var genreEntity = await _unitOfWork.Genre.GetAsync(g => g.Id == genreId);
-                if (genreEntity != null)
+                if (genreEntity == null)
                 {
-                    movie.MovieGenres.Add(new MovieGenre { MovieId = movie.Id, GenreId = genreEntity.Id });
+                    _logger.LogWarning($"Genre with ID {genreId} not found for movie {movie.Title}");
+                    continue;
                 }
+                movie.MovieGenres.Add(new MovieGenre { MovieId = movie.Id, GenreId = genreEntity.Id });
             }
         }
         movie.CreatedAt = DateTime.Now;
         movie.LastUpdatedAt = DateTime.Now;
 
-        await _unitOfWork.Movie.UpdateAsync(movie);
+        await _unitOfWork.SaveAsync();
         _logger.LogInformation($"Movie {movie.Title} created successfully with ID {movie.Id}");
 
-        await _unitOfWork.SaveAsync();
+        return _mapper.Map<MovieDTO>(movie);
     }
 
-    public async Task DeleteMovieAsync(int id)
+    public async Task<MovieDTO> DeleteMovieAsync(int id)
     {
         var movie = await _unitOfWork.Movie.GetAsync(m => m.Id == id);
         if (movie == null)
@@ -72,6 +74,8 @@ public class MovieService : IMovieService
         movie.LastUpdatedAt = DateTime.Now;
         await _unitOfWork.Movie.UpdateAsync(movie);
         await _unitOfWork.SaveAsync();
+        _logger.LogInformation($"Movie {movie.Title} deleted successfully with ID {movie.Id}");
+        return _mapper.Map<MovieDTO>(movie);
     }
 
     public async Task<List<MovieDTO>> GetAllMoviesAsync(bool? isActive = true)
@@ -127,16 +131,54 @@ public class MovieService : IMovieService
         return _mapper.Map<List<MovieDTO>>(movies);
     }
 
-    public async Task UpdateMovieAsync(int id, MovieUpdateDTO movieUpdateDTO)
+    public async Task<MovieDTO> UpdateMovieAsync(int id, MovieUpdateDTO movieUpdateDTO)
     {
-        var movie = await _unitOfWork.Movie.GetAsync(m => m.Id == id && m.IsActive == true);
+        var movie = await _unitOfWork.Movie.GetAsync(
+            m => m.Id == id && m.IsActive == true,
+            includeProperties: "MovieGenres"
+        );
         if (movie == null)
         {
             _logger.LogError($"Movie with ID {id} not found");
             throw new AppException(ErrorCodes.MovieNotFound(id));
         }
+
+        // Map các trường thông thường
         movie = _mapper.Map(movieUpdateDTO, movie);
+
+        // Cập nhật lại MovieGenres
+        if (movieUpdateDTO.GenreIds != null)
+        {
+            // Tìm các genre cần xóa
+            var genresToRemove = movie.MovieGenres
+                .Where(mg => !movieUpdateDTO.GenreIds.Contains(mg.GenreId))
+                .ToList();
+
+            foreach (var mg in genresToRemove)
+            {
+                movie.MovieGenres.Remove(mg);
+            }
+
+            // Thêm các genre mới chưa có
+            foreach (var genreId in movieUpdateDTO.GenreIds)
+            {
+                if (!movie.MovieGenres.Any(mg => mg.GenreId == genreId))
+                {
+                    movie.MovieGenres.Add(new MovieGenre { MovieId = movie.Id, GenreId = genreId });
+                }
+            }
+        }
+
         await _unitOfWork.Movie.UpdateAsync(movie);
         await _unitOfWork.SaveAsync();
+
+        // Lấy lại movie đã update kèm genres
+        var updatedMovie = await _unitOfWork.Movie.GetAsync(
+            m => m.Id == movie.Id,
+            includeProperties: "MovieGenres.Genre,ShowTimes"
+        );
+
+        _logger.LogInformation($"Movie {movie.Title} updated successfully with ID {movie.Id}");
+        return _mapper.Map<MovieDTO>(updatedMovie);
     }
 }

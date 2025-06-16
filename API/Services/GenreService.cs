@@ -20,7 +20,7 @@ namespace API.Services
             _mapper = mapper;
             _logger = logger;
         }
-        public async Task CreateGenreAsync(GenreCreateDTO genreCreateDTO)
+        public async Task<GenreDTO> CreateGenreAsync(GenreCreateDTO genreCreateDTO)
         {
             if (genreCreateDTO == null)
             {
@@ -42,11 +42,12 @@ namespace API.Services
             await _unitOfWork.SaveAsync();
 
             _logger.LogInformation($"Genre {genre.Name} created successfully with ID {genre.Id}");
+            return _mapper.Map<GenreDTO>(genre);
         }
 
-        public async Task DeleteGenreAsync(int id)
+        public async Task<GenreDTO> DeleteGenreAsync(int id)
         {
-            var genre = await _unitOfWork.Genre.GetAsync(m => m.Id == id);
+            var genre = await _unitOfWork.Genre.GetAsync(m => m.Id == id && m.IsActive == true);
             if (genre == null)
             {
                 _logger.LogError($"Genre with ID {id} not found");
@@ -57,6 +58,7 @@ namespace API.Services
             await _unitOfWork.Genre.UpdateAsync(genre);
             await _unitOfWork.SaveAsync();
             _logger.LogInformation($"Genre {genre.Name} deleted successfully with ID {genre.Id}");
+            return _mapper.Map<GenreDTO>(genre);
         }
 
         public async Task<List<GenreDTO>> GetAllGenresAsync(bool? isActive = true)
@@ -105,7 +107,7 @@ namespace API.Services
             return _mapper.Map<List<GenreDTO>>(genres);
         }
 
-        public async Task UpdateGenreAsync(int id, GenreUpdateDTO genreUpdateDTO)
+        public async Task<GenreDTO> UpdateGenreAsync(int id, GenreUpdateDTO genreUpdateDTO)
         {
             var genre = await _unitOfWork.Genre.GetAsync(m => m.Id == id && m.IsActive == true);
             if (genre == null)
@@ -116,6 +118,8 @@ namespace API.Services
             genre = _mapper.Map(genreUpdateDTO, genre);
             await _unitOfWork.Genre.UpdateAsync(genre);
             await _unitOfWork.SaveAsync();
+            _logger.LogInformation($"Genre {genre.Name} updated successfully with ID {genre.Id}");
+            return _mapper.Map<GenreDTO>(genre);
         }
     }
 }

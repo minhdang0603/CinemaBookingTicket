@@ -43,23 +43,23 @@ namespace API.Controllers
         }
 
         [HttpPost("create-genre")]
-        public async Task<ActionResult<APIResponse<string>>> CreateGenreAsync([FromBody]GenreCreateDTO genreCreateDTO)
+        public async Task<ActionResult<APIResponse<GenreDTO>>> CreateGenreAsync([FromBody]GenreCreateDTO genreCreateDTO)
         {
-            await _genreService.CreateGenreAsync(genreCreateDTO);
+            GenreDTO genreDTO = await _genreService.CreateGenreAsync(genreCreateDTO);
 
-            return Ok(APIResponse<string>.Builder().WithResult($"Genre {genreCreateDTO.Name} created successfully.").WithStatusCode(HttpStatusCode.OK).Build());
+            return Ok(APIResponse<GenreDTO>.Builder().WithResult(genreDTO).WithStatusCode(HttpStatusCode.OK).Build());
         }
 
         [HttpPut("update-genre")]
-        public async Task<ActionResult<APIResponse<string>>> UpdateGenreAsync(int id, [FromBody] GenreUpdateDTO genreUpdateDTO)
+        public async Task<ActionResult<APIResponse<GenreDTO>>> UpdateGenreAsync(int id, [FromBody] GenreUpdateDTO genreUpdateDTO)
         {
             if(id == 0 || genreUpdateDTO == null)
             {
-                return BadRequest(APIResponse<string>.Builder().WithErrorMessages("Genre Id or Update Genre is null.").WithStatusCode(HttpStatusCode.BadRequest).Build());
+                return BadRequest(APIResponse<GenreDTO>.Builder().WithErrorMessages("Genre Id or Update Genre is null.").WithStatusCode(HttpStatusCode.BadRequest).Build());
             }
-            await _genreService.UpdateGenreAsync(id, genreUpdateDTO);
+            GenreDTO genreDTO = await _genreService.UpdateGenreAsync(id, genreUpdateDTO);
 
-            return Ok(APIResponse<string>.Builder().WithResult($"Genre {genreUpdateDTO.Name} updated successfully.").WithStatusCode(HttpStatusCode.OK).Build());
+            return Ok(APIResponse<GenreDTO>.Builder().WithResult(genreDTO).WithStatusCode(HttpStatusCode.OK).Build());
         }
 
         [HttpGet("get-genre-by-id")]
@@ -67,21 +67,21 @@ namespace API.Controllers
         {
             if (id == 0)
             {
-                return BadRequest(APIResponse<string>.Builder().WithErrorMessages("Genre Id is null.").WithStatusCode(HttpStatusCode.BadRequest).Build());
+                return BadRequest(APIResponse<GenreDTO>.Builder().WithErrorMessages("Genre Id is null.").WithStatusCode(HttpStatusCode.BadRequest).Build());
             }
             var genre = await _genreService.GetGenreByIdAsync(id);
             return Ok(APIResponse<GenreDTO>.Builder().WithResult(genre).WithStatusCode(HttpStatusCode.OK).Build());
         }
 
         [HttpDelete("delete-genre")]
-        public async Task<ActionResult<APIResponse<string>>> DeleteGenreAsync(int id)
+        public async Task<ActionResult<APIResponse<GenreDTO>>> DeleteGenreAsync(int id)
         {
             if (id == 0)
             {
-                return BadRequest(APIResponse<string>.Builder().WithErrorMessages("Genre Id is null.").WithStatusCode(HttpStatusCode.BadRequest).Build());
+                return BadRequest(APIResponse<GenreDTO>.Builder().WithErrorMessages("Genre Id is null.").WithStatusCode(HttpStatusCode.BadRequest).Build());
             }
-            await _genreService.DeleteGenreAsync(id);
-            return Ok(APIResponse<string>.Builder().WithResult($"Genre {id} deleted successfully.").WithStatusCode(HttpStatusCode.OK).Build());
+             GenreDTO genreDTO = await _genreService.DeleteGenreAsync(id);
+            return Ok(APIResponse<GenreDTO>.Builder().WithResult(genreDTO).WithStatusCode(HttpStatusCode.OK).Build());
         }
 
         [HttpGet("search-genre-by-name")]
@@ -92,6 +92,10 @@ namespace API.Controllers
                 return BadRequest(APIResponse<List<GenreDTO>>.Builder().WithErrorMessages("Input is null or empty.").WithStatusCode(HttpStatusCode.BadRequest).Build());
             }
             var genres = await _genreService.SearchGenresAsync(name);
+            if(genres.Count == 0)
+            {
+                return NotFound(APIResponse<List<GenreDTO>>.Builder().WithErrorMessages("No genres found").WithStatusCode(HttpStatusCode.NotFound).Build());
+            }
             return Ok(APIResponse<List<GenreDTO>>.Builder().WithResult(genres).WithStatusCode(HttpStatusCode.OK).Build());
         }
     }

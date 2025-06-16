@@ -45,23 +45,23 @@ namespace API.Controllers
 
 
         [HttpPost("create-movie")]
-        public async Task<ActionResult<APIResponse<string>>> CreateGenreAsync([FromBody] MovieCreateDTO movieCreateDTO)
+        public async Task<ActionResult<APIResponse<MovieDTO>>> CreateGenreAsync([FromBody] MovieCreateDTO movieCreateDTO)
         {
-            await _movieService.CreateMovieAsync(movieCreateDTO);
+           MovieDTO movieDTO =  await _movieService.CreateMovieAsync(movieCreateDTO);
 
-            return Ok(APIResponse<string>.Builder().WithResult($"Movie {movieCreateDTO.Title} created successfully.").WithStatusCode(HttpStatusCode.OK).Build());
+            return Ok(APIResponse<MovieDTO>.Builder().WithResult(movieDTO).WithStatusCode(HttpStatusCode.OK).Build());
         }
 
         [HttpPut("update-movie")]
-        public async Task<ActionResult<APIResponse<string>>> UpdateGenreAsync(int id, [FromBody] MovieUpdateDTO movieUpdateDTO)
+        public async Task<ActionResult<APIResponse<MovieDTO>>> UpdateGenreAsync(int id, [FromBody] MovieUpdateDTO movieUpdateDTO)
         {
             if (id == 0 || movieUpdateDTO == null)
             {
-                return BadRequest(APIResponse<string>.Builder().WithErrorMessages("Movie Id or Update Genre is null.").WithStatusCode(HttpStatusCode.BadRequest).Build());
+                return BadRequest(APIResponse<MovieDTO>.Builder().WithErrorMessages("Movie Id or Update Movie is null.").WithStatusCode(HttpStatusCode.BadRequest).Build());
             }
-            await _movieService.UpdateMovieAsync(id, movieUpdateDTO);
+            MovieDTO movieDTO = await _movieService.UpdateMovieAsync(id, movieUpdateDTO);
 
-            return Ok(APIResponse<string>.Builder().WithResult($"Movie {movieUpdateDTO.Title} updated successfully.").WithStatusCode(HttpStatusCode.OK).Build());
+            return Ok(APIResponse<MovieDTO>.Builder().WithResult(movieDTO).WithStatusCode(HttpStatusCode.OK).Build());
         }
 
         [HttpGet("get-movie-by-id")]
@@ -69,21 +69,21 @@ namespace API.Controllers
         {
             if (id == 0)
             {
-                return BadRequest(APIResponse<string>.Builder().WithErrorMessages("Movie Id is null.").WithStatusCode(HttpStatusCode.BadRequest).Build());
+                return BadRequest(APIResponse<MovieDTO>.Builder().WithErrorMessages("Movie Id is null.").WithStatusCode(HttpStatusCode.BadRequest).Build());
             }
             var movieDTO = await _movieService.GetMovieByIdAsync(id);
             return Ok(APIResponse<MovieDTO>.Builder().WithResult(movieDTO).WithStatusCode(HttpStatusCode.OK).Build());
         }
 
         [HttpDelete("delete-movie")]
-        public async Task<ActionResult<APIResponse<string>>> DeleteGenreAsync(int id)
+        public async Task<ActionResult<APIResponse<MovieDTO>>> DeleteGenreAsync(int id)
         {
             if (id == 0)
             {
-                return BadRequest(APIResponse<string>.Builder().WithErrorMessages("Movie Id is null.").WithStatusCode(HttpStatusCode.BadRequest).Build());
+                return BadRequest(APIResponse<MovieDTO>.Builder().WithErrorMessages("Movie Id is null.").WithStatusCode(HttpStatusCode.BadRequest).Build());
             }
-            await _movieService.DeleteMovieAsync(id);
-            return Ok(APIResponse<string>.Builder().WithResult($"Movie deleted successfully.").WithStatusCode(HttpStatusCode.OK).Build());
+            MovieDTO movie = await _movieService.DeleteMovieAsync(id);
+            return Ok(APIResponse<MovieDTO>.Builder().WithResult(movie).WithStatusCode(HttpStatusCode.OK).Build());
         }
 
         [HttpGet("search-movie-by-name")]

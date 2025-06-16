@@ -24,7 +24,8 @@ public class MappingConfig : Profile
                 .ForMember(dest => dest.LastUpdatedAt, opt => opt.MapFrom(src =>
                     DateTime.Now));
         CreateMap<MovieUpdateDTO, Movie>()
-                .ForMember(dest => dest.MovieGenres, opt => opt.Ignore())
+                .ForMember(dest => dest.MovieGenres, opt => opt.MapFrom((src, dest) =>
+                    src.GenreIds.Select(id => new MovieGenre { GenreId = id, MovieId = dest.Id }).ToList()))
                 .ForMember(dest => dest.ShowTimes, opt => opt.Ignore())
                 .ForMember(dest => dest.LastUpdatedAt, opt => opt.MapFrom(src =>
                     DateTime.Now));
