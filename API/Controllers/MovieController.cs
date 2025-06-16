@@ -27,9 +27,17 @@ namespace API.Controllers
             var movies = await _movieService.GetAllMoviesAsync();
             if (movies.Count == 0)
             {
-                return NotFound(APIResponse<List<MovieDTO>>.Builder().WithErrorMessages("No movies found").WithStatusCode(HttpStatusCode.NotFound).Build());
+                return NotFound(APIResponse<List<MovieDTO>>.Builder()
+                    .WithErrorMessages(new List<string> { "No movies found" })
+                    .WithStatusCode(HttpStatusCode.NotFound)
+                    .WithSuccess(false)
+                    .Build());
             }
-            return Ok(APIResponse<List<MovieDTO>>.Builder().WithResult(movies).WithStatusCode(HttpStatusCode.OK).Build());
+            return Ok(APIResponse<List<MovieDTO>>.Builder()
+                .WithResult(movies)
+                .WithStatusCode(HttpStatusCode.OK)
+                .WithSuccess(true)
+                .Build());
         }
 
         [HttpGet("get-all-movies-with-pagination")]
@@ -38,18 +46,30 @@ namespace API.Controllers
             var movies = await _movieService.GetAllMoviesWithPaginationAsync(pageNumber, pageSize, isActive);
             if (movies.Count == 0)
             {
-                return NotFound(APIResponse<List<MovieDTO>>.Builder().WithErrorMessages("No movies found").WithStatusCode(HttpStatusCode.NotFound).Build());
+                return NotFound(APIResponse<List<MovieDTO>>.Builder()
+                    .WithErrorMessages(new List<string> { "No movies found" })
+                    .WithStatusCode(HttpStatusCode.NotFound)
+                    .WithSuccess(false)
+                    .Build());
             }
-            return Ok(APIResponse<List<MovieDTO>>.Builder().WithResult(movies).WithStatusCode(HttpStatusCode.OK).Build());
+            return Ok(APIResponse<List<MovieDTO>>.Builder()
+                .WithResult(movies)
+                .WithStatusCode(HttpStatusCode.OK)
+                .WithSuccess(true)
+                .Build());
         }
 
 
         [HttpPost("create-movie")]
         public async Task<ActionResult<APIResponse<MovieDTO>>> CreateGenreAsync([FromBody] MovieCreateDTO movieCreateDTO)
         {
-           MovieDTO movieDTO =  await _movieService.CreateMovieAsync(movieCreateDTO);
+            MovieDTO movieDTO = await _movieService.CreateMovieAsync(movieCreateDTO);
 
-            return Ok(APIResponse<MovieDTO>.Builder().WithResult(movieDTO).WithStatusCode(HttpStatusCode.OK).Build());
+            return Ok(APIResponse<MovieDTO>.Builder()
+                .WithResult(movieDTO)
+                .WithStatusCode(HttpStatusCode.OK)
+                .WithSuccess(true)
+                .Build());
         }
 
         [HttpPut("update-movie")]
@@ -57,11 +77,19 @@ namespace API.Controllers
         {
             if (id == 0 || movieUpdateDTO == null)
             {
-                return BadRequest(APIResponse<MovieDTO>.Builder().WithErrorMessages("Movie Id or Update Movie is null.").WithStatusCode(HttpStatusCode.BadRequest).Build());
+                return BadRequest(APIResponse<MovieDTO>.Builder()
+                    .WithErrorMessages(new List<string> { "Movie Id or Update Movie is null." })
+                    .WithStatusCode(HttpStatusCode.BadRequest)
+                    .WithSuccess(false)
+                    .Build());
             }
             MovieDTO movieDTO = await _movieService.UpdateMovieAsync(id, movieUpdateDTO);
 
-            return Ok(APIResponse<MovieDTO>.Builder().WithResult(movieDTO).WithStatusCode(HttpStatusCode.OK).Build());
+            return Ok(APIResponse<MovieDTO>.Builder()
+                .WithResult(movieDTO)
+                .WithStatusCode(HttpStatusCode.OK)
+                .WithSuccess(true)
+                .Build());
         }
 
         [HttpGet("get-movie-by-id")]
@@ -69,10 +97,18 @@ namespace API.Controllers
         {
             if (id == 0)
             {
-                return BadRequest(APIResponse<MovieDTO>.Builder().WithErrorMessages("Movie Id is null.").WithStatusCode(HttpStatusCode.BadRequest).Build());
+                return BadRequest(APIResponse<MovieDTO>.Builder()
+                    .WithErrorMessages(new List<string> { "Movie Id is null." })
+                    .WithStatusCode(HttpStatusCode.BadRequest)
+                    .WithSuccess(false)
+                    .Build());
             }
             var movieDTO = await _movieService.GetMovieByIdAsync(id);
-            return Ok(APIResponse<MovieDTO>.Builder().WithResult(movieDTO).WithStatusCode(HttpStatusCode.OK).Build());
+            return Ok(APIResponse<MovieDTO>.Builder()
+                .WithResult(movieDTO)
+                .WithStatusCode(HttpStatusCode.OK)
+                .WithSuccess(true)
+                .Build());
         }
 
         [HttpDelete("delete-movie")]
@@ -80,10 +116,18 @@ namespace API.Controllers
         {
             if (id == 0)
             {
-                return BadRequest(APIResponse<MovieDTO>.Builder().WithErrorMessages("Movie Id is null.").WithStatusCode(HttpStatusCode.BadRequest).Build());
+                return BadRequest(APIResponse<MovieDTO>.Builder()
+                    .WithErrorMessages(new List<string> { "Movie Id is null." })
+                    .WithStatusCode(HttpStatusCode.BadRequest)
+                    .WithSuccess(false)
+                    .Build());
             }
-            MovieDTO movie = await _movieService.DeleteMovieAsync(id);
-            return Ok(APIResponse<MovieDTO>.Builder().WithResult(movie).WithStatusCode(HttpStatusCode.OK).Build());
+            var movieDTO = await _movieService.GetMovieByIdAsync(id);
+            return Ok(APIResponse<MovieDTO>.Builder()
+                .WithResult(movieDTO)
+                .WithStatusCode(HttpStatusCode.OK)
+                .WithSuccess(true)
+                .Build());
         }
 
         [HttpGet("search-movie-by-name")]
@@ -91,10 +135,18 @@ namespace API.Controllers
         {
             if (name.IsNullOrEmpty())
             {
-                return BadRequest(APIResponse<List<MovieDTO>>.Builder().WithErrorMessages("Input is null or empty.").WithStatusCode(HttpStatusCode.BadRequest).Build());
+                return BadRequest(APIResponse<List<MovieDTO>>.Builder()
+                    .WithErrorMessages(new List<string> { "Input is null or empty." })
+                    .WithStatusCode(HttpStatusCode.BadRequest)
+                    .WithSuccess(false)
+                    .Build());
             }
             var movies = await _movieService.SearchMoviesAsync(name);
-            return Ok(APIResponse<List<MovieDTO>>.Builder().WithResult(movies).WithStatusCode(HttpStatusCode.OK).Build());
+            return Ok(APIResponse<List<MovieDTO>>.Builder()
+                .WithResult(movies)
+                .WithStatusCode(HttpStatusCode.OK)
+                .WithSuccess(true)
+                .Build());
         }
     }
 }

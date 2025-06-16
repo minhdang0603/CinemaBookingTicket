@@ -60,7 +60,7 @@ public class MappingConfig : Profile
                 .ForMember(dest => dest.BookingCode, opt => opt.MapFrom(src =>
                     Guid.NewGuid().ToString()))
                 .ForMember(dest => dest.BookingStatus, opt => opt.MapFrom(src =>
-                    Constant.Payment_Status_Pending))
+                    Constant.Booking_Status_Pending))
                 .ForMember(dest => dest.TotalAmount, opt => opt.MapFrom(src =>
                     src.BookingDetails.Sum(bd => bd.SeatPrice)))
                 .ForMember(dest => dest.IsActive, opt => opt.MapFrom(src =>

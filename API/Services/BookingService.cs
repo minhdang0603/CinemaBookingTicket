@@ -1,6 +1,7 @@
 using API.Data.Models;
 using API.DTOs.Request;
 using API.DTOs.Response;
+using API.Exceptions;
 using API.Repositories.IRepositories;
 using API.Services.IServices;
 using AutoMapper;
@@ -25,17 +26,17 @@ public class BookingService : IBookingService
         {
             try
             {
-                // Check seats availability
+                // Kiểm tra xem ghế đã được đặt chưa
                 foreach (var detail in bookingCreateDTO.BookingDetails)
                 {
-                    // Check seat exists
+                    // Kiểm tra ghế có tồn tại không
                     var seat = await _unitOfWork.Seat.GetAsync(s => s.Id == detail.SeatId);
                     if (seat == null)
                     {
                         throw new Exception($"Seat with ID {detail.SeatId} not found");
                     }
 
-                    // Check seat not already booked for this showtime
+                    // Kiểm tra ghế chưa được đặt cho showtime này
                     var existingBooking = await _unitOfWork.BookingDetail.GetAsync(
                         bd => bd.SeatId == detail.SeatId &&
                               bd.Booking.ShowTimeId == bookingCreateDTO.ShowTimeId &&
@@ -48,17 +49,16 @@ public class BookingService : IBookingService
                     }
                 }
 
-                // Map DTO to Booking entity
+                // Add booking to repository
                 var booking = _mapper.Map<Booking>(bookingCreateDTO);
 
-                // Add booking to repository
                 await _unitOfWork.Booking.CreateAsync(booking);
 
                 await _unitOfWork.SaveAsync();
 
                 var bookingDetails = _mapper.Map<List<BookingDetail>>(bookingCreateDTO.BookingDetails);
 
-                // Set BookingId for each BookingDetail
+                // Đặt BookingId cho từng BookingDetail
                 foreach (var detail in bookingDetails)
                 {
                     detail.BookingId = booking.Id;
@@ -73,25 +73,48 @@ public class BookingService : IBookingService
             }
             catch (Exception ex)
             {
-                // Rollback transaction in case of error
+                // Rollback transaction trong trường hợp có lỗi
                 await _unitOfWork.RollbackAsync();
                 throw new Exception("Error creating booking", ex);
             }
         }
     }
 
-    public Task DeleteBookingAsync(int bookingId)
+    public async Task DeleteBookingAsync(int bookingId)
     {
-        throw new NotImplementedException();
+        var booking = await _unitOfWork.Booking.GetAsync(b => b.Id == bookingId && b.IsActive == true, includeProperties: "BookingDetails");
+        if (booking == null)
+        {
+            throw new AppException(ErrorCodes.BookingNotFound(bookingId));
+        }
+
+        // Mark booking as inactive
+        booking.IsActive = false;
+        await _unitOfWork.Booking.UpdateAsync(booking);
+        await _unitOfWork.SaveAsync();
     }
 
-    public Task<IEnumerable<BookingDTO>> GetAllBookingsAsync()
+    public async Task<List<BookingDTO>> GetAllBookingsAsync(bool? isActive = true)
     {
-        throw new NotImplementedException();
+        var bookings = await _unitOfWork.Booking.GetAllAsync(b => b.IsActive == isActive, includeProperties: "BookingDetails");
+        return _mapper.Map<List<BookingDTO>>(bookings);
     }
 
-    public Task<BookingDTO> GetBookingByIdAsync(int bookingId)
+    public async Task<List<BookingDTO>> GetAllBookingsWithPaginationAsync(int pageNumber, int pageSize, bool? isActive = true)
     {
-        throw new NotImplementedException();
+        var bookings = await _unitOfWork.Booking.GetAllAsync(
+                b => b.IsActive == isActive,
+                pageSize: pageSize,
+                pageNumber: pageNumber,
+                includeProperties: "BookingDetails");
+        return _mapper.Map<List<BookingDTO>>(bookings);
+    }
+
+    public async Task<BookingDTO> GetBookingByIdAsync(int bookingId, bool? isActive = true)
+    {
+        var booking = await _unitOfWork.Booking.GetAsync(b => b.Id == bookingId && b.IsActive == isActive, includeProperties: "BookingDetails")
+                ?? throw new AppException(ErrorCodes.BookingNotFound(bookingId));
+
+        return _mapper.Map<BookingDTO>(booking);
     }
 }

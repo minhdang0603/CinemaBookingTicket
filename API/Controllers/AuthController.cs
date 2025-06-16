@@ -26,6 +26,7 @@ public class AuthController : ControllerBase
         return Ok(APIResponse<LoginResponseDTO>.Builder()
             .WithResult(response)
             .WithStatusCode(HttpStatusCode.OK)
+            .WithSuccess(true)
             .Build());
     }
 
@@ -37,6 +38,7 @@ public class AuthController : ControllerBase
         return CreatedAtAction(nameof(Login), new { email = userCreateDTO.Email }, APIResponse<LoginResponseDTO>.Builder()
             .WithResult(response)
             .WithStatusCode(HttpStatusCode.Created)
+            .WithSuccess(true)
             .Build());
     }
 
