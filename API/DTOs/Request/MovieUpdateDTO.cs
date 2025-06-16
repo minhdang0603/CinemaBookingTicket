@@ -4,7 +4,6 @@ namespace API.DTOs.Request;
 
 public class MovieUpdateDTO
 {
-    public int Id { get; set; }
 
     public string Title { get; set; } = string.Empty;
 
