@@ -1,4 +1,5 @@
 ﻿using API.DTOs.Request;
+using API.DTOs.Response;
 
 namespace API.Services.IServices
 {
@@ -7,5 +8,7 @@ namespace API.Services.IServices
         Task AddScreenAsync(ScreenCreateDTO dto);
         Task UpdateScreenAsync(int id, ScreenUpdateDTO dto);
         Task DeleteScreenAsync(int id);
+
+        Task<ScreenDetailDTO> GetScreenByIdAsync(int id, bool? isActive = true);
     }
 }

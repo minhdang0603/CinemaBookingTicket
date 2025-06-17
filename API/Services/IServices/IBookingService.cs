@@ -5,8 +5,10 @@ namespace API.Services.IServices;
 
 public interface IBookingService
 {
-    Task CreateBookingAsync(BookingCreateDTO bookingCreateDTO);
     Task<BookingDTO> GetBookingByIdAsync(int bookingId);
-    Task<IEnumerable<BookingDTO>> GetAllBookingsAsync();
+    Task<List<BookingDTO>> GetAllBookingsAsync();
+    Task<List<BookingDTO>> GetMyBookingsAsync();
     Task DeleteBookingAsync(int bookingId);
+    Task CancelBookingAsync(int bookingId);
+    Task<string> CreateBookingWithPaymentAsync(BookingCreateDTO bookingCreateDTO);
 }

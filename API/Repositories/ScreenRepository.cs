@@ -6,35 +6,13 @@ using System.Threading.Tasks;
 
 namespace API.Repositories
 {
-    public class ScreenRepository : IScreenRepository
+    public class ScreenRepository : Repository<Screen>, IScreenRepository
     {
         private readonly ApplicationDbContext _context;
 
-        public ScreenRepository(ApplicationDbContext context)
+        public ScreenRepository(ApplicationDbContext context) : base(context)
         {
             _context = context;
-        }
-
-        public async Task AddAsync(Screen entity)
-        {
-            await _context.Screens.AddAsync(entity);
-        }
-
-        public void Update(Screen entity)
-        {
-            _context.Screens.Update(entity);
-        }
-
-        public void Remove(Screen entity)
-        {
-            _context.Screens.Remove(entity);
-        }
-
-        public async Task<Screen?> GetAsync(int id)
-        {
-            return await _context.Screens
-                .Include(s => s.Theater) // nếu bạn cần lấy luôn Theater
-                .FirstOrDefaultAsync(s => s.Id == id);
         }
     }
 }

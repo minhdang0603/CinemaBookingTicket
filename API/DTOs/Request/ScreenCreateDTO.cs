@@ -6,6 +6,5 @@
         public int TheaterId { get; set; }
         public int Rows { get; set; }
         public int SeatsPerRow { get; set; }
-        public bool IsActive { get; set; } = true;
     }
 }

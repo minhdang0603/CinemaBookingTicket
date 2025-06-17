@@ -2,6 +2,7 @@
 using API.DTOs;
 using API.DTOs.Request;
 using API.DTOs.Response;
+using API.Repositories.IRepositories;
 using API.Services.IServices;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
@@ -10,74 +11,73 @@ namespace API.Services
 {
     public class ProvinceService : IProvinceService
     {
-        private readonly ApplicationDbContext _context;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
 
-        public ProvinceService(ApplicationDbContext context, IMapper mapper)
+        public ProvinceService(IUnitOfWork unitOfWork, IMapper mapper)
         {
-            _context = context;
+            _unitOfWork = unitOfWork;
             _mapper = mapper;
         }
 
-        public async Task<List<ProvinceDTO>> GetAllProvincesAsync()
+        public async Task<List<ProvinceDTO>> GetAllProvincesAsync(bool? isActive = true)
         {
-            var provinces = await _context.Provinces.ToListAsync();
+            var provinces = await _unitOfWork.Province.GetAllAsync(p => p.IsActive == isActive);
+
             return _mapper.Map<List<ProvinceDTO>>(provinces);
         }
 
         public async Task<List<ProvinceDTO>> GetAllProvincesWithPaginationAsync(int pageNumber, int pageSize, bool? isActive = true)
         {
-            var query = _context.Provinces.AsQueryable();
-
-            if (isActive != null)
-                query = query.Where(p => p.IsActive == isActive);
-
-            var provinces = await query
-                .Skip((pageNumber - 1) * pageSize)
-                .Take(pageSize)
-                .ToListAsync();
+            var provinces = await _unitOfWork.Province.GetAllAsync(
+                p => p.IsActive == isActive,
+                pageNumber: pageNumber,
+                pageSize: pageSize);
 
             return _mapper.Map<List<ProvinceDTO>>(provinces);
         }
 
-        public async Task<ProvinceDTO> GetProvinceByIdAsync(int id)
+        public async Task<ProvinceDetailDTO> GetProvinceByIdAsync(int id, bool? isActive = true)
         {
-            var province = await _context.Provinces.FindAsync(id);
-            return _mapper.Map<ProvinceDTO>(province);
+            var province = await _unitOfWork.Province.GetAsync(p => p.Id == id && p.IsActive == isActive);
+            return _mapper.Map<ProvinceDetailDTO>(province);
         }
 
         public async Task CreateProvinceAsync(ProvinceCreateDTO provinceCreateDTO)
         {
             var province = _mapper.Map<Province>(provinceCreateDTO);
-            await _context.Provinces.AddAsync(province);
-            await _context.SaveChangesAsync();
+            await _unitOfWork.Province.CreateAsync(province);
+            await _unitOfWork.SaveAsync();
         }
 
         public async Task UpdateProvinceAsync(int id, ProvinceUpdateDTO provinceUpdateDTO)
         {
-            var province = await _context.Provinces.FindAsync(id);
+            var province = await _unitOfWork.Province.GetAsync(p => p.Id == id);
             if (province != null)
             {
                 _mapper.Map(provinceUpdateDTO, province);
-                await _context.SaveChangesAsync();
+                await _unitOfWork.Province.UpdateAsync(province);
+                await _unitOfWork.SaveAsync();
             }
         }
 
         public async Task DeleteProvinceAsync(int id)
         {
-            var province = await _context.Provinces.FindAsync(id);
-            if (province != null)
+            var province = await _unitOfWork.Province.GetAsync(p => p.Id == id);
+            if (province == null)
             {
-                _context.Provinces.Remove(province);
-                await _context.SaveChangesAsync();
+                throw new Exception($"Province with ID {id} not found");
             }
+
+            province.IsActive = false; // Thay vì xóa, đánh dấu là không hoạt động
+
+            await _unitOfWork.Province.UpdateAsync(province);
+            await _unitOfWork.SaveAsync();
         }
 
-        public async Task<List<ProvinceDTO>> SearchProvincesAsync(string name)
+        public async Task<List<ProvinceDTO>> SearchProvincesAsync(string name, bool? isActive = true)
         {
-            var provinces = await _context.Provinces
-                .Where(p => p.Name.ToLower().Contains(name.ToLower()))
-                .ToListAsync();
+            var provinces = await _unitOfWork.Province.GetAllAsync(p => p.Name.ToLower().Contains(name.ToLower()) && p.IsActive == isActive);
 
             return _mapper.Map<List<ProvinceDTO>>(provinces);
         }

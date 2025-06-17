@@ -3,14 +3,7 @@ using API.Repositories.IRepositories;
 
 namespace API.Repositories.IRepositories
 {
-    public interface ITheaterRepository
+    public interface ITheaterRepository : IRepository<Theater>
     {
-        Task AddAsync(Theater entity);
-        void Update(Theater entity);
-        void Remove(Theater entity);
-
-        Task<Theater?> GetAsync(int id);
-
     }
-
 }

@@ -2,9 +2,9 @@ using API.Configurations;
 using API.Data.DbInitializer;
 using API.Exceptions;
 using API.Middlewares;
-using API.Services.IServices;
-using API.Services;
 using brevo_csharp.Client;
+using System.Text.Json;
+using Utilities;
 
 namespace API
 {
@@ -48,7 +48,13 @@ namespace API
                     {
                         Duration = 60 // Cache for 60 seconds
                     });
-            }).AddNewtonsoftJson().AddXmlDataContractSerializerFormatters();
+            })
+            .AddJsonOptions(options =>
+            {
+                options.JsonSerializerOptions.Converters.Add(new TimeOnlyJsonConverter());
+            })
+            .AddNewtonsoftJson()
+            .AddXmlDataContractSerializerFormatters();
 
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
@@ -85,7 +91,5 @@ namespace API
                 }
             }
         }
-
-
     }
 }

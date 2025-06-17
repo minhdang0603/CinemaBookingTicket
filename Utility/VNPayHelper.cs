@@ -6,7 +6,7 @@ namespace Utility
 {
     public static class VNPayHelper
     {
-        public static string CreatePaymentUrl(double amount, string orderInfo, string ipAddress, string returnUrl, string tmnCode, string hashSecret, string baseUrl, string ipnUrl = null)
+        public static string CreatePaymentUrl(decimal amount, string orderInfo, string ipAddress, string returnUrl, string tmnCode, string hashSecret, string baseUrl, string ipnUrl = null)
         {
             var vnpParams = new SortedList<string, string>
             {

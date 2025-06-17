@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using API.Data.Models;
 using API.DTOs.Request;
 using API.DTOs.Response;
@@ -21,6 +22,7 @@ public class PaymentService : IPaymentService
     private readonly string _vnpayHashSecret;
     private readonly string _vnpayUrl;
     private readonly string _vnpayIpnUrl;
+    private readonly string _vnpayReturnUrl;
 
     public PaymentService(IConfiguration configuration, IUnitOfWork unitOfWork, IMapper mapper)
     {
@@ -33,23 +35,25 @@ public class PaymentService : IPaymentService
         _vnpayHashSecret = _configuration["VNPay:HashSecret"] ?? "";
         _vnpayUrl = _configuration["VNPay:Url"] ?? "";
         _vnpayIpnUrl = _configuration["VNPay:IpnUrl"] ?? "";
-
+        _vnpayReturnUrl = _configuration["VNPay:ReturnUrl"] ?? "";
     }
 
     #region VNPay implementation
 
-    public string CreateVNPayPaymentUrl(VNPayRequestDTO request)
+    public async Task<string> CreateVNPayPaymentUrl(VNPayRequestDTO request)
     {
         string paymentUrl = VNPayHelper.CreatePaymentUrl(
             amount: request.Amount,
             orderInfo: request.OrderInfo,
             ipAddress: request.ClientIpAddress,
-            returnUrl: request.ReturnUrl,
+            returnUrl: _vnpayReturnUrl,
             tmnCode: _vnpayTmnCode,
             hashSecret: _vnpayHashSecret,
             baseUrl: _vnpayUrl,
             ipnUrl: _vnpayIpnUrl
         );
+
+        await CreatePaymentAsync(request.BookingId);
 
         return paymentUrl;
 

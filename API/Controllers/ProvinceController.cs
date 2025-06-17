@@ -23,13 +23,6 @@ namespace API.Controllers
         public async Task<ActionResult<APIResponse<List<ProvinceDTO>>>> GetAllProvincesAsync()
         {
             var provinces = await _provinceService.GetAllProvincesAsync();
-            if (provinces.Count == 0)
-            {
-                return NotFound(APIResponse<List<ProvinceDTO>>.Builder()
-                    .WithErrorMessages("No provinces found")
-                    .WithStatusCode(HttpStatusCode.NotFound)
-                    .Build());
-            }
 
             return Ok(APIResponse<List<ProvinceDTO>>.Builder()
                 .WithResult(provinces)
@@ -38,18 +31,18 @@ namespace API.Controllers
         }
 
         [HttpGet("get-province-by-id")]
-        public async Task<ActionResult<APIResponse<ProvinceDTO>>> GetProvinceByIdAsync(int id)
+        public async Task<ActionResult<APIResponse<ProvinceDetailDTO>>> GetProvinceByIdAsync(int id)
         {
             if (id == 0)
             {
                 return BadRequest(APIResponse<string>.Builder()
-                    .WithErrorMessages("Province Id is null.")
+                    .WithErrorMessages(new List<string> { "Province Id is null." })
                     .WithStatusCode(HttpStatusCode.BadRequest)
                     .Build());
             }
 
             var province = await _provinceService.GetProvinceByIdAsync(id);
-            return Ok(APIResponse<ProvinceDTO>.Builder()
+            return Ok(APIResponse<ProvinceDetailDTO>.Builder()
                 .WithResult(province)
                 .WithStatusCode(HttpStatusCode.OK)
                 .Build());
@@ -71,7 +64,7 @@ namespace API.Controllers
             if (id == 0 || provinceUpdateDTO == null)
             {
                 return BadRequest(APIResponse<string>.Builder()
-                    .WithErrorMessages("Province Id or Update DTO is null.")
+                    .WithErrorMessages(new List<string> { "Province Id or Update DTO is null." })
                     .WithStatusCode(HttpStatusCode.BadRequest)
                     .Build());
             }
@@ -89,7 +82,7 @@ namespace API.Controllers
             if (id == 0)
             {
                 return BadRequest(APIResponse<string>.Builder()
-                    .WithErrorMessages("Province Id is null.")
+                    .WithErrorMessages(new List<string> { "Province Id is null." })
                     .WithStatusCode(HttpStatusCode.BadRequest)
                     .Build());
             }
@@ -107,7 +100,7 @@ namespace API.Controllers
             if (name.IsNullOrEmpty())
             {
                 return BadRequest(APIResponse<List<ProvinceDTO>>.Builder()
-                    .WithErrorMessages("Input is null or empty.")
+                    .WithErrorMessages(new List<string> { "Input is null or empty." })
                     .WithStatusCode(HttpStatusCode.BadRequest)
                     .Build());
             }

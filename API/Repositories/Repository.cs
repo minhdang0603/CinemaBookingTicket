@@ -74,9 +74,10 @@ namespace API.Repositories
             return await query.ToListAsync();
         }
 
-        public async Task RemoveAsync(T entity)
+        public Task RemoveAsync(T entity)
         {
             dbSet.Remove(entity);
+            return Task.CompletedTask;
         }
 
         public Task<T> UpdateAsync(T entity)

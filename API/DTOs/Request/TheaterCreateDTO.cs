@@ -10,6 +10,5 @@
 
         public string? Description { get; set; }
         public int ProvinceId { get; set; }
-        public bool IsActive { get; set; }
     }
 }

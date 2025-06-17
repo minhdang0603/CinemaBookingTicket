@@ -16,6 +16,10 @@ namespace API.Exceptions
         public static Error BookingNotFound(int bookingId) => new($"The booking with id = {bookingId} was not found", HttpStatusCode.NotFound);
         public static Error PaymentNotFound(int bookingId) => new($"The payment of booking with id = {bookingId} was not found", HttpStatusCode.NotFound);
         public static Error UserCreationFailed() => new("User creation failed. Please try again.", HttpStatusCode.InternalServerError);
+        public static Error TheaterNotFound(int theaterId) => new($"The theater with id = {theaterId} was not found", HttpStatusCode.NotFound);
+        public static Error ScreenNotFound(int screenId) => new($"The screen with id = {screenId} was not found", HttpStatusCode.NotFound);
+        public static Error TheaterAlreadyExists(string name)
+            => new($"The theater with name = {name} already exists", HttpStatusCode.Conflict);
         public static Error InternalServerError(string message = "An unexpected error occurred. Please try again later.")
             => new(message, HttpStatusCode.InternalServerError);
     }
