@@ -20,6 +20,7 @@ namespace API.Configurations
             services.AddScoped<IScreenService, ScreenService>();
             services.AddScoped<IBookingService, BookingService>();
             services.AddScoped<IPaymentService, PaymentService>();
+            services.AddScoped<IShowTimeService, ShowTimeService>();
         }
     }
 }
