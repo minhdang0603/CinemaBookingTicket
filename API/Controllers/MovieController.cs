@@ -4,10 +4,12 @@ using API.DTOs.Request;
 using API.DTOs.Response;
 using API.Services;
 using API.Services.IServices;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using System.Net;
+using Utility;
 
 namespace API.Controllers
 {
@@ -53,6 +55,7 @@ namespace API.Controllers
 
 
         [HttpPost("create-movie")]
+        [Authorize(Roles = Constant.Role_Admin)]
         public async Task<ActionResult<APIResponse<MovieDTO>>> CreateMovieAsync([FromBody] MovieCreateDTO movieCreateDTO)
         {
             if (movieCreateDTO == null)
@@ -69,6 +72,7 @@ namespace API.Controllers
         }
 
         [HttpPut("update-movie")]
+        [Authorize(Roles = Constant.Role_Admin)]
         public async Task<ActionResult<APIResponse<MovieDTO>>> UpdateMovieAsync(int id, [FromBody] MovieUpdateDTO movieUpdateDTO)
         {
             if (id == 0 || movieUpdateDTO == null)
@@ -119,6 +123,7 @@ namespace API.Controllers
         }
 
         [HttpDelete("delete-movie")]
+        [Authorize(Roles = Constant.Role_Admin)]
         public async Task<ActionResult<APIResponse<MovieDTO>>> DeleteMovieAsync(int id)
         {
             if (id == 0)

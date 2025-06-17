@@ -2,10 +2,12 @@
 using API.DTOs.Request;
 using API.DTOs.Response;
 using API.Services.IServices;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using System.Net;
+using Utility;
 
 namespace API.Controllers
 {
@@ -51,6 +53,7 @@ namespace API.Controllers
         }
 
         [HttpPost("create-genre")]
+        [Authorize(Roles = Constant.Role_Admin)]
         public async Task<ActionResult<APIResponse<GenreDTO>>> CreateGenreAsync([FromBody] GenreCreateDTO genreCreateDTO)
         {
             if (genreCreateDTO == null)
@@ -67,6 +70,7 @@ namespace API.Controllers
         }
 
         [HttpPut("update-genre")]
+        [Authorize(Roles = Constant.Role_Admin)]
         public async Task<ActionResult<APIResponse<GenreDTO>>> UpdateGenreAsync(int id, [FromBody] GenreUpdateDTO genreUpdateDTO)
         {
             if (id == 0 || genreUpdateDTO == null)
@@ -117,6 +121,7 @@ namespace API.Controllers
         }
 
         [HttpDelete("delete-genre")]
+        [Authorize(Roles = Constant.Role_Admin)]
         public async Task<ActionResult<APIResponse<GenreDTO>>> DeleteGenreAsync(int id)
         {
             if (id == 0)
