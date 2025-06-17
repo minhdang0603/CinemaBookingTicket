@@ -20,7 +20,10 @@ namespace API
             Configuration.Default.ApiKey.Add("api-key", builder.Configuration.GetValue<string>("BrevoApi:ApiKey"));
 
             // Add services to the container.
-            builder.Services.AddControllers();
+            builder.Services.AddControllers().AddJsonOptions(options =>
+            {
+                options.JsonSerializerOptions.Converters.Add(new TimeOnlyJsonConverter());
+            });
 
 
             builder.Services.AddExceptionHandler<GlobalExceptionHandler>();

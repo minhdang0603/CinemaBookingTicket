@@ -1,6 +1,8 @@
-using API.Repositories.IRepositories;
+﻿using API.Data;
 using API.Data.Models;
-using API.Repositories;
+using API.DTOs.Request;
+using API.DTOs.Response;
+using API.Repositories.IRepositories;
 
 namespace API.Repositories
 {
@@ -11,6 +13,17 @@ namespace API.Repositories
         public ShowTimeRepository(ApplicationDbContext context) : base(context)
         {
             _context = context;
+        }
+
+        public Task AddRangeAsync(List<ShowTime> showTimes)
+        {
+            if (showTimes == null || showTimes.Count == 0)
+            {
+                throw new ArgumentNullException(nameof(showTimes), "ShowTimes cannot be null or empty");
+            }
+
+            _context.ShowTimes.AddRange(showTimes);
+            return _context.SaveChangesAsync();
         }
     }
 }
