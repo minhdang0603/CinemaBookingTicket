@@ -9,5 +9,9 @@ namespace API.Exceptions
         public static Error UserAlreadyExists(string email) => new($"The user with email = {email} already exists", HttpStatusCode.Conflict);
         public static Error MovieNotFound(int movieId) => new($"The movie with id = {movieId} was not found", HttpStatusCode.NotFound);
         public static Error MovieAlreadyExists(string title) => new($"The movie with title = {title} already exists", HttpStatusCode.Conflict);
+        public static Error MovieIdNotFound(int movieId) => new($"The movie with id = {movieId} was not found", HttpStatusCode.NotFound);
+        public static Error ScreenIdNotFound(int screenId) => new($"The screen with id = {screenId} was not", HttpStatusCode.Conflict);
+        public static Error ShowTimeNotFound(int ShowTimId) => new($"The showtime with id = {ShowTimId} was not", HttpStatusCode.NotFound);
+
     }
 }

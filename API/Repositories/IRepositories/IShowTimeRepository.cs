@@ -6,9 +6,6 @@ namespace API.Repositories.IRepositories
 {
     public interface IShowTimeRepository : IRepository<ShowTime>
     {
-        Task<List<ShowTimeDTO>> GetAllShowTimesAsync();
-        Task<(List<ShowTimeDTO> Added, List<string> Errors)> AddShowTimesAsync(List<ShowTimeCreateDTO> newShowTimes);
-        Task<(ShowTimeDTO? Updated, string? Error)> UpdateShowTimeAsync(int id, ShowTimeUpdateDTO dto);
-        Task<bool> DeleteShowTimeAsync(int id);
+        Task AddRangeAsync(List<ShowTime> showTimes);
     }
 }

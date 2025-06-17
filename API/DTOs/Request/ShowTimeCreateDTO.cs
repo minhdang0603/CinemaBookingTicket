@@ -1,4 +1,6 @@
-﻿namespace API.DTOs.Request
+﻿using API.DTOs.Response;
+
+namespace API.DTOs.Request
 {
     public class ShowTimeCreateDTO
     {
@@ -8,6 +10,6 @@
         public TimeOnly StartTime { get; set; }
         public TimeOnly EndTime { get; set; }
         public decimal BasePrice { get; set; }
-        public bool IsActive { get; set; }
+
     }
 }
