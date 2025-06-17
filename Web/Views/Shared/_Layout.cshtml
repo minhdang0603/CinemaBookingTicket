@@ -1,49 +1,102 @@
 ﻿<!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - Web</title>
+    <title>@ViewData["Title"] - Cinema</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/Web.styles.css" asp-append-version="true" />
 </head>
 <body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">Web</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </nav>
-    </header>
     <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
+        <!-- Sidebar -->
+        <nav class="sidebar" id="sidebar">
+            <div class="logo">
+                <div class="logo-text">🎬 CINEMA</div>
+            </div>
+            <ul class="sidebar-menu">
+                <li><a asp-area="" asp-controller="Home" asp-action="Index"><span class="icon">🏠</span>Trang chủ</a></li>
+                <li><a asp-area="" asp-controller="Account" asp-action="Login"><span class="icon">👤</span>Đăng nhập</a></li>
+                <li><a asp-area="" asp-controller="Cinema" asp-action="Index"><span class="icon">🎭</span>Tìm rạp chiếu phim</a></li>
+                <li><a asp-area="" asp-controller="Movie" asp-action="Index"><span class="icon">🎬</span>Tìm tác phẩm</a></li>
+                <li><a asp-area="" asp-controller="Cinema" asp-action="All"><span class="icon">📋</span>Tất cả các rạp chiếu phim</a></li>
+                <li><a asp-area="" asp-controller="Cinema" asp-action="IMAX"><span class="icon">🎪</span>Danh sách rạp chiếu phim IMAX</a></li>
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" onclick="toggleDropdown(event)">
+                        <span class="icon">🎫</span>Quản lí rạp
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a asp-controller="Genre" asp-action="Index">Genre</a></li>
+                        <li><a asp-controller="Director" asp-action="Index">Director</a></li>
+                        <li><a asp-controller="AdminMovie" asp-action="Index">Movie</a></li>
+                        <li><a asp-controller="Session" asp-action="Index">Session</a></li>
+                        <li><a asp-controller="Room" asp-action="Index">Room</a></li>
+                        <li><a asp-controller="Booking" asp-action="Index">Booking</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content"> 
+            <!-- Header -->
+            <header class="header">
+                <div class="logo-main">
+                    <button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
+                    CINEMA
+                </div>
+                <div class="search-section">
+                    <form asp-area="" asp-controller="Movie" asp-action="Search" method="get">
+                        <div class="search-group">
+                            <label>Tìm phim</label>
+                            <input type="text" name="query" class="search-input" placeholder="Tên phim..." />
+                        </div>
+                        <div class="search-group">
+                            <label>Thể loại</label>
+                            <select name="genre" class="search-input">
+                                <option value="">Tất cả</option>
+                                <option value="action">Hành động</option>
+                                <option value="comedy">Hài</option>
+                                <option value="drama">Chính kịch</option>
+                                <option value="horror">Kinh dị</option>
+                                <option value="animation">Hoạt hình</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="search-btn">Tìm kiếm</button>
+                    </form>
+                </div>
+                <div class="user-section">
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        <span>Xin chào, @User.Identity.Name</span>
+                        <a asp-area="" asp-controller="Account" asp-action="Logout">Đăng xuất</a>
+                    }
+                    else
+                    {
+                        <a asp-area="" asp-controller="Account" asp-action="Login">Đăng nhập</a>
+                    }
+                </div>
+            </header>
+
+            <!-- Page Content -->
+            <div class="page-content">
+                @RenderBody()
+            </div>
         </main>
     </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2025 - Web - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-        </div>
-    </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    <script>
+        function toggleDropdown(event) {
+            event.preventDefault();
+            var parent = event.target.closest(".dropdown");
+            parent.classList.toggle("open");
+        }
+    </script>
+
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
