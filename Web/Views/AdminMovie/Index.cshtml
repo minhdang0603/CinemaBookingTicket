@@ -1,0 +1,590 @@
+﻿@model List<Web.Models.Movie>
+@{
+    ViewData["Title"] = "Movie List";
+}
+
+<div class="management-container">
+    <div class="management-header">
+        <h1 class="management-title">Movie List</h1>
+        <a asp-controller="AdminMovie" asp-action="Create" class="btn-create-new">
+            <span class="create-icon">➕</span>
+            Create New
+        </a>
+    </div>
+
+    <div class="management-table-container">
+        <table class="management-table">
+            <thead>
+                <tr>
+                    <th>Movie Title</th>
+                    <th>Genre</th>
+                    <th>Duration</th>
+                    <th>Rating</th>
+                    <th>Release Date</th>
+                    <th>Status</th>
+                    <th>Price</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model != null && Model.Any())
+                {
+                    @for (int i = 0; i < Model.Count; i++)
+                    {
+                        var movie = Model[i];
+                        <tr class="@(i % 2 == 0 ? "row-even" : "row-odd")">
+                            <td class="movie-title">
+                                <div class="movie-info">
+                                    <img src="@(movie.PosterUrl ?? "/images/no-poster.jpg")" alt="@movie.Title" class="movie-poster-thumb" />
+                                    <div class="movie-details">
+                                        <span class="title">@movie.Title</span>
+                                        <span class="description">@(movie.Description.Length > 60 ? movie.Description.Substring(0, 60) + "..." : movie.Description)</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="genre-badge">@movie.Genre</span>
+                            </td>
+                            <td>
+                                <span class="duration">@movie.Duration min</span>
+                            </td>
+                            <td>
+                                <div class="rating">
+                                    <span class="rating-stars">⭐</span>
+                                    <span class="rating-value">@movie.Rating.ToString("F1")</span>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="release-date">@movie.ReleaseDate.ToString("MMM dd, yyyy")</span>
+                            </td>
+                            <td>
+                                <div class="status-badges">
+                                    @if (movie.IsNowShowing)
+                                    {
+                                        <span class="status-badge status-showing">Now Showing</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="status-badge status-ended">Ended</span>
+                                    }
+                                    
+                                    @if (movie.IsFeatured)
+                                    {
+                                        <span class="status-badge status-featured">Featured</span>
+                                    }
+                                </div>
+                            </td>
+                            <td>
+                                <span class="price">@movie.Price.ToString("C0", new System.Globalization.CultureInfo("vi-VN"))</span>
+                            </td>
+                            <td class="actions">
+                                <a asp-controller="AdminMovie" asp-action="Details" asp-route-id="@movie.Id" class="btn-action btn-view" title="View Details">
+                                    <span>👁️</span>
+                                    View
+                                </a>
+                                <a asp-controller="AdminMovie" asp-action="Edit" asp-route-id="@movie.Id" class="btn-action btn-edit" title="Edit Movie">
+                                    <span>✏️</span>
+                                    Edit
+                                </a>
+                                <button type="button" class="btn-action btn-delete" onclick="confirmDelete(@movie.Id, '@movie.Title')" title="Delete Movie">
+                                    <span>🗑️</span>
+                                    Delete
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="8" class="no-data">
+                            <div class="no-data-message">
+                                <span class="no-data-icon">🎬</span>
+                                <h3>No movies found</h3>
+                                <p>Start by creating your first movie.</p>
+                                <a asp-controller="AdminMovie" asp-action="Create" class="btn-create-first">Create First Movie</a>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div id="deleteModal" class="modal-overlay" style="display: none;">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Confirm Delete</h3>
+            <button type="button" class="modal-close" onclick="closeDeleteModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="delete-warning">
+                <span class="warning-icon">⚠️</span>
+                <p>Are you sure you want to delete the movie "<span id="movieTitle"></span>"?</p>
+                <p class="warning-text">This action cannot be undone.</p>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn-cancel" onclick="closeDeleteModal()">Cancel</button>
+            <form method="post" style="display: inline;" asp-controller="AdminMovie" asp-action="Delete">
+                <input type="hidden" name="id" id="deleteMovieId" />
+                <button type="submit" class="btn-confirm-delete">Delete Movie</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Management Container */
+    .management-container {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        overflow: hidden;
+        margin: 20px 0;
+    }
+
+    .management-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 25px 30px;
+        background: #f8f9fa;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    .management-title {
+        margin: 0;
+        font-size: 28px;
+        font-weight: 600;
+        color: #2c3e50;
+    }
+
+    /* Create New Button */
+    .btn-create-new {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: #28a745;
+        color: white;
+        padding: 12px 24px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 4px rgba(40, 167, 69, 0.2);
+    }
+
+    .btn-create-new:hover {
+        background: #218838;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
+        color: white;
+    }
+
+    .create-icon {
+        font-size: 14px;
+    }
+
+    /* Table Styles */
+    .management-table-container {
+        overflow-x: auto;
+    }
+
+    .management-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 14px;
+    }
+
+    .management-table thead {
+        background: #495057;
+        color: white;
+    }
+
+    .management-table thead th {
+        padding: 15px 12px;
+        text-align: left;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 12px;
+        letter-spacing: 0.5px;
+        border: none;
+    }
+
+    .management-table tbody td {
+        padding: 15px 12px;
+        border-bottom: 1px solid #e9ecef;
+        vertical-align: middle;
+    }
+
+    /* Row Styles */
+    .row-even {
+        background-color: #f8f9fa;
+    }
+
+    .row-odd {
+        background-color: white;
+    }
+
+    .management-table tbody tr:hover {
+        background-color: #e3f2fd !important;
+        transition: background-color 0.2s ease;
+    }
+
+    /* Movie Info */
+    .movie-info {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .movie-poster-thumb {
+        width: 50px;
+        height: 70px;
+        object-fit: cover;
+        border-radius: 6px;
+        border: 2px solid #e9ecef;
+    }
+
+    .movie-details {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .movie-details .title {
+        font-weight: 600;
+        color: #2c3e50;
+        font-size: 15px;
+    }
+
+    .movie-details .description {
+        color: #6c757d;
+        font-size: 12px;
+        line-height: 1.4;
+    }
+
+    /* Genre Badge */
+    .genre-badge {
+        background: #17a2b8;
+        color: white;
+        padding: 4px 10px;
+        border-radius: 15px;
+        font-size: 11px;
+        font-weight: 500;
+        white-space: nowrap;
+    }
+
+    /* Duration */
+    .duration {
+        color: #495057;
+        font-weight: 500;
+    }
+
+    /* Rating */
+    .rating {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .rating-stars {
+        color: #ffc107;
+        font-size: 16px;
+    }
+
+    .rating-value {
+        font-weight: 600;
+        color: #495057;
+    }
+
+    /* Release Date */
+    .release-date {
+        color: #6c757d;
+        font-size: 13px;
+    }
+
+    /* Status Badges */
+    .status-badges {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .status-badge {
+        padding: 3px 8px;
+        border-radius: 12px;
+        font-size: 10px;
+        font-weight: 600;
+        text-align: center;
+        white-space: nowrap;
+    }
+
+    .status-showing {
+        background: #d4edda;
+        color: #155724;
+    }
+
+    .status-ended {
+        background: #f8d7da;
+        color: #721c24;
+    }
+
+    .status-featured {
+        background: #fff3cd;
+        color: #856404;
+    }
+
+    /* Price */
+    .price {
+        font-weight: 600;
+        color: #28a745;
+        font-size: 14px;
+    }
+
+    /* Action Buttons */
+    .actions {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+    }
+
+    .btn-action {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        padding: 6px 12px;
+        border: none;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        white-space: nowrap;
+    }
+
+    .btn-view {
+        background: #17a2b8;
+        color: white;
+    }
+
+    .btn-view:hover {
+        background: #138496;
+        color: white;
+    }
+
+    .btn-edit {
+        background: #ffc107;
+        color: #212529;
+    }
+
+    .btn-edit:hover {
+        background: #e0a800;
+        color: #212529;
+    }
+
+    .btn-delete {
+        background: #dc3545;
+        color: white;
+    }
+
+    .btn-delete:hover {
+        background: #c82333;
+    }
+
+    /* No Data State */
+    .no-data {
+        text-align: center;
+        padding: 60px 20px;
+    }
+
+    .no-data-message {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .no-data-icon {
+        font-size: 48px;
+        opacity: 0.5;
+    }
+
+    .no-data-message h3 {
+        margin: 0;
+        color: #6c757d;
+        font-size: 18px;
+    }
+
+    .no-data-message p {
+        margin: 0;
+        color: #adb5bd;
+        font-size: 14px;
+    }
+
+    .btn-create-first {
+        background: #007bff;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 6px;
+        text-decoration: none;
+        font-weight: 500;
+        transition: background-color 0.3s;
+    }
+
+    .btn-create-first:hover {
+        background: #0056b3;
+        color: white;
+    }
+
+    /* Modal Styles */
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0,0,0,0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+    }
+
+    .modal-content {
+        background: white;
+        border-radius: 12px;
+        max-width: 450px;
+        width: 90%;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px 25px;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    .modal-header h3 {
+        margin: 0;
+        color: #2c3e50;
+        font-size: 18px;
+    }
+
+    .modal-close {
+        background: none;
+        border: none;
+        font-size: 24px;
+        cursor: pointer;
+        color: #6c757d;
+        padding: 0;
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        transition: background-color 0.3s;
+    }
+
+    .modal-close:hover {
+        background-color: #f8f9fa;
+    }
+
+    .modal-body {
+        padding: 25px;
+    }
+
+    .delete-warning {
+        text-align: center;
+    }
+
+    .warning-icon {
+        font-size: 48px;
+        display: block;
+        margin-bottom: 15px;
+    }
+
+    .delete-warning p {
+        margin: 10px 0;
+        color: #495057;
+    }
+
+    .warning-text {
+        color: #dc3545 !important;
+        font-weight: 500;
+        font-size: 14px;
+    }
+
+    .modal-footer {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        padding: 20px 25px;
+        border-top: 1px solid #e9ecef;
+    }
+
+    .btn-cancel {
+        background: #6c757d;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 500;
+        transition: background-color 0.3s;
+    }
+
+    .btn-cancel:hover {
+        background: #545b62;
+    }
+
+    .btn-confirm-delete {
+        background: #dc3545;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 500;
+        transition: background-color 0.3s;
+    }
+
+    .btn-confirm-delete:hover {
+        background: #c82333;
+    }
+
+    }
+</style>
+
+<script>
+    function confirmDelete(movieId, movieTitle) {
+        document.getElementById('deleteMovieId').value = movieId;
+        document.getElementById('movieTitle').textContent = movieTitle;
+        document.getElementById('deleteModal').style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeDeleteModal() {
+        document.getElementById('deleteModal').style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
+
+    document.getElementById('deleteModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeDeleteModal();
+        }
+    });
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeDeleteModal();
+        }
+    });
+</script>
