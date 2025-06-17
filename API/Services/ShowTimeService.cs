@@ -32,20 +32,42 @@ namespace API.Services
             // check movie and screen have valid ids and exist in the database
             foreach (var showTime in newShowTimes)
             {
-                var movieExists = _unitOfWork.Movie.GetAsync(m => m.Id == showTime.MovieId);
-                var screenExists = _unitOfWork.Screen.GetAsync(s => s.Id == showTime.ScreenId);
+                // Kiểm tra movie và screen có tồn tại không
+                var movie = await _unitOfWork.Movie.GetAsync(m => m.Id == showTime.MovieId);
+                var screen = await _unitOfWork.Screen.GetAsync(s => s.Id == showTime.ScreenId);
 
-                if (movieExists == null)
+                if (movie == null)
                 {
                     _logger.LogError($"Movie with ID {showTime.MovieId} does not exist.");
                     throw new AppException(ErrorCodes.MovieIdNotFound(showTime.MovieId));
                 }
-                if (screenExists == null)
+                if (screen == null)
                 {
                     _logger.LogError($"Screen with ID {showTime.ScreenId} does not exist.");
                     throw new AppException(ErrorCodes.ScreenIdNotFound(showTime.ScreenId));
                 }
+                if (showTime.StartTime >= showTime.EndTime)
+                {
+                    _logger.LogError($"Invalid showtime range for Movie ID {showTime.MovieId} and Screen ID {showTime.ScreenId}.");
+                    throw new AppException(ErrorCodes.InvalidShowTimeRange(showTime.MovieId, showTime.ScreenId));
+                }
+
+                // Lấy các suất chiếu đã có trên cùng màn hình
+                var existingShowTimes = await _unitOfWork.ShowTime.GetAllAsync(
+                    s => s.ScreenId == showTime.ScreenId && s.IsActive == true);
+
+                // Kiểm tra thời gian giữa các suất chiếu phải cách nhau ít nhất 30 phút
+                foreach (var exist in existingShowTimes)
+                {
+                    // Nếu thời gian kết thúc của suất trước + 30p > thời gian bắt đầu của suất mới => lỗi
+                    if (exist.EndTime.AddMinutes(30) > showTime.StartTime)
+                    {
+                        _logger.LogError($"Showtime for Screen ID {showTime.ScreenId} must be at least 30 minutes after previous showtime.");
+                        throw new AppException(ErrorCodes.InvalidStartForShowTime(showTime.ScreenId, exist.EndTime, showTime.StartTime));
+                    }
+                }
             }
+
             // Map DTOs to ShowTime entities
             var showTimes = _mapper.Map<List<ShowTime>>(newShowTimes);
             await _unitOfWork.ShowTime.AddRangeAsync(showTimes);
@@ -123,7 +145,7 @@ namespace API.Services
                 throw new ArgumentNullException(nameof(dto));
             }
 
-            var showTime = await _unitOfWork.ShowTime.GetAsync(s => s.Id == id && s.IsActive == true, includeProperties:"Movie,Screen");
+            var showTime = await _unitOfWork.ShowTime.GetAsync(s => s.Id == id && s.IsActive == true, includeProperties: "Movie,Screen");
             if (showTime == null)
             {
                 _logger.LogError($"ShowTime with ID {id} not found.");
