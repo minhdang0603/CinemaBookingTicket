@@ -13,6 +13,8 @@ namespace API.Configurations
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IDbInitializer, DbInitializer>();
             services.AddTransient<IEmailService, BrevoEmailService>();
+            services.AddScoped<IAuthService, AuthService>();
+            services.AddScoped<IUserService, UserService>();
             services.AddScoped<IGenreService, GenreService>();
             services.AddScoped<IMovieService, MovieService>();
             services.AddScoped<IProvinceService, ProvinceService>();

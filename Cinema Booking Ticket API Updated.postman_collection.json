@@ -6,12 +6,96 @@
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "34446651"
 	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Auto token refresh for regular user token",
+					"if (pm.environment.get('tokenExpiresAt')) {",
+					"    const expiryTime = new Date(pm.environment.get('tokenExpiresAt'));",
+					"    const currentTime = new Date();",
+					"    const timeBuffer = 5 * 60 * 1000; // 5 minutes in milliseconds",
+					"    ",
+					"    // If token will expire in less than 5 minutes",
+					"    if ((expiryTime.getTime() - currentTime.getTime()) < timeBuffer) {",
+					"        console.log('⚠️ Auth token is about to expire. Consider running the Login request again.');",
+					"    }",
+					"}",
+					"",
+					"// Auto token refresh for admin token",
+					"if (pm.environment.get('adminTokenExpiresAt')) {",
+					"    const adminExpiryTime = new Date(pm.environment.get('adminTokenExpiresAt'));",
+					"    const currentTime = new Date();",
+					"    const timeBuffer = 5 * 60 * 1000; // 5 minutes in milliseconds",
+					"    ",
+					"    // If admin token will expire in less than 5 minutes",
+					"    if ((adminExpiryTime.getTime() - currentTime.getTime()) < timeBuffer) {",
+					"        console.log('⚠️ Admin token is about to expire. Consider running the Login as Admin request again.');",
+					"    }",
+					"}"
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Global test script for all requests",
+					"if (pm.response.code === 401) {",
+					"    console.log('⛔ 401 Unauthorized: Authentication token may have expired');",
+					"    pm.test(\"Authentication token has expired. Please login again.\", function() {",
+					"        pm.expect(false).to.be.true;",
+					"    });",
+					"}",
+					"",
+					"if (pm.response.code >= 500) {",
+					"    console.log('⛔ Server error: ' + pm.response.code);",
+					"}"
+				]
+			}
+		}
+	],
 	"item": [
 		{
 			"name": "Authentication",
 			"item": [
 				{
 					"name": "Register User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"",
+									"// Log response for debugging",
+									"console.log('Register API Response:', JSON.stringify(jsonData));",
+									"",
+									"// Check if response is successful and contains token",
+									"if (jsonData && jsonData.result && jsonData.result.token) {",
+									"    // Store token in environment variable",
+									"    pm.environment.set(\"authToken\", jsonData.result.token);",
+									"    console.log('✅ Auth token saved from register API');",
+									"    ",
+									"    // If user ID is available, store it too",
+									"    if (jsonData.result.userId) {",
+									"        pm.environment.set(\"userId\", jsonData.result.userId);",
+									"        console.log('✅ User ID saved');",
+									"    }",
+									"}",
+									"",
+									"// Check if the status code is as expected",
+									"pm.test(\"Status code is 201 Created\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "POST",
 						"header": [
@@ -47,9 +131,34 @@
 							"script": {
 								"exec": [
 									"var jsonData = pm.response.json();",
+									"",
+									"// Log response for debugging",
+									"console.log('Login API Response:', JSON.stringify(jsonData));",
+									"",
+									"// Check if response is successful and contains token",
 									"if (jsonData && jsonData.result && jsonData.result.token) {",
+									"    // Store token in environment variable",
 									"    pm.environment.set(\"authToken\", jsonData.result.token);",
-									"}"
+									"    console.log('✅ Auth token saved from login API');",
+									"    ",
+									"    // If user ID is available, store it too",
+									"    if (jsonData.result.user && jsonData.result.user.id) {",
+									"        pm.environment.set(\"userId\", jsonData.result.user.id);",
+									"        console.log('✅ User ID saved');",
+									"    }",
+									"",
+									"    // Store expiration time if available",
+									"    if (jsonData.result.expiresIn) {",
+									"        const expiryTime = new Date(new Date().getTime() + jsonData.result.expiresIn * 1000);",
+									"        pm.environment.set(\"tokenExpiresAt\", expiryTime.toISOString());",
+									"        console.log('✅ Token expiration time saved: ' + expiryTime.toISOString());",
+									"    }",
+									"}",
+									"",
+									"// Check if the status code is as expected",
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
 								],
 								"type": "text/javascript"
 							}
@@ -90,9 +199,34 @@
 							"script": {
 								"exec": [
 									"var jsonData = pm.response.json();",
+									"",
+									"// Log response for debugging",
+									"console.log('Admin Login API Response:', JSON.stringify(jsonData));",
+									"",
+									"// Check if response is successful and contains token",
 									"if (jsonData && jsonData.result && jsonData.result.token) {",
+									"    // Store token in environment variable",
 									"    pm.environment.set(\"adminToken\", jsonData.result.token);",
-									"}"
+									"    console.log('✅ Admin token saved');",
+									"    ",
+									"    // If user ID is available, store it too",
+									"    if (jsonData.result.user && jsonData.result.user.id) {",
+									"        pm.environment.set(\"adminId\", jsonData.result.user.id);",
+									"        console.log('✅ Admin ID saved');",
+									"    }",
+									"",
+									"    // Store expiration time if available",
+									"    if (jsonData.result.expiresIn) {",
+									"        const expiryTime = new Date(new Date().getTime() + jsonData.result.expiresIn * 1000);",
+									"        pm.environment.set(\"adminTokenExpiresAt\", expiryTime.toISOString());",
+									"        console.log('✅ Admin token expiration time saved: ' + expiryTime.toISOString());",
+									"    }",
+									"}",
+									"",
+									"// Check if the status code is as expected",
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
 								],
 								"type": "text/javascript"
 							}
@@ -1261,26 +1395,6 @@
 				}
 			],
 			"description": "Endpoints for managing users"
-		}
-	],
-	"event": [
-		{
-			"listen": "prerequest",
-			"script": {
-				"type": "text/javascript",
-				"exec": [
-					""
-				]
-			}
-		},
-		{
-			"listen": "test",
-			"script": {
-				"type": "text/javascript",
-				"exec": [
-					""
-				]
-			}
 		}
 	],
 	"variable": [
