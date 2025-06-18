@@ -1,10 +1,6 @@
-using API.Data.Models;
-using API.DTOs.Response;
-using Utility;
-
 namespace API.DTOs.Response;
 
-public class MovieDTO
+public class MovieDetailDTO
 {
     public int Id { get; set; }
 
@@ -31,4 +27,6 @@ public class MovieDTO
     public string? Status { get; set; }
 
     public List<GenreDTO>? Genres { get; set; }
+
+    public List<ShowTimeLiteDTO>? ShowTimes { get; set; }
 }

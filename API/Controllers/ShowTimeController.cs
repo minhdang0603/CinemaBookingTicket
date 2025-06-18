@@ -28,7 +28,7 @@ namespace API.Controllers
                 return NotFound(APIResponse<List<ShowTimeDTO>>.Builder()
                     .WithStatusCode(HttpStatusCode.NotFound)
                     .WithSuccess(false)
-                    .WithErrorMessages("Showtimes is null or empty.")
+                    .WithErrorMessages(new List<string> { "Showtimes is null or empty." })
                     .Build());
             }
 
@@ -38,26 +38,52 @@ namespace API.Controllers
                 .WithResult(showTimes)
                 .Build());
         }
-
         [HttpPost("add-showtimes")]
-        public async Task<ActionResult<APIResponse<List<ShowTimeDTO>>>> AddShowTimes([FromBody] List<ShowTimeCreateDTO> newShowTimes)
+        public async Task<ActionResult<APIResponse<ShowTimeBulkResultDTO>>> AddShowTimes([FromBody] List<ShowTimeCreateDTO> newShowTimes)
         {
             if (newShowTimes == null || !newShowTimes.Any())
             {
-                return BadRequest(APIResponse<List<ShowTimeDTO>>.Builder()
+                return BadRequest(APIResponse<ShowTimeBulkResultDTO>.Builder()
                     .WithStatusCode(HttpStatusCode.BadRequest)
                     .WithSuccess(false)
-                    .WithErrorMessages("Showtimes is null or empty.")
+                    .WithErrorMessages(new List<string> { "Showtimes is null or empty." })
                     .Build());
             }
 
-            var addedShowtimes = await _showTimeService.AddShowTimesAsync(newShowTimes);
+            var result = await _showTimeService.AddShowTimesAsync(newShowTimes);
 
-            return Ok(APIResponse<List<ShowTimeDTO>>.Builder()
-                .WithStatusCode(HttpStatusCode.OK)
-                .WithSuccess(true)
-                .WithResult(addedShowtimes)
-                .Build());
+            // Nếu có cả thành công và thất bại, trả về mã 207 Multi-Status
+            if (result.SuccessfulShowTimes.Any() && result.FailedShowTimes.Any())
+            {
+                var message = $"Added {result.SuccessfulShowTimes.Count} showtimes successfully, {result.FailedShowTimes.Count} showtimes failed.";
+                return StatusCode(207, APIResponse<ShowTimeBulkResultDTO>.Builder()
+                    .WithStatusCode((HttpStatusCode)207) // Multi-Status
+                    .WithSuccess(true)
+                    .WithResult(result)
+                    .WithErrorMessages(new List<string> { message })
+                    .Build());
+            }
+            // Nếu tất cả đều thành công
+            else if (result.SuccessfulShowTimes.Any() && !result.FailedShowTimes.Any())
+            {
+                var message = $"Added all {result.SuccessfulShowTimes.Count} showtimes successfully.";
+                return Ok(APIResponse<ShowTimeBulkResultDTO>.Builder()
+                    .WithStatusCode(HttpStatusCode.OK)
+                    .WithSuccess(true)
+                    .WithResult(result)
+                    .Build());
+            }
+            // Nếu tất cả đều thất bại
+            else
+            {
+                var failureMessages = result.FailedShowTimes.Select(f => f.ErrorMessage).ToList();
+                return BadRequest(APIResponse<ShowTimeBulkResultDTO>.Builder()
+                    .WithStatusCode(HttpStatusCode.BadRequest)
+                    .WithSuccess(false)
+                    .WithResult(result)
+                    .WithErrorMessages(failureMessages)
+                    .Build());
+            }
         }
 
         [HttpPut("update-showtime/{id}")]
@@ -68,7 +94,7 @@ namespace API.Controllers
                 return BadRequest(APIResponse<ShowTimeDTO>.Builder()
                     .WithStatusCode(HttpStatusCode.BadRequest)
                     .WithSuccess(false)
-                    .WithErrorMessages("Invalid showtime update data or ID.")
+                    .WithErrorMessages(new List<string> { "Invalid showtime update data or ID." })
                     .Build());
             }
 
@@ -89,7 +115,7 @@ namespace API.Controllers
                 return BadRequest(APIResponse<ShowTimeDTO>.Builder()
                     .WithStatusCode(HttpStatusCode.BadRequest)
                     .WithSuccess(false)
-                    .WithErrorMessages("Invalid showtime ID.")
+                    .WithErrorMessages(new List<string> { "Invalid showtime ID." })
                     .Build());
             }
             var deletedShowtime = await _showTimeService.DeleteShowTimeAsync(id);
@@ -108,7 +134,7 @@ namespace API.Controllers
                 return BadRequest(APIResponse<List<ShowTimeDTO>>.Builder()
                     .WithStatusCode(HttpStatusCode.BadRequest)
                     .WithSuccess(false)
-                    .WithErrorMessages("Invalid pagination parameters.")
+                    .WithErrorMessages(new List<string> { "Invalid pagination parameters." })
                     .Build());
             }
 
@@ -118,7 +144,7 @@ namespace API.Controllers
                 return NotFound(APIResponse<List<ShowTimeDTO>>.Builder()
                     .WithStatusCode(HttpStatusCode.NotFound)
                     .WithSuccess(false)
-                    .WithErrorMessages("Showtimes is empty.")
+                    .WithErrorMessages(new List<string> { "Showtimes is empty." })
                     .Build());
             }
 

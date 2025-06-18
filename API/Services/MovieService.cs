@@ -62,7 +62,7 @@ public class MovieService : IMovieService
         return _mapper.Map<MovieDTO>(movie);
     }
 
-    public async Task<MovieDTO> DeleteMovieAsync(int id)
+    public async Task DeleteMovieAsync(int id)
     {
         var movie = await _unitOfWork.Movie.GetAsync(m => m.Id == id);
         if (movie == null)
@@ -75,7 +75,6 @@ public class MovieService : IMovieService
         await _unitOfWork.Movie.UpdateAsync(movie);
         await _unitOfWork.SaveAsync();
         _logger.LogInformation($"Movie {movie.Title} deleted successfully with ID {movie.Id}");
-        return _mapper.Map<MovieDTO>(movie);
     }
 
     public async Task<List<MovieDTO>> GetAllMoviesAsync(bool? isActive = true)
@@ -102,7 +101,7 @@ public class MovieService : IMovieService
         return _mapper.Map<List<MovieDTO>>(movies);
     }
 
-    public async Task<MovieDTO> GetMovieByIdAsync(int id, bool? isActive = true)
+    public async Task<MovieDetailDTO> GetMovieByIdAsync(int id, bool? isActive = true)
     {
         var movie = await _unitOfWork.Movie.GetAsync(
             m => m.Id == id && m.IsActive == isActive,
@@ -112,7 +111,7 @@ public class MovieService : IMovieService
             _logger.LogError($"Movie with ID {id} not found");
             throw new AppException(ErrorCodes.MovieNotFound(id));
         }
-        return _mapper.Map<MovieDTO>(movie);
+        return _mapper.Map<MovieDetailDTO>(movie);
     }
 
     public async Task<List<MovieDTO>> GetMoviesByGenreAsync(int genreId, bool? isActive = true)

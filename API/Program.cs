@@ -23,6 +23,7 @@ namespace API
             builder.Services.AddControllers().AddJsonOptions(options =>
             {
                 options.JsonSerializerOptions.Converters.Add(new TimeOnlyJsonConverter());
+                options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve;
             });
 
 
@@ -38,7 +39,6 @@ namespace API
 
             // Add Dependency Injection Config
             builder.Services.AddDependencyInjectionConfiguration();
-
             builder.Services.AddResponseCaching();
 
             // Add Authentication Config

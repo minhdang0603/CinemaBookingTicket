@@ -13,7 +13,7 @@ public interface IPaymentService
 
     // Common methods
     Task<PaymentDTO> GetPaymentsByBookingIdAsync(int bookingId);
-    Task<PaymentDTO> UpdatePaymentStatusAsync(int paymentId, string status, string transactionId = null);
+    Task<PaymentDTO> UpdatePaymentStatusAsync(int paymentId, string status, string? transactionId = null);
 
     Task<PaymentDTO> CreatePaymentAsync(int bookingId);
 }

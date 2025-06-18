@@ -11,5 +11,5 @@ public class TheaterDetailDTO
 
     public string? Description { get; set; }
 
-    public List<ScreenDTO> Screens { get; set; }
+    public List<ScreenLiteDTO> Screens { get; set; } = new List<ScreenLiteDTO>();
 }

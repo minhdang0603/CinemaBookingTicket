@@ -2,9 +2,11 @@
 using API.DTOs.Request;
 using API.DTOs.Response;
 using API.Services.IServices;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using System.Net;
+using Utility;
 
 namespace API.Controllers
 {
@@ -49,6 +51,7 @@ namespace API.Controllers
         }
 
         [HttpPost("create-province")]
+        [Authorize(Roles = Constant.Role_Admin)]
         public async Task<ActionResult<APIResponse<string>>> CreateProvinceAsync([FromBody] ProvinceCreateDTO provinceCreateDTO)
         {
             await _provinceService.CreateProvinceAsync(provinceCreateDTO);
@@ -59,6 +62,7 @@ namespace API.Controllers
         }
 
         [HttpPut("update-province")]
+        [Authorize(Roles = Constant.Role_Admin)]
         public async Task<ActionResult<APIResponse<string>>> UpdateProvinceAsync(int id, [FromBody] ProvinceUpdateDTO provinceUpdateDTO)
         {
             if (id == 0 || provinceUpdateDTO == null)
@@ -77,6 +81,7 @@ namespace API.Controllers
         }
 
         [HttpDelete("delete-province")]
+        [Authorize(Roles = Constant.Role_Admin)]
         public async Task<ActionResult<APIResponse<string>>> DeleteProvinceAsync(int id)
         {
             if (id == 0)

@@ -23,6 +23,7 @@ public class PaymentService : IPaymentService
     private readonly string _vnpayUrl;
     private readonly string _vnpayIpnUrl;
     private readonly string _vnpayReturnUrl;
+    private readonly string _frontendUrl;
 
     public PaymentService(IConfiguration configuration, IUnitOfWork unitOfWork, IMapper mapper)
     {
@@ -36,12 +37,14 @@ public class PaymentService : IPaymentService
         _vnpayUrl = _configuration["VNPay:Url"] ?? "";
         _vnpayIpnUrl = _configuration["VNPay:IpnUrl"] ?? "";
         _vnpayReturnUrl = _configuration["VNPay:ReturnUrl"] ?? "";
+        _frontendUrl = _configuration["Frontend:BaseUrl"] ?? "http://localhost:5082";
     }
 
-    #region VNPay implementation
-
+    #region VNPay implementation    
     public async Task<string> CreateVNPayPaymentUrl(VNPayRequestDTO request)
     {
+        var payment = await CreatePaymentAsync(request.BookingId);
+
         string paymentUrl = VNPayHelper.CreatePaymentUrl(
             amount: request.Amount,
             orderInfo: request.OrderInfo,
@@ -50,13 +53,11 @@ public class PaymentService : IPaymentService
             tmnCode: _vnpayTmnCode,
             hashSecret: _vnpayHashSecret,
             baseUrl: _vnpayUrl,
-            ipnUrl: _vnpayIpnUrl
+            ipnUrl: _vnpayIpnUrl,
+            txnRef: payment.Id.ToString() // Sử dụng payment.Id làm vnp_TxnRef
         );
 
-        await CreatePaymentAsync(request.BookingId);
-
         return paymentUrl;
-
     }
 
     public async Task<VNPayIPNResponseDTO> ProcessVNPayIPNAsync(IQueryCollection queryParams)
@@ -75,44 +76,60 @@ public class PaymentService : IPaymentService
 
         if (isValidSignature)
         {
-            string orderId = queryParams["vnp_TxnRef"];
-            string vnp_ResponseCode = queryParams["vnp_ResponseCode"];
-            string vnp_TransactionStatus = queryParams["vnp_TransactionStatus"];
-            string vnpayTranId = queryParams["vnp_TransactionNo"];
+            string vnp_TxnRef = queryParams["vnp_TxnRef"].ToString();
+            string vnp_ResponseCode = queryParams["vnp_ResponseCode"].ToString();
+            string vnp_TransactionStatus = queryParams["vnp_TransactionStatus"].ToString();
+            string vnpayTranId = queryParams["vnp_TransactionNo"].ToString();
+
+            // vnp_TxnRef là payment_id từ hệ thống của chúng ta
+            int paymentId = int.Parse(vnp_TxnRef);
 
             if (vnp_ResponseCode == "00" && vnp_TransactionStatus == "00")
             {
                 // Payment successful - update database
-                await UpdatePaymentStatusAsync(int.Parse(orderId), "Completed", vnpayTranId);
+                await UpdatePaymentStatusAsync(paymentId, Constant.Payment_Status_Completed, vnpayTranId);
 
-                return new VNPayIPNResponseDTO
+                // Optionally, you can also update the booking status to confirmed here
+                var payment = await _unitOfWork.Payment.GetAsync(p => p.Id == paymentId);
+                if (payment != null)
                 {
-                    RspCode = "00",
-                    Message = "Confirm Success"
-                };
+                    var booking = await _unitOfWork.Booking.GetAsync(b => b.Id == payment.BookingId); if (booking == null || !payment.BookingId.HasValue)
+                    {
+                        throw new AppException(ErrorCodes.BookingNotFound(payment.BookingId ?? 0));
+                    }
+
+                    booking.BookingStatus = Constant.Booking_Status_Confirmed;
+                    booking.LastUpdatedAt = DateTime.Now;
+                    await _unitOfWork.Booking.UpdateAsync(booking);
+                    await _unitOfWork.SaveAsync();
+
+                    return new VNPayIPNResponseDTO
+                    {
+                        RspCode = "00",
+                        Message = "Confirm Success"
+                    };
+                }
+                else
+                {
+                    throw new AppException(ErrorCodes.PaymentNotFound(paymentId));
+                }
             }
             else
             {
-                // Payment failed - update database
-                await UpdatePaymentStatusAsync(int.Parse(orderId), "Failed", vnpayTranId);
-
                 return new VNPayIPNResponseDTO
                 {
-                    RspCode = "00",
-                    Message = "Confirm Success"
+                    RspCode = "97",
+                    Message = "Invalid Signature"
                 };
             }
         }
-        else
-        {
-            return new VNPayIPNResponseDTO
-            {
-                RspCode = "97",
-                Message = "Invalid Signature"
-            };
-        }
-    }
 
+        return new VNPayIPNResponseDTO
+        {
+            RspCode = "97",
+            Message = "Invalid Signature"
+        };
+    }
     public async Task<VNPayResponseDTO> ProcessVNPayReturnAsync(IQueryCollection queryParams)
     {
         var responseData = new SortedList<string, string>();
@@ -122,45 +139,60 @@ public class PaymentService : IPaymentService
             responseData.Add(queryParam.Key, queryParam.Value.ToString());
         }
 
-        bool isValidSignature = VNPayHelper.ValidateResponse(
+        // Use await Task.Run to ensure this method is truly asynchronous
+        bool isValidSignature = await Task.Run(() => VNPayHelper.ValidateResponse(
             responseData,
             _vnpayHashSecret
-        );
+        ));
 
         if (isValidSignature)
         {
-            string orderId = queryParams["vnp_TxnRef"];
-            string vnp_ResponseCode = queryParams["vnp_ResponseCode"];
-            string vnp_TransactionStatus = queryParams["vnp_TransactionStatus"];
-            string vnpayTranId = queryParams["vnp_TransactionNo"];
-            string amount = queryParams["vnp_Amount"];
-            string payDate = queryParams["vnp_PayDate"];
+            string vnp_TxnRef = queryParams["vnp_TxnRef"].ToString();
+            string vnp_ResponseCode = queryParams["vnp_ResponseCode"].ToString();
+            string vnp_TransactionStatus = queryParams["vnp_TransactionStatus"].ToString();
+            string vnpayTranId = queryParams["vnp_TransactionNo"].ToString();
+            string amount = queryParams["vnp_Amount"].ToString();
+            string payDate = queryParams["vnp_PayDate"].ToString();
 
             if (vnp_ResponseCode == "00" && vnp_TransactionStatus == "00")
             {
+                // Get the frontend URL and success route from configuration
+                string successRoute = _configuration["Frontend:SuccessRoute"] ?? "/booking-success/{0}";
+
+                // Format the success route with the payment ID
+                string formattedSuccessRoute = string.Format(successRoute, vnp_TxnRef);
+
+                // Use the _frontendUrl for the RedirectUrl
                 return new VNPayResponseDTO
                 {
                     Success = true,
-                    OrderId = orderId,
+                    OrderId = vnp_TxnRef,
                     TransactionId = vnpayTranId,
                     Amount = decimal.Parse(amount) / 100,
                     ResponseCode = vnp_ResponseCode,
                     TransactionStatus = vnp_TransactionStatus,
                     TransactionDate = DateTime.ParseExact(payDate, "yyyyMMddHHmmss", null),
                     Message = "Payment successful! Your booking is confirmed.",
-                    RedirectUrl = $"/booking-success/{orderId}"
+                    RedirectUrl = $"{_frontendUrl.TrimEnd('/')}{formattedSuccessRoute}"
                 };
             }
             else
             {
+                // Get the frontend URL and failure route from configuration
+                string failureRoute = _configuration["Frontend:FailureRoute"] ?? "/booking-failed/{0}";
+
+                // Format the failure route with the payment ID
+                string formattedFailureRoute = string.Format(failureRoute, vnp_TxnRef);
+
+                // Use the _frontendUrl for the RedirectUrl
                 return new VNPayResponseDTO
                 {
                     Success = false,
-                    OrderId = orderId,
+                    OrderId = vnp_TxnRef,
                     ResponseCode = vnp_ResponseCode,
                     TransactionStatus = vnp_TransactionStatus,
                     Message = GetVNPayResponseMessage(vnp_ResponseCode),
-                    RedirectUrl = $"/booking-failed/{orderId}"
+                    RedirectUrl = $"{_frontendUrl.TrimEnd('/')}{formattedFailureRoute}"
                 };
             }
         }
@@ -191,7 +223,7 @@ public class PaymentService : IPaymentService
     }
     #endregion
 
-    public async Task<PaymentDTO> UpdatePaymentStatusAsync(int paymentId, string status, string transactionId = null)
+    public async Task<PaymentDTO> UpdatePaymentStatusAsync(int paymentId, string status, string? transactionId = null)
     {
         var payment = await _unitOfWork.Payment.GetAsync(p => p.Id == paymentId);
 

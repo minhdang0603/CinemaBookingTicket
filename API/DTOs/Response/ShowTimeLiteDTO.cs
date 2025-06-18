@@ -1,13 +1,15 @@
-﻿namespace API.DTOs.Response
+namespace API.DTOs.Response
 {
-    public class ShowTimeDTO
+    /// <summary>
+    /// A lightweight version of ShowTimeDTO without Movie information to prevent circular references
+    /// </summary>
+    public class ShowTimeLiteDTO
     {
         public int Id { get; set; }
         public DateOnly ShowDate { get; set; }
         public TimeOnly StartTime { get; set; }
         public TimeOnly EndTime { get; set; }
         public decimal BasePrice { get; set; }
-        public MovieLiteDTO Movie { get; set; } = new MovieLiteDTO();
         public ScreenDTO Screen { get; set; } = new ScreenDTO();
     }
 }

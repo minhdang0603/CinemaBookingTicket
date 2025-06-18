@@ -20,8 +20,7 @@ namespace API.Services
             _mapper = mapper;
             _logger = logger;
         }
-
-        public async Task<List<ShowTimeDTO>> AddShowTimesAsync(List<ShowTimeCreateDTO> newShowTimes)
+        public async Task<ShowTimeBulkResultDTO> AddShowTimesAsync(List<ShowTimeCreateDTO> newShowTimes)
         {
             if (newShowTimes == null || newShowTimes.Count == 0)
             {
@@ -29,56 +28,123 @@ namespace API.Services
                 throw new ArgumentNullException(nameof(newShowTimes));
             }
 
-            // check movie and screen have valid ids and exist in the database
+            var successfulShowTimes = new List<ShowTimeCreateDTO>();
+            var failedShowTimes = new List<ShowTimeFailureDTO>();
+
+            // Check movie and screen have valid ids and exist in the database
             foreach (var showTime in newShowTimes)
             {
-                // Kiểm tra movie và screen có tồn tại không
-                var movie = await _unitOfWork.Movie.GetAsync(m => m.Id == showTime.MovieId);
-                var screen = await _unitOfWork.Screen.GetAsync(s => s.Id == showTime.ScreenId);
+                try
+                {
+                    // Kiểm tra movie và screen có tồn tại không
+                    var movie = await _unitOfWork.Movie.GetAsync(m => m.Id == showTime.MovieId);
+                    var screen = await _unitOfWork.Screen.GetAsync(s => s.Id == showTime.ScreenId);
 
-                if (movie == null)
-                {
-                    _logger.LogError($"Movie with ID {showTime.MovieId} does not exist.");
-                    throw new AppException(ErrorCodes.MovieIdNotFound(showTime.MovieId));
-                }
-                if (screen == null)
-                {
-                    _logger.LogError($"Screen with ID {showTime.ScreenId} does not exist.");
-                    throw new AppException(ErrorCodes.ScreenIdNotFound(showTime.ScreenId));
-                }
-                if (showTime.StartTime >= showTime.EndTime)
-                {
-                    _logger.LogError($"Invalid showtime range for Movie ID {showTime.MovieId} and Screen ID {showTime.ScreenId}.");
-                    throw new AppException(ErrorCodes.InvalidShowTimeRange(showTime.MovieId, showTime.ScreenId));
-                }
-
-                // Lấy các suất chiếu đã có trên cùng màn hình
-                var existingShowTimes = await _unitOfWork.ShowTime.GetAllAsync(
-                    s => s.ScreenId == showTime.ScreenId && s.IsActive == true);
-
-                // Kiểm tra thời gian giữa các suất chiếu phải cách nhau ít nhất 30 phút
-                foreach (var exist in existingShowTimes)
-                {
-                    // Nếu thời gian kết thúc của suất trước + 30p > thời gian bắt đầu của suất mới => lỗi
-                    if (exist.EndTime.AddMinutes(30) > showTime.StartTime)
+                    if (movie == null)
                     {
-                        _logger.LogError($"Showtime for Screen ID {showTime.ScreenId} must be at least 30 minutes after previous showtime.");
-                        throw new AppException(ErrorCodes.InvalidStartForShowTime(showTime.ScreenId, exist.EndTime, showTime.StartTime));
+                        _logger.LogError($"Movie with ID {showTime.MovieId} does not exist.");
+                        failedShowTimes.Add(new ShowTimeFailureDTO
+                        {
+                            ShowTime = showTime,
+                            ErrorMessage = $"Movie with ID {showTime.MovieId} does not exist."
+                        });
+                        continue;
                     }
+
+                    if (screen == null)
+                    {
+                        _logger.LogError($"Screen with ID {showTime.ScreenId} does not exist.");
+                        failedShowTimes.Add(new ShowTimeFailureDTO
+                        {
+                            ShowTime = showTime,
+                            ErrorMessage = $"Screen with ID {showTime.ScreenId} does not exist."
+                        });
+                        continue;
+                    }
+
+                    if (showTime.StartTime >= showTime.EndTime)
+                    {
+                        _logger.LogError($"Invalid showtime range for Movie ID {showTime.MovieId} and Screen ID {showTime.ScreenId}.");
+                        failedShowTimes.Add(new ShowTimeFailureDTO
+                        {
+                            ShowTime = showTime,
+                            ErrorMessage = $"Invalid showtime range: Start time must be before end time."
+                        });
+                        continue;
+                    }
+
+                    // Lấy các suất chiếu đã có trên cùng màn hình
+                    var existingShowTimes = await _unitOfWork.ShowTime.GetAllAsync(
+                        s => s.ScreenId == showTime.ScreenId && s.ShowDate == showTime.ShowDate && s.IsActive == true);
+
+                    bool isOverlapping = existingShowTimes.Any(s =>
+                        showTime.StartTime < s.EndTime && showTime.EndTime > s.StartTime
+                    );
+
+                    if (isOverlapping)
+                    {
+                        _logger.LogError($"Overlapping showtime for Screen ID {showTime.ScreenId}.");
+                        failedShowTimes.Add(new ShowTimeFailureDTO
+                        {
+                            ShowTime = showTime,
+                            ErrorMessage = $"Overlapping showtime: ScreenId={showTime.ScreenId}, Date={showTime.ShowDate}, Time={showTime.StartTime}-{showTime.EndTime}"
+                        });
+                        continue;
+                    }
+
+                    bool isTooClose = existingShowTimes.Any(s =>
+                        Math.Abs((showTime.StartTime - s.EndTime).TotalMinutes) < 30 ||
+                        Math.Abs((showTime.EndTime - s.StartTime).TotalMinutes) < 30
+                    );
+
+                    if (isTooClose)
+                    {
+                        _logger.LogError($"Showtimes too close for Screen ID {showTime.ScreenId}.");
+                        failedShowTimes.Add(new ShowTimeFailureDTO
+                        {
+                            ShowTime = showTime,
+                            ErrorMessage = $"Showtimes must be at least 30 minutes apart: ScreenId={showTime.ScreenId}, Date={showTime.ShowDate}, Time={showTime.StartTime}-{showTime.EndTime}"
+                        });
+                        continue;
+                    }
+
+                    // Nếu vượt qua tất cả các kiểm tra, thêm vào danh sách thành công
+                    successfulShowTimes.Add(showTime);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError($"Error processing showtime: {ex.Message}");
+                    failedShowTimes.Add(new ShowTimeFailureDTO
+                    {
+                        ShowTime = showTime,
+                        ErrorMessage = $"Unexpected error: {ex.Message}"
+                    });
                 }
             }
 
-            // Map DTOs to ShowTime entities
-            var showTimes = _mapper.Map<List<ShowTime>>(newShowTimes);
-            await _unitOfWork.ShowTime.AddRangeAsync(showTimes);
-            await _unitOfWork.SaveAsync();
-            _logger.LogInformation("ShowTimes added successfully.");
-            // Get the added showtimes and map them to DTOs
-            var addedShowTimes = await _unitOfWork.ShowTime.GetAllAsync(
-                s => newShowTimes.Select(nt => nt.MovieId).Contains(s.MovieId) &&
-                     newShowTimes.Select(nt => nt.ScreenId).Contains(s.ScreenId),
-                includeProperties: "Movie,Screen");
-            return _mapper.Map<List<ShowTimeDTO>>(showTimes);
+            List<ShowTimeDTO> createdShowTimes = new List<ShowTimeDTO>();
+
+            if (successfulShowTimes.Any())
+            {
+                // Map DTOs to ShowTime entities for successful entries only
+                var showTimes = _mapper.Map<List<ShowTime>>(successfulShowTimes);
+                await _unitOfWork.ShowTime.AddRangeAsync(showTimes);
+                await _unitOfWork.SaveAsync();
+                _logger.LogInformation($"{successfulShowTimes.Count} ShowTimes added successfully.");
+
+                // Get the added showtimes and map them to DTOs
+                var addedShowTimes = await _unitOfWork.ShowTime.GetAllAsync(
+                    s => showTimes.Select(st => st.Id).Contains(s.Id),
+                    includeProperties: "Movie,Screen");
+
+                createdShowTimes = _mapper.Map<List<ShowTimeDTO>>(addedShowTimes);
+            }
+
+            return new ShowTimeBulkResultDTO
+            {
+                SuccessfulShowTimes = createdShowTimes,
+                FailedShowTimes = failedShowTimes
+            };
         }
 
         public async Task<ShowTimeDTO> DeleteShowTimeAsync(int id)

@@ -55,33 +55,23 @@ public class BookingService : IBookingService
 
     public async Task<string> CreateBookingWithPaymentAsync(BookingCreateDTO bookingCreateDTO)
     {
-        using (var transaction = await _unitOfWork.BeginTransactionAsync())
+
+        // 1. Tạo booking (code hiện tại của bạn)
+        var booking = await CreateBookingAsync(bookingCreateDTO);
+
+        VNPayRequestDTO request = new VNPayRequestDTO
         {
-            try
-            {
-                // 1. Tạo booking (code hiện tại của bạn)
-                var booking = await CreateBookingAsync(bookingCreateDTO);
+            BookingId = booking.Id,
+            Amount = booking.TotalAmount,
+            OrderInfo = $"Booking for ShowTime {booking.ShowTimeId} - User {booking.ApplicationUser.Name}",
+            ClientIpAddress = "127.0.0.1"
+        };
 
-                VNPayRequestDTO request = new VNPayRequestDTO
-                {
-                    BookingId = booking.Id,
-                    Amount = booking.TotalAmount,
-                    OrderInfo = $"Booking for ShowTime {booking.ShowTimeId} - User {booking.ApplicationUser.Name}",
-                    ClientIpAddress = "127.0.0.1"
-                };
+        // 2. Tạo payment và lấy URL redirect
+        var paymentUrl = await _paymentService.CreateVNPayPaymentUrl(request);
 
-                // 2. Tạo payment và lấy URL redirect
-                var paymentUrl = await _paymentService.CreateVNPayPaymentUrl(request);
+        return paymentUrl; // Trả về URL cho controller
 
-                await _unitOfWork.CommitAsync();
-                return paymentUrl; // Trả về URL cho controller
-            }
-            catch
-            {
-                await _unitOfWork.RollbackAsync();
-                throw;
-            }
-        }
     }
 
     public async Task DeleteBookingAsync(int bookingId)
@@ -110,11 +100,6 @@ public class BookingService : IBookingService
         var bookings = await _unitOfWork.Booking.GetAllAsync(includeProperties: "BookingDetails,ShowTime,ApplicationUser");
 
         var bookingDTOs = _mapper.Map<List<BookingDTO>>(bookings);
-
-        bookingDTOs.ForEach(b =>
-        {
-            b.BookingItems = _mapper.Map<List<BookingDetailDTO>>(b.BookingItems);
-        });
 
         return bookingDTOs;
     }
@@ -164,49 +149,60 @@ public class BookingService : IBookingService
 
     private async Task<Booking> CreateBookingAsync(BookingCreateDTO bookingCreateDTO)
     {
-        // Check seats availability
-        foreach (var detail in bookingCreateDTO.BookingDetails)
+        using (var transaction = await _unitOfWork.BeginTransactionAsync())
         {
-            // Check seat exists
-            var seat = await _unitOfWork.Seat.GetAsync(s => s.Id == detail.SeatId);
-            if (seat == null)
+            try
             {
-                throw new AppException(ErrorCodes.InternalServerError());
+                // Check seats availability
+                foreach (var detail in bookingCreateDTO.BookingDetails)
+                {
+                    // Check seat exists
+                    var seat = await _unitOfWork.Seat.GetAsync(s => s.Id == detail.SeatId);
+                    if (seat == null)
+                    {
+                        throw new AppException(ErrorCodes.InternalServerError());
+                    }
+
+                    // Check seat not already booked for this showtime
+                    var existingBooking = await _unitOfWork.BookingDetail.GetAsync(
+                        bd => bd.SeatId == detail.SeatId &&
+                              bd.Booking.ShowTimeId == bookingCreateDTO.ShowTimeId &&
+                              bd.Booking.BookingStatus != Constant.Booking_Status_Cancelled,
+                        includeProperties: "Booking");
+
+                    if (existingBooking != null)
+                    {
+                        _logger.LogError($"Seat {detail.SeatName} is already booked");
+                        throw new AppException(ErrorCodes.InternalServerError());
+                    }
+                }
+
+                // Map DTO to Booking entity
+                var booking = _mapper.Map<Booking>(bookingCreateDTO);
+
+                // Add booking to repository
+                await _unitOfWork.Booking.CreateAsync(booking);
+
+                await _unitOfWork.SaveAsync();
+
+                var bookingDetails = _mapper.Map<List<BookingDetail>>(bookingCreateDTO.BookingDetails);
+
+                // Set BookingId for each BookingDetail
+                foreach (var detail in bookingDetails)
+                {
+                    detail.BookingId = booking.Id;
+                    await _unitOfWork.BookingDetail.CreateAsync(detail);
+                }
+
+                await _unitOfWork.SaveAsync();
+                await _unitOfWork.CommitAsync();
+                return booking; // Return created booking
             }
-
-            // Check seat not already booked for this showtime
-            var existingBooking = await _unitOfWork.BookingDetail.GetAsync(
-                bd => bd.SeatId == detail.SeatId &&
-                      bd.Booking.ShowTimeId == bookingCreateDTO.ShowTimeId &&
-                      bd.Booking.BookingStatus != Constant.Booking_Status_Cancelled,
-                includeProperties: "Booking");
-
-            if (existingBooking != null)
+            catch
             {
-                _logger.LogError($"Seat {detail.SeatName} is already booked");
-                throw new AppException(ErrorCodes.InternalServerError());
+                await _unitOfWork.RollbackAsync();
+                throw;
             }
         }
-
-        // Map DTO to Booking entity
-        var booking = _mapper.Map<Booking>(bookingCreateDTO);
-
-        // Add booking to repository
-        await _unitOfWork.Booking.CreateAsync(booking);
-
-        await _unitOfWork.SaveAsync();
-
-        var bookingDetails = _mapper.Map<List<BookingDetail>>(bookingCreateDTO.BookingDetails);
-
-        // Set BookingId for each BookingDetail
-        foreach (var detail in bookingDetails)
-        {
-            detail.BookingId = booking.Id;
-            await _unitOfWork.BookingDetail.CreateAsync(detail);
-        }
-
-        await _unitOfWork.SaveAsync();
-
-        return booking; // Return created booking
     }
 }

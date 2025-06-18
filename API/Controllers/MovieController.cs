@@ -98,11 +98,11 @@ namespace API.Controllers
         }
 
         [HttpGet("get-movie-by-id")]
-        public async Task<ActionResult<APIResponse<MovieDTO>>> GetMovieByIdAsync(int id)
+        public async Task<ActionResult<APIResponse<MovieDetailDTO>>> GetMovieByIdAsync(int id)
         {
             if (id == 0)
             {
-                return BadRequest(APIResponse<MovieDTO>.Builder()
+                return BadRequest(APIResponse<MovieDetailDTO>.Builder()
                     .WithErrorMessages(new List<string> { "Movie Id is null" })
                     .WithStatusCode(HttpStatusCode.BadRequest)
                     .WithSuccess(false)
@@ -112,19 +112,19 @@ namespace API.Controllers
             var movieDTO = await _movieService.GetMovieByIdAsync(id);
             if (movieDTO == null)
             {
-                return NotFound(APIResponse<MovieDTO>.Builder()
+                return NotFound(APIResponse<MovieDetailDTO>.Builder()
                     .WithErrorMessages(new List<string> { $"Movie with ID {id} not found" })
                     .WithStatusCode(HttpStatusCode.NotFound)
                     .WithSuccess(false)
                     .Build());
             }
 
-            return Ok(APIResponse<MovieDTO>.Builder().WithResult(movieDTO).WithStatusCode(HttpStatusCode.OK).Build());
+            return Ok(APIResponse<MovieDetailDTO>.Builder().WithResult(movieDTO).WithStatusCode(HttpStatusCode.OK).Build());
         }
 
         [HttpDelete("delete-movie")]
         [Authorize(Roles = Constant.Role_Admin)]
-        public async Task<ActionResult<APIResponse<MovieDTO>>> DeleteMovieAsync(int id)
+        public async Task<ActionResult<APIResponse<object>>> DeleteMovieAsync(int id)
         {
             if (id == 0)
             {
@@ -135,17 +135,9 @@ namespace API.Controllers
                     .Build());
             }
 
-            MovieDTO movie = await _movieService.DeleteMovieAsync(id);
-            if (movie == null)
-            {
-                return NotFound(APIResponse<MovieDTO>.Builder()
-                    .WithErrorMessages(new List<string> { $"Movie with ID {id} not found" })
-                    .WithStatusCode(HttpStatusCode.NotFound)
-                    .WithSuccess(false)
-                    .Build());
-            }
+            await _movieService.DeleteMovieAsync(id);
 
-            return Ok(APIResponse<MovieDTO>.Builder().WithResult(movie).WithStatusCode(HttpStatusCode.OK).Build());
+            return Ok(APIResponse<MovieDTO>.Builder().WithStatusCode(HttpStatusCode.OK).Build());
         }
 
         [HttpGet("search-movie-by-name")]
