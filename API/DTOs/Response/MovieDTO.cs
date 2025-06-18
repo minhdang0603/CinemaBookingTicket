@@ -20,7 +20,7 @@ public class MovieDTO
 
     public DateOnly ReleaseDate { get; set; }
 
-    public Constant.AgeRatingType AgeRating { get; set; }
+    public string? AgeRating { get; set; }
 
     public string? PosterUrl { get; set; }
 
@@ -30,5 +30,5 @@ public class MovieDTO
 
     public string? Status { get; set; }
 
-    public List<GenreDTO>? Genres { get; set; } = new List<GenreDTO>();
+    public List<GenreDTO>? Genres { get; set; }
 }

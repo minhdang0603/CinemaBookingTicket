@@ -1,0 +1,1293 @@
+{
+	"info": {
+		"_postman_id": "d54f6c96-0f07-49be-a56d-0d9f0cef5501",
+		"name": "Cinema Booking Ticket API",
+		"description": "Collection for testing the Cinema Booking Ticket API endpoints",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "34446651"
+	},
+	"item": [
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "Register User",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Test User\",\n    \"email\": \"testuser@example.com\",\n    \"password\": \"P@ssw0rd!\",\n    \"role\": \"Customer\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/Auth/register",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"Auth",
+								"register"
+							]
+						},
+						"description": "Register a new user in the system"
+					},
+					"response": []
+				},
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData && jsonData.result && jsonData.result.token) {",
+									"    pm.environment.set(\"authToken\", jsonData.result.token);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"testuser@example.com\",\n    \"password\": \"P@ssw0rd!\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/Auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"Auth",
+								"login"
+							]
+						},
+						"description": "Login and get JWT token"
+					},
+					"response": []
+				},
+				{
+					"name": "Login as Admin",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData && jsonData.result && jsonData.result.token) {",
+									"    pm.environment.set(\"adminToken\", jsonData.result.token);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"admin@example.com\",\n    \"password\": \"Admin@123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/Auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"Auth",
+								"login"
+							]
+						},
+						"description": "Login as admin and get JWT token"
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints for user registration and authentication"
+		},
+		{
+			"name": "Movies",
+			"item": [
+				{
+					"name": "Get All Movies",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/Movie/get-all-movies",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"Movie",
+								"get-all-movies"
+							]
+						},
+						"description": "Get all movies"
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Movies With Pagination",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/Movie/get-all-movies-with-pagination?pageNumber=1&pageSize=10&isActive=true",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"Movie",
+								"get-all-movies-with-pagination"
+							],
+							"query": [
+								{
+									"key": "pageNumber",
+									"value": "1"
+								},
+								{
+									"key": "pageSize",
+									"value": "10"
+								},
+								{
+									"key": "isActive",
+									"value": "true"
+								}
+							]
+						},
+						"description": "Get all movies with pagination"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Movie By Id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/Movie/get-movie-by-id?id=1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"Movie",
+								"get-movie-by-id"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						},
+						"description": "Get a movie by ID"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Movie (Admin)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{adminToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"New Test Movie\",\n    \"description\": \"A test movie description\",\n    \"duration\": 120,\n    \"language\": \"English\",\n    \"releaseDate\": \"2023-06-01\",\n    \"country\": \"USA\",\n    \"director\": \"Test Director\",\n    \"trailer\": \"https://www.youtube.com/watch?v=test\",\n    \"posterUrl\": \"https://example.com/poster.jpg\",\n    \"genreIds\": [1, 2]\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/Movie/create-movie",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"Movie",
+								"create-movie"
+							]
+						},
+						"description": "Create a new movie (admin only)"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Movie (Admin)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{adminToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"id\": 1,\n    \"title\": \"Updated Movie Title\",\n    \"description\": \"Updated description\",\n    \"duration\": 130,\n    \"language\": \"English\",\n    \"releaseDate\": \"2023-06-01\",\n    \"country\": \"USA\",\n    \"director\": \"Updated Director\",\n    \"trailer\": \"https://www.youtube.com/watch?v=updated\",\n    \"posterUrl\": \"https://example.com/updated-poster.jpg\",\n    \"genreIds\": [1, 3]\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/Movie/update-movie?id=1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"Movie",
+								"update-movie"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						},
+						"description": "Update an existing movie (admin only)"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Movie (Admin)",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{adminToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/Movie/delete-movie?id=1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"Movie",
+								"delete-movie"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						},
+						"description": "Delete a movie by ID (admin only)"
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints for managing movies"
+		},
+		{
+			"name": "Genres",
+			"item": [
+				{
+					"name": "Get All Genres",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/Genre/get-all-genres",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"Genre",
+								"get-all-genres"
+							]
+						},
+						"description": "Get all movie genres"
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Genres With Pagination",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/Genre/get-all-genre-pagination?pageNumber=1&pageSize=10&isActive=true",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"Genre",
+								"get-all-genre-pagination"
+							],
+							"query": [
+								{
+									"key": "pageNumber",
+									"value": "1"
+								},
+								{
+									"key": "pageSize",
+									"value": "10"
+								},
+								{
+									"key": "isActive",
+									"value": "true"
+								}
+							]
+						},
+						"description": "Get all genres with pagination"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Genre By Id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/Genre/get-genre-by-id?id=1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"Genre",
+								"get-genre-by-id"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						},
+						"description": "Get a genre by ID"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Genre (Admin)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{adminToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"New Test Genre\",\n    \"description\": \"A test genre description\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/Genre/create-genre",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"Genre",
+								"create-genre"
+							]
+						},
+						"description": "Create a new genre (admin only)"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Genre (Admin)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{adminToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"id\": 1,\n    \"name\": \"Updated Genre Name\",\n    \"description\": \"Updated genre description\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/Genre/update-genre?id=1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"Genre",
+								"update-genre"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						},
+						"description": "Update an existing genre (admin only)"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Genre (Admin)",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{adminToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/Genre/delete-genre?id=1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"Genre",
+								"delete-genre"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						},
+						"description": "Delete a genre by ID (admin only)"
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints for managing movie genres"
+		},
+		{
+			"name": "Theaters",
+			"item": [
+				{
+					"name": "Get All Theaters",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/Theater",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"Theater"
+							]
+						},
+						"description": "Get all theaters"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Theater By Id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/Theater/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"Theater",
+								"1"
+							]
+						},
+						"description": "Get a theater by ID"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Theater (Admin)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{adminToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"New Test Theater\",\n    \"description\": \"A test theater description\",\n    \"address\": \"123 Test Street\",\n    \"provinceId\": 1,\n    \"openingTime\": \"10:00\",\n    \"closingTime\": \"22:00\",\n    \"imageUrl\": \"https://example.com/theater.jpg\",\n    \"isActive\": true\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/Theater/add-theater-admin",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"Theater",
+								"add-theater-admin"
+							]
+						},
+						"description": "Create a new theater (admin only)"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Theater (Admin)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{adminToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"id\": 1,\n    \"name\": \"Updated Theater Name\",\n    \"description\": \"Updated theater description\",\n    \"address\": \"456 Updated Street\",\n    \"provinceId\": 2,\n    \"openingTime\": \"09:00\",\n    \"closingTime\": \"23:00\",\n    \"imageUrl\": \"https://example.com/updated-theater.jpg\",\n    \"isActive\": true\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/Theater/update-theater-admin?id=1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"Theater",
+								"update-theater-admin"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						},
+						"description": "Update an existing theater (admin only)"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Theater (Admin)",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{adminToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/Theater/delete-theater-admin?id=1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"Theater",
+								"delete-theater-admin"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						},
+						"description": "Delete a theater by ID (admin only)"
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints for managing theaters"
+		},
+		{
+			"name": "Screens",
+			"item": [
+				{
+					"name": "Add Room (Admin)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{adminToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"New Test Screen\",\n    \"theaterId\": 1,\n    \"rows\": 10,\n    \"seatsPerRow\": 12,\n    \"isActive\": true\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/Screen/add-room-admin",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"Screen",
+								"add-room-admin"
+							]
+						},
+						"description": "Create a new screen/room (admin only)"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Room (Admin)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{adminToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"id\": 1,\n    \"name\": \"Updated Screen Name\",\n    \"theaterId\": 1,\n    \"rows\": 12,\n    \"seatsPerRow\": 14,\n    \"isActive\": true\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/Screen/update-room-admin?id=1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"Screen",
+								"update-room-admin"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						},
+						"description": "Update an existing screen/room (admin only)"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Room (Admin)",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{adminToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/Screen/delete-room-admin?id=1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"Screen",
+								"delete-room-admin"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						},
+						"description": "Delete a screen/room by ID (admin only)"
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints for managing screens (rooms)"
+		},
+		{
+			"name": "Bookings",
+			"item": [
+				{
+					"name": "Create Booking",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"roomId\": 1,\n    \"userId\": 2,\n    \"showTimeId\": 1,\n    \"bookingDetails\": [\n        {\n            \"seatId\": 1,\n            \"seatName\": \"A1\",\n            \"seatPrice\": 150000\n        },\n        {\n            \"seatId\": 2,\n            \"seatName\": \"A2\",\n            \"seatPrice\": 150000\n        }\n    ]\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/Booking",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"Booking"
+							]
+						},
+						"description": "Create a new booking with payment"
+					},
+					"response": []
+				},
+				{
+					"name": "Get My Bookings",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/Booking/my-bookings",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"Booking",
+								"my-bookings"
+							]
+						},
+						"description": "Get bookings for the currently logged-in user"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Booking By Id",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/Booking/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"Booking",
+								"1"
+							]
+						},
+						"description": "Get a booking by ID"
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Bookings (Admin)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{adminToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/Booking",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"Booking"
+							]
+						},
+						"description": "Get all bookings (admin only)"
+					},
+					"response": []
+				},
+				{
+					"name": "Cancel Booking",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/Booking/1/cancel",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"Booking",
+								"1",
+								"cancel"
+							]
+						},
+						"description": "Cancel a booking"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Booking (Admin)",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{adminToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/Booking/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"Booking",
+								"1"
+							]
+						},
+						"description": "Delete a booking (admin only)"
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints for managing bookings"
+		},
+		{
+			"name": "Provinces",
+			"item": [
+				{
+					"name": "Get All Provinces",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/Province/get-all-provinces",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"Province",
+								"get-all-provinces"
+							]
+						},
+						"description": "Get all provinces"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Province By Id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/Province/get-province-by-id?id=1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"Province",
+								"get-province-by-id"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						},
+						"description": "Get a province by ID"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Province (Admin)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{adminToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"New Province\",\n    \"description\": \"A new province\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/Province/create-province",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"Province",
+								"create-province"
+							]
+						},
+						"description": "Create a new province (admin only)"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Province (Admin)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{adminToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"id\": 1,\n    \"name\": \"Updated Province\",\n    \"description\": \"An updated province\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/Province/update-province?id=1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"Province",
+								"update-province"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						},
+						"description": "Update an existing province (admin only)"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Province (Admin)",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{adminToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/Province/delete-province?id=1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"Province",
+								"delete-province"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						},
+						"description": "Delete a province by ID (admin only)"
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints for managing provinces"
+		},
+		{
+			"name": "Users",
+			"item": [
+				{
+					"name": "Get User Profile",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/User/profile",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"User",
+								"profile"
+							]
+						},
+						"description": "Get current user's profile"
+					},
+					"response": []
+				},
+				{
+					"name": "Update User Profile",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Updated Name\",\n    \"phoneNumber\": \"0987654321\",\n    \"address\": \"123 Updated St\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/User/profile",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"User",
+								"profile"
+							]
+						},
+						"description": "Update current user's profile"
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Users (Admin)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{adminToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/User?pageNumber=1&pageSize=10",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"User"
+							],
+							"query": [
+								{
+									"key": "pageNumber",
+									"value": "1"
+								},
+								{
+									"key": "pageSize",
+									"value": "10"
+								}
+							]
+						},
+						"description": "Get all users (admin only)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get User By Id (Admin)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{adminToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/User/userId123",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"User",
+								"userId123"
+							]
+						},
+						"description": "Get a user by ID (admin only)"
+					},
+					"response": []
+				},
+				{
+					"name": "Update User (Admin)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{adminToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"userId\": \"12345678-1234-1234-1234-123456789abc\",\n    \"name\": \"Updated By Admin\",\n    \"email\": \"user@example.com\",\n    \"phoneNumber\": \"0987654321\",\n    \"address\": \"123 Admin St\",\n    \"role\": \"Customer\",\n    \"isActive\": true\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/User/12345678-1234-1234-1234-123456789abc",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"User",
+								"12345678-1234-1234-1234-123456789abc"
+							]
+						},
+						"description": "Update a user (admin only)"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete User (Admin)",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{adminToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/User/userId123",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"User",
+								"userId123"
+							]
+						},
+						"description": "Delete a user (admin only)"
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints for managing users"
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "https://localhost:7111",
+			"type": "string"
+		}
+	]
+}

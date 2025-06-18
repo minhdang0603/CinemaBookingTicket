@@ -15,6 +15,12 @@ namespace API.Configurations
             services.AddTransient<IEmailService, BrevoEmailService>();
             services.AddScoped<IGenreService, GenreService>();
             services.AddScoped<IMovieService, MovieService>();
+            services.AddScoped<IProvinceService, ProvinceService>();
+            services.AddScoped<ITheaterService, TheaterService>();
+            services.AddScoped<IScreenService, ScreenService>();
+            services.AddScoped<IBookingService, BookingService>();
+            services.AddScoped<IPaymentService, PaymentService>();
+            services.AddScoped<IShowTimeService, ShowTimeService>();
         }
     }
 }

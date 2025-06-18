@@ -6,7 +6,7 @@ namespace Utility
 {
     public static class VNPayHelper
     {
-        public static string CreatePaymentUrl(double amount, string orderInfo, string ipAddress, string returnUrl, string tmnCode, string hashSecret, string baseUrl, string ipnUrl = null)
+        public static string CreatePaymentUrl(decimal amount, string orderInfo, string ipAddress, string returnUrl, string tmnCode, string hashSecret, string baseUrl, string ipnUrl = null, string txnRef = null)
         {
             var vnpParams = new SortedList<string, string>
             {
@@ -21,7 +21,7 @@ namespace Utility
                 { "vnp_OrderInfo", orderInfo },
                 { "vnp_OrderType", "other" },
                 { "vnp_ReturnUrl", returnUrl },
-                { "vnp_TxnRef", DateTime.Now.Ticks.ToString()},
+                { "vnp_TxnRef", string.IsNullOrEmpty(txnRef) ? DateTime.Now.Ticks.ToString() : txnRef},
                 { "vnp_ExpireDate", DateTime.Now.AddMinutes(15).ToString("yyyyMMddHHmmss") }
             };
 

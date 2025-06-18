@@ -41,7 +41,7 @@ namespace API.Configurations
                       context.HttpContext.Response.ContentType = "application/json";
                       var response = APIResponse<object>.Builder()
                           .WithStatusCode(HttpStatusCode.Unauthorized)
-                          .WithErrorMessages("Authentication failed")
+                          .WithErrorMessages(new List<string> { "Authentication failed" })
                           .WithSuccess(false)
                           .Build();
                       return context.HttpContext.Response.WriteAsJsonAsync(response);
@@ -52,7 +52,7 @@ namespace API.Configurations
                       context.HttpContext.Response.ContentType = "application/json";
                       var response = APIResponse<object>.Builder()
                           .WithStatusCode(HttpStatusCode.Forbidden)
-                          .WithErrorMessages("You do not have permission to access this resource.")
+                          .WithErrorMessages(new List<string> { "You do not have permission to access this resource." })
                           .WithSuccess(false)
                           .Build();
                       return context.HttpContext.Response.WriteAsJsonAsync(response);

@@ -6,7 +6,6 @@ public class BookingCreateDTO
     public int UserId { get; set; }
     public int ShowTimeId { get; set; }
     public List<BookingDetailItemDTO> BookingDetails { get; set; } = new List<BookingDetailItemDTO>();
-
 }
 
 public class BookingDetailItemDTO

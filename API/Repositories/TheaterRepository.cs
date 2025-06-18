@@ -1,6 +1,7 @@
-using API.Repositories.IRepositories;
+﻿using API.Data;
 using API.Data.Models;
-using API.Repositories;
+using API.Repositories.IRepositories;
+using Microsoft.EntityFrameworkCore;
 
 namespace API.Repositories
 {

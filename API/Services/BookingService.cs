@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using API.Data.Models;
 using API.DTOs.Request;
 using API.DTOs.Response;
@@ -13,30 +14,156 @@ public class BookingService : IBookingService
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
+    private readonly IPaymentService _paymentService;
+    private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly ILogger<BookingService> _logger;
 
-    public BookingService(IUnitOfWork unitOfWork, IMapper mapper)
+
+    public BookingService(IUnitOfWork unitOfWork, IMapper mapper, IPaymentService paymentService, IHttpContextAccessor httpContextAccessor, ILogger<BookingService> logger)
     {
         _unitOfWork = unitOfWork;
         _mapper = mapper;
+        _paymentService = paymentService;
+        _httpContextAccessor = httpContextAccessor;
+        _logger = logger;
     }
 
-    public async Task CreateBookingAsync(BookingCreateDTO bookingCreateDTO)
+    public async Task CancelBookingAsync(int bookingId)
+    {
+        // Check if user is authorized to cancel booking
+        var userId = _httpContextAccessor.HttpContext?.User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                      ?? throw new AppException(ErrorCodes.UnauthorizedAccess());
+
+        // Get booking by ID
+        var booking = await _unitOfWork.Booking.GetAsync(b => b.Id == bookingId && b.ApplicationUser.Id == userId);
+
+        if (booking == null)
+        {
+            throw new AppException(ErrorCodes.BookingNotFound(bookingId));
+        }
+
+        booking.BookingStatus = Constant.Booking_Status_Cancelled;
+        booking.IsActive = false;
+        booking.LastUpdatedAt = DateTime.UtcNow;
+
+        // Update booking
+        await _unitOfWork.Booking.UpdateAsync(booking);
+
+        // Commit transaction
+        await _unitOfWork.SaveAsync();
+    }
+
+    public async Task<string> CreateBookingWithPaymentAsync(BookingCreateDTO bookingCreateDTO)
+    {
+
+        // 1. Tạo booking (code hiện tại của bạn)
+        var booking = await CreateBookingAsync(bookingCreateDTO);
+
+        VNPayRequestDTO request = new VNPayRequestDTO
+        {
+            BookingId = booking.Id,
+            Amount = booking.TotalAmount,
+            OrderInfo = $"Booking for ShowTime {booking.ShowTimeId} - User {booking.ApplicationUser.Name}",
+            ClientIpAddress = "127.0.0.1"
+        };
+
+        // 2. Tạo payment và lấy URL redirect
+        var paymentUrl = await _paymentService.CreateVNPayPaymentUrl(request);
+
+        return paymentUrl; // Trả về URL cho controller
+
+    }
+
+    public async Task DeleteBookingAsync(int bookingId)
+    {
+        // Get booking by ID
+        var booking = await _unitOfWork.Booking.GetAsync(b => b.Id == bookingId);
+
+        if (booking == null)
+        {
+            throw new AppException(ErrorCodes.BookingNotFound(bookingId));
+        }
+
+        // Mark booking as cancelled
+        booking.IsActive = false;
+        booking.LastUpdatedAt = DateTime.UtcNow;
+
+        // Update booking
+        await _unitOfWork.Booking.UpdateAsync(booking);
+
+        // Commit transaction
+        await _unitOfWork.SaveAsync();
+    }
+
+    public async Task<List<BookingDTO>> GetAllBookingsAsync()
+    {
+        var bookings = await _unitOfWork.Booking.GetAllAsync(includeProperties: "BookingDetails,ShowTime,ApplicationUser");
+
+        var bookingDTOs = _mapper.Map<List<BookingDTO>>(bookings);
+
+        return bookingDTOs;
+    }
+
+    public async Task<BookingDTO> GetBookingByIdAsync(int bookingId)
+    {
+        var booking = await _unitOfWork.Booking.GetAsync(b => b.Id == bookingId, includeProperties: "BookingDetails,ShowTime,ApplicationUser");
+
+        if (booking == null)
+        {
+            throw new AppException(ErrorCodes.BookingNotFound(bookingId));
+        }
+
+        // Kiểm tra quyền truy cập
+        var userId = _httpContextAccessor.HttpContext?.User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                      ?? throw new AppException(ErrorCodes.UnauthorizedAccess());
+
+        if (booking.ApplicationUser.Id != userId && !_httpContextAccessor.HttpContext.User.IsInRole(Constant.Role_Admin))
+        {
+            throw new AppException(ErrorCodes.UnauthorizedAccess());
+        }
+
+        var bookingDTO = _mapper.Map<BookingDTO>(booking);
+        bookingDTO.BookingItems = _mapper.Map<List<BookingDetailDTO>>(bookingDTO.BookingItems);
+
+        return bookingDTO;
+    }
+
+    public async Task<List<BookingDTO>> GetMyBookingsAsync()
+    {
+        // Get current user ID from claims
+        var userId = _httpContextAccessor.HttpContext?.User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                      ?? throw new AppException(ErrorCodes.UnauthorizedAccess());
+
+        // Get bookings for the current user
+        var bookings = await _unitOfWork.Booking.GetAllAsync(
+            b => b.ApplicationUser.Id == userId,
+            includeProperties: "BookingDetails,ShowTime, ApplicationUser");
+
+        var bookingDTOs = _mapper.Map<List<BookingDTO>>(bookings);
+        bookingDTOs.ForEach(b =>
+        {
+            b.BookingItems = _mapper.Map<List<BookingDetailDTO>>(b.BookingItems);
+        });
+        return bookingDTOs;
+    }
+
+    private async Task<Booking> CreateBookingAsync(BookingCreateDTO bookingCreateDTO)
     {
         using (var transaction = await _unitOfWork.BeginTransactionAsync())
         {
             try
             {
-                // Kiểm tra xem ghế đã được đặt chưa
+                // Check seats availability
                 foreach (var detail in bookingCreateDTO.BookingDetails)
                 {
-                    // Kiểm tra ghế có tồn tại không
+                    // Check seat exists
                     var seat = await _unitOfWork.Seat.GetAsync(s => s.Id == detail.SeatId);
                     if (seat == null)
                     {
-                        throw new Exception($"Seat with ID {detail.SeatId} not found");
+                        throw new AppException(ErrorCodes.InternalServerError());
                     }
 
-                    // Kiểm tra ghế chưa được đặt cho showtime này
+                    // Check seat not already booked for this showtime
                     var existingBooking = await _unitOfWork.BookingDetail.GetAsync(
                         bd => bd.SeatId == detail.SeatId &&
                               bd.Booking.ShowTimeId == bookingCreateDTO.ShowTimeId &&
@@ -45,20 +172,22 @@ public class BookingService : IBookingService
 
                     if (existingBooking != null)
                     {
-                        throw new Exception($"Seat {detail.SeatName} is already booked");
+                        _logger.LogError($"Seat {detail.SeatName} is already booked");
+                        throw new AppException(ErrorCodes.InternalServerError());
                     }
                 }
 
-                // Add booking to repository
+                // Map DTO to Booking entity
                 var booking = _mapper.Map<Booking>(bookingCreateDTO);
 
+                // Add booking to repository
                 await _unitOfWork.Booking.CreateAsync(booking);
 
                 await _unitOfWork.SaveAsync();
 
                 var bookingDetails = _mapper.Map<List<BookingDetail>>(bookingCreateDTO.BookingDetails);
 
-                // Đặt BookingId cho từng BookingDetail
+                // Set BookingId for each BookingDetail
                 foreach (var detail in bookingDetails)
                 {
                     detail.BookingId = booking.Id;
@@ -66,55 +195,14 @@ public class BookingService : IBookingService
                 }
 
                 await _unitOfWork.SaveAsync();
-
-                // Commit transaction
                 await _unitOfWork.CommitAsync();
-
+                return booking; // Return created booking
             }
-            catch (Exception ex)
+            catch
             {
-                // Rollback transaction trong trường hợp có lỗi
                 await _unitOfWork.RollbackAsync();
-                throw new Exception("Error creating booking", ex);
+                throw;
             }
         }
-    }
-
-    public async Task DeleteBookingAsync(int bookingId)
-    {
-        var booking = await _unitOfWork.Booking.GetAsync(b => b.Id == bookingId && b.IsActive == true, includeProperties: "BookingDetails");
-        if (booking == null)
-        {
-            throw new AppException(ErrorCodes.BookingNotFound(bookingId));
-        }
-
-        // Mark booking as inactive
-        booking.IsActive = false;
-        await _unitOfWork.Booking.UpdateAsync(booking);
-        await _unitOfWork.SaveAsync();
-    }
-
-    public async Task<List<BookingDTO>> GetAllBookingsAsync(bool? isActive = true)
-    {
-        var bookings = await _unitOfWork.Booking.GetAllAsync(b => b.IsActive == isActive, includeProperties: "BookingDetails");
-        return _mapper.Map<List<BookingDTO>>(bookings);
-    }
-
-    public async Task<List<BookingDTO>> GetAllBookingsWithPaginationAsync(int pageNumber, int pageSize, bool? isActive = true)
-    {
-        var bookings = await _unitOfWork.Booking.GetAllAsync(
-                b => b.IsActive == isActive,
-                pageSize: pageSize,
-                pageNumber: pageNumber,
-                includeProperties: "BookingDetails");
-        return _mapper.Map<List<BookingDTO>>(bookings);
-    }
-
-    public async Task<BookingDTO> GetBookingByIdAsync(int bookingId, bool? isActive = true)
-    {
-        var booking = await _unitOfWork.Booking.GetAsync(b => b.Id == bookingId && b.IsActive == isActive, includeProperties: "BookingDetails")
-                ?? throw new AppException(ErrorCodes.BookingNotFound(bookingId));
-
-        return _mapper.Map<BookingDTO>(booking);
     }
 }
