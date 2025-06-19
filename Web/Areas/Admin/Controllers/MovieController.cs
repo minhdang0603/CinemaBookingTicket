@@ -6,7 +6,7 @@ using Web.Models;
 namespace Web.Areas.Admin.Controllers
 {
     [Area("Admin")]
-    // [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin")]
     public class MovieController : Controller
     {
         public IActionResult Index()

@@ -21,15 +21,10 @@ namespace Web.Models.ViewModels
         [Compare("Password", ErrorMessage = "Password and confirm password do not match")]
         public string ConfirmPassword { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "First name is required")]
-        [StringLength(50, ErrorMessage = "First name cannot exceed 50 characters")]
-        [Display(Name = "First Name")]
-        public string FirstName { get; set; } = string.Empty;
-
-        [Required(ErrorMessage = "Last name is required")]
-        [StringLength(50, ErrorMessage = "Last name cannot exceed 50 characters")]
-        [Display(Name = "Last Name")]
-        public string LastName { get; set; } = string.Empty;
+        [Required(ErrorMessage = "Name is required")]
+        [StringLength(50, ErrorMessage = "Name cannot exceed 50 characters")]
+        [Display(Name = "Name")]
+        public string Name { get; set; } = string.Empty;
 
         [Phone(ErrorMessage = "Invalid phone number format")]
         [Display(Name = "Phone Number")]

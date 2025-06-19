@@ -3,7 +3,6 @@ using System.Net.Http.Headers;
 using System.Text;
 using Web.Models;
 using Web.Services.IServices;
-using MagicVilla_Web.Models;
 using Newtonsoft.Json;
 
 namespace Web.Services
@@ -47,21 +46,17 @@ namespace Web.Services
                         message.Method = HttpMethod.Get;
                         break;
 
-                }
-
-                HttpResponseMessage apiResponse = null;
-
+                }                // Set authorization header if token is provided
                 if (!string.IsNullOrEmpty(apiRequest.Token))
                 {
                     client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiRequest.Token);
                 }
 
-                apiResponse = await client.SendAsync(message);
-
-                var apiContent = await apiResponse.Content.ReadAsStringAsync();
+                // Send the request
+                HttpResponseMessage apiResponse = await client.SendAsync(message); var apiContent = await apiResponse.Content.ReadAsStringAsync();
                 try
                 {
-                    APIResponse ApiResponse = JsonConvert.DeserializeObject<APIResponse>(apiContent);
+                    APIResponse? ApiResponse = JsonConvert.DeserializeObject<APIResponse>(apiContent);
                     if (ApiResponse != null && (apiResponse.StatusCode == System.Net.HttpStatusCode.BadRequest
                         || apiResponse.StatusCode == System.Net.HttpStatusCode.NotFound))
                     {
@@ -69,16 +64,16 @@ namespace Web.Services
                         ApiResponse.IsSuccess = false;
                         var res = JsonConvert.SerializeObject(ApiResponse);
                         var returnObj = JsonConvert.DeserializeObject<T>(res);
-                        return returnObj;
+                        return returnObj!;
                     }
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
                     var exceptionResponse = JsonConvert.DeserializeObject<T>(apiContent);
-                    return exceptionResponse;
+                    return exceptionResponse!;
                 }
-                var APIResponse = JsonConvert.DeserializeObject<T>(apiContent);
-                return APIResponse;
+                var response = JsonConvert.DeserializeObject<T>(apiContent);
+                return response!;
             }
             catch (Exception e)
             {
@@ -88,8 +83,8 @@ namespace Web.Services
                     IsSuccess = false
                 };
                 var res = JsonConvert.SerializeObject(dto);
-                var APIResponse = JsonConvert.DeserializeObject<T>(res);
-                return APIResponse;
+                var response = JsonConvert.DeserializeObject<T>(res);
+                return response!;
             }
         }
     }
