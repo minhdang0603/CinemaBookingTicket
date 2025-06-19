@@ -9,15 +9,20 @@ namespace Web
             // Add services to the container.
             builder.Services.AddControllersWithViews();
 
-            // Add simple authentication (temporary)
-            builder.Services.AddAuthentication("Cookies")
-                .AddCookie("Cookies", options =>
-                {
-                    options.LoginPath = "/Account/Login";
-                    options.AccessDeniedPath = "/Account/AccessDenied";
-                });
 
-            builder.Services.AddAuthorization();
+            builder.Services.ConfigureApplicationCookie(options =>
+            {
+                options.LoginPath = "/Public/Auth/Login";
+                options.LogoutPath = "/Public/Auth/Logout";
+                options.AccessDeniedPath = "/Public/Auth/AccessDenied";
+            });
+
+            builder.Services.AddSession(options =>
+            {
+                options.IdleTimeout = TimeSpan.FromMinutes(100);
+                options.Cookie.HttpOnly = true;
+                options.Cookie.IsEssential = true;
+            });
 
             var app = builder.Build();
 
@@ -39,7 +44,7 @@ namespace Web
 
             app.MapControllerRoute(
                 name: "default",
-                pattern: "{controller=Home}/{action=Index}/{id?}");
+                pattern: "{area=Public}/{controller=Home}/{action=Index}/{id?}");
 
             app.Run();
         }

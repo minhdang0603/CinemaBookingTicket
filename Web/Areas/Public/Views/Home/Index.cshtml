@@ -181,20 +181,20 @@
         function bookMovie(movieId, event) {
             event.stopPropagation();
 
-        @if (User.Identity.IsAuthenticated)
-        {
-            <text>
-                    window.location.href = '@Url.Action("Book", "Booking")/' + movieId;
-            </text>
-        }
-        else
-        {
-            <text>
-                    alert('Vui lòng đăng nhập để đặt vé!');
-                window.location.href = '@Url.Action("Login", "Account")';
-            </text>
-        }
-                }
+            @if (User.Identity.IsAuthenticated)
+                {
+                    <text>
+                        window.location.href = '@Url.Action("Book", "Booking")/' + movieId;
+                    </text>
+            }
+                else
+                {
+                    <text>
+                        alert('Vui lòng đăng nhập để đặt vé!');
+                        window.location.href = '@Url.Action("Login", "Account")';
+                    </text>
+            }
+                    }
 
         function loadFeaturedMovies() {
             // AJAX call to load featured movies
@@ -223,22 +223,22 @@
             card.onclick = () => viewMovieDetail(movie.id);
 
             card.innerHTML = `
-                        <div class="movie-poster">
-                            ${movie.posterUrl ?
+                            <div class="movie-poster">
+                                ${movie.posterUrl ?
                     `<img src="${movie.posterUrl}" alt="${movie.title}" />` :
                     `<span>${movie.title}</span>`
                 }
-                        </div>
-                        <div class="movie-info">
-                            <div class="movie-title">${movie.title}</div>
-                            <div class="movie-genre">${movie.genre}</div>
-                            <div class="movie-rating">
-                                <span class="rating-stars">${generateStars(movie.rating)}</span>
-                                <span>${movie.rating}/10</span>
                             </div>
-                            <button class="book-btn" onclick="bookMovie(${movie.id}, event)">Đặt vé</button>
-                        </div>
-                    `;
+                            <div class="movie-info">
+                                <div class="movie-title">${movie.title}</div>
+                                <div class="movie-genre">${movie.genre}</div>
+                                <div class="movie-rating">
+                                    <span class="rating-stars">${generateStars(movie.rating)}</span>
+                                    <span>${movie.rating}/10</span>
+                                </div>
+                                <button class="book-btn" onclick="bookMovie(${movie.id}, event)">Đặt vé</button>
+                            </div>
+                        `;
 
             return card;
         }

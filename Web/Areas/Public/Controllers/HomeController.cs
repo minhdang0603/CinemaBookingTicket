@@ -1,9 +1,10 @@
 using System.Diagnostics;
-using Web.Models;
 using Microsoft.AspNetCore.Mvc;
+using Web.Models.ViewModels;
 
-namespace Web.Controllers
+namespace Web.Areas.Public.Controllers
 {
+    [Area("Public")]
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;

@@ -1,20 +1,19 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 using Web.Models;
 
-namespace Web.Controllers
+namespace Web.Areas.Admin.Controllers
 {
-    //  [Authorize(Roles = "Admin")]
-    public class AdminMovieController : Controller
+    [Area("Admin")]
+    // [Authorize(Roles = "Admin")]
+    public class MovieController : Controller
     {
         public IActionResult Index()
         {
-          
+
             return View();
         }
-        
- }
 
-    
+    }
 }
