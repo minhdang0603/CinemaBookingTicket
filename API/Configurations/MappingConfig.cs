@@ -178,5 +178,22 @@ public class MappingConfig : Profile
         CreateMap<ShowTimeUpdateDTO, ShowTime>()
                 .ForMember(dest => dest.LastUpdatedAt, opt => opt.MapFrom(src =>
                     DateTime.Now));
+        // Concession Category Mappings
+        CreateMap<ConcessionCategory, ConcessionCategoryDTO>();
+        CreateMap<ConcessionCategoryCreateDTO, ConcessionCategory>();
+        CreateMap<ConcessionCategoryUpdateDTO, ConcessionCategory>();
+
+        // Concession Mappings
+        CreateMap<Concession, ConcessionDTO>()
+            .ForMember(dest => dest.Category, opt => opt.MapFrom(src =>
+                src.Category));
+        CreateMap<ConcessionCreateDTO, Concession>()
+            .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src =>
+                DateTime.Now))
+            .ForMember(dest => dest.LastUpdatedAt, opt => opt.MapFrom(src =>
+                DateTime.Now));
+        CreateMap<ConcessionUpdateDTO, Concession>()
+            .ForMember(dest => dest.LastUpdatedAt, opt => opt.MapFrom(src =>
+                DateTime.Now));
     }
 }

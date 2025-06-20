@@ -39,7 +39,7 @@ namespace API.Controllers
         }
 
         [HttpGet("get-all-movies-with-pagination")]
-        public async Task<ActionResult<APIResponse<List<MovieDTO>>>> GetAllMoviesWithPaginationAsync(int pageNumber, int pageSize, bool? isActive = true)
+        public async Task<ActionResult<APIResponse<List<MovieDTO>>>> GetAllMoviesWithPaginationAsync([FromQuery] int pageNumber, [FromQuery] int pageSize, [FromQuery] bool? isActive = true)
         {
             var movies = await _movieService.GetAllMoviesWithPaginationAsync(pageNumber, pageSize, isActive);
             if (movies.Count == 0)
@@ -73,7 +73,7 @@ namespace API.Controllers
 
         [HttpPut("update-movie")]
         [Authorize(Roles = Constant.Role_Admin)]
-        public async Task<ActionResult<APIResponse<MovieDTO>>> UpdateMovieAsync(int id, [FromBody] MovieUpdateDTO movieUpdateDTO)
+        public async Task<ActionResult<APIResponse<MovieDTO>>> UpdateMovieAsync([FromQuery] int id, [FromBody] MovieUpdateDTO movieUpdateDTO)
         {
             if (id == 0 || movieUpdateDTO == null)
             {
@@ -97,8 +97,8 @@ namespace API.Controllers
             return Ok(APIResponse<MovieDTO>.Builder().WithResult(movieDTO).WithStatusCode(HttpStatusCode.OK).Build());
         }
 
-        [HttpGet("get-movie-by-id")]
-        public async Task<ActionResult<APIResponse<MovieDetailDTO>>> GetMovieByIdAsync(int id)
+        [HttpGet("get-movie-by-id/{id}")]
+        public async Task<ActionResult<APIResponse<MovieDetailDTO>>> GetMovieByIdAsync([FromRoute] int id)
         {
             if (id == 0)
             {
@@ -122,9 +122,9 @@ namespace API.Controllers
             return Ok(APIResponse<MovieDetailDTO>.Builder().WithResult(movieDTO).WithStatusCode(HttpStatusCode.OK).Build());
         }
 
-        [HttpDelete("delete-movie")]
+        [HttpDelete("delete-movie/{id}")]
         [Authorize(Roles = Constant.Role_Admin)]
-        public async Task<ActionResult<APIResponse<object>>> DeleteMovieAsync(int id)
+        public async Task<ActionResult<APIResponse<object>>> DeleteMovieAsync([FromRoute] int id)
         {
             if (id == 0)
             {
@@ -141,7 +141,7 @@ namespace API.Controllers
         }
 
         [HttpGet("search-movie-by-name")]
-        public async Task<ActionResult<APIResponse<List<MovieDTO>>>> SearchMoviesByNameAsync(string name)
+        public async Task<ActionResult<APIResponse<List<MovieDTO>>>> SearchMoviesByNameAsync([FromQuery] string name)
         {
             if (name.IsNullOrEmpty())
             {

@@ -37,7 +37,7 @@ namespace API.Controllers
         }
 
         [HttpGet("get-all-genre-pagination")]
-        public async Task<ActionResult<APIResponse<List<GenreDTO>>>> GetAllGenresWithPaginationAsync(int pageNumber, int pageSize, bool? isActive = true)
+        public async Task<ActionResult<APIResponse<List<GenreDTO>>>> GetAllGenresWithPaginationAsync([FromQuery] int pageNumber, [FromQuery] int pageSize, [FromQuery] bool? isActive = true)
         {
             var genres = await _genreService.GetAllGenresWithPaginationAsync(pageNumber, pageSize, isActive);
             if (genres.Count == 0)
@@ -71,7 +71,7 @@ namespace API.Controllers
 
         [HttpPut("update-genre")]
         [Authorize(Roles = Constant.Role_Admin)]
-        public async Task<ActionResult<APIResponse<GenreDTO>>> UpdateGenreAsync(int id, [FromBody] GenreUpdateDTO genreUpdateDTO)
+        public async Task<ActionResult<APIResponse<GenreDTO>>> UpdateGenreAsync([FromQuery] int id, [FromBody] GenreUpdateDTO genreUpdateDTO)
         {
             if (id == 0 || genreUpdateDTO == null)
             {
@@ -95,8 +95,8 @@ namespace API.Controllers
             return Ok(APIResponse<GenreDTO>.Builder().WithResult(genreDTO).WithStatusCode(HttpStatusCode.OK).Build());
         }
 
-        [HttpGet("get-genre-by-id")]
-        public async Task<ActionResult<APIResponse<GenreDTO>>> GetGenreByIdAsync(int id)
+        [HttpGet("get-genre-by-id/{id}")]
+        public async Task<ActionResult<APIResponse<GenreDTO>>> GetGenreByIdAsync([FromRoute] int id)
         {
             if (id == 0)
             {
@@ -120,9 +120,9 @@ namespace API.Controllers
             return Ok(APIResponse<GenreDTO>.Builder().WithResult(genre).WithStatusCode(HttpStatusCode.OK).Build());
         }
 
-        [HttpDelete("delete-genre")]
+        [HttpDelete("delete-genre/{id}")]
         [Authorize(Roles = Constant.Role_Admin)]
-        public async Task<ActionResult<APIResponse<GenreDTO>>> DeleteGenreAsync(int id)
+        public async Task<ActionResult<APIResponse<GenreDTO>>> DeleteGenreAsync([FromRoute] int id)
         {
             if (id == 0)
             {
@@ -147,7 +147,7 @@ namespace API.Controllers
         }
 
         [HttpGet("search-genre-by-name")]
-        public async Task<ActionResult<APIResponse<List<GenreDTO>>>> SearchGenresAsync(string name)
+        public async Task<ActionResult<APIResponse<List<GenreDTO>>>> SearchGenresAsync([FromQuery] string name)
         {
             if (name.IsNullOrEmpty())
             {
