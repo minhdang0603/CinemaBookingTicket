@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Web.Configurations;
 using Web.Services;
 using Web.Services.IServices;
 
@@ -12,6 +13,9 @@ namespace Web
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();
+
+            // Đăng ký AutoMapper
+            builder.Services.AddAutoMapper(typeof(MappingConfig));
 
 
             builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
