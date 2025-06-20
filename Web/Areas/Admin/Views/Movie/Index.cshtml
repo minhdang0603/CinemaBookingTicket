@@ -1,478 +1,232 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Movie Management</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <style>
-        body {
-            background-color: #f8f9fa;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
+@{
+    ViewData["Title"] = "Movie Management";
+    ViewData["Header"] = "Movie List";
+    ViewData["HeaderIcon"] = "fas fa-film";
+    ViewData["CreateButtonText"] = "Create New";
+    ViewData["CreateButtonIcon"] = "fas fa-plus";
+    ViewData["CreateButtonOnClick"] = "openCreateModal()";
+}
+<!-- Success Message Demo -->
+<div class="alert alert-success alert-dismissible fade show" role="alert">
+    Movie updated successfully!
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+</div>
 
-        .main-container {
-            margin: 20px auto;
-            max-width: 1200px;
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 0 20px rgba(0,0,0,0.1);
-            overflow: hidden;
-        }
-
-        .page-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 30px;
-            text-align: center;
-            position: relative;
-        }
-
-        .page-header h1 {
-            margin: 0;
-            font-size: 2.5rem;
-            font-weight: 300;
-        }
-
-        .btn-create {
-            position: absolute;
-            top: 50%;
-            left: 30px;
-            transform: translateY(-50%);
-            background: #28a745;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 25px;
-            color: white;
-            font-weight: 500;
-            transition: all 0.3s ease;
-        }
-
-        .btn-create:hover {
-            background: #218838;
-            transform: translateY(-50%) scale(1.05);
-            color: white;
-        }
-
-        .content-area {
-            padding: 30px;
-        }
-
-        .search-area {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 30px;
-        }
-
-        .movie-table {
-            background: white;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-
-        .table-header {
-            background: #343a40;
-            color: white;
-        }
-
-        .table-header th {
-            padding: 20px 15px;
-            font-weight: 600;
-            border: none;
-            text-transform: uppercase;
-            font-size: 0.9rem;
-            letter-spacing: 0.5px;
-        }
-
-        .table tbody tr {
-            transition: all 0.3s ease;
-            border: none;
-        }
-
-        .table tbody tr:hover {
-            background-color: #f8f9fa;
-            transform: scale(1.02);
-        }
-
-        .table tbody td {
-            padding: 20px 15px;
-            vertical-align: middle;
-            border: none;
-            border-bottom: 1px solid #eee;
-        }
-
-        .movie-poster {
-            width: 60px;
-            height: 80px;
-            object-fit: cover;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-        }
-
-        .movie-title {
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 5px;
-        }
-
-        .movie-meta {
-            font-size: 0.9rem;
-            color: #666;
-        }
-
-        .status-badge {
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            text-transform: uppercase;
-        }
-
-        .status-now-showing {
-            background: #d4edda;
-            color: #155724;
-        }
-
-        .status-coming-soon {
-            background: #fff3cd;
-            color: #856404;
-        }
-
-        .status-ended {
-            background: #f8d7da;
-            color: #721c24;
-        }
-
-        .action-buttons {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-        }
-
-        .btn-action {
-            padding: 8px 15px;
-            border: none;
-            border-radius: 20px;
-            font-size: 0.9rem;
-            font-weight: 500;
-            transition: all 0.3s ease;
-            min-width: 70px;
-        }
-
-        .btn-edit {
-            background: #fd7e14;
-            color: white;
-        }
-
-        .btn-edit:hover {
-            background: #e86100;
-            color: white;
-            transform: scale(1.1);
-        }
-
-        .btn-delete {
-            background: #dc3545;
-            color: white;
-        }
-
-        .btn-delete:hover {
-            background: #c82333;
-            color: white;
-            transform: scale(1.1);
-        }
-
-        .modal-content {
-            border: none;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-        }
-
-        .modal-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border-radius: 15px 15px 0 0;
-            padding: 20px 30px;
-        }
-
-        .modal-header h5 {
-            font-weight: 300;
-            font-size: 1.5rem;
-        }
-
-        .btn-close {
-            filter: invert(1);
-        }
-
-        .modal-body {
-            padding: 30px;
-        }
-
-        .form-floating {
-            margin-bottom: 20px;
-        }
-
-        .form-control {
-            border: 2px solid #e9ecef;
-            border-radius: 10px;
-            padding: 12px 15px;
-            transition: all 0.3s ease;
-        }
-
-        .form-control:focus {
-            border-color: #667eea;
-            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 80px;
-            color: #666;
-        }
-
-        .empty-state i {
-            font-size: 4rem;
-            margin-bottom: 20px;
-            color: #ddd;
-        }
-
-       
-    </style>
-</head>
-<body>
-    <div class="main-container">
-        <!-- Header -->
-        <div class="page-header">
-            <button class="btn btn-create" onclick="openCreateModal()">
-                <i class="fas fa-plus"></i> Create New
-            </button>
-            <h1><i class="fas fa-film"></i> Movie List</h1>
-        </div>
-
-        <!-- Content Area -->
-        <div class="content-area">
-            <!-- Success Message Demo -->
-            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                Movie updated successfully!
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+<!-- Search Area -->
+<div class="search-area">
+    <form>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-floating">
+                    <input type="text" class="form-control" placeholder="Search items...">
+                    <label>Search Items</label>
+                </div>
             </div>
+            <div class="col-md-3">
+                <div class="form-floating">
+                    <select class="form-control">
+                        <option value="">All Status</option>
+                        <option value="now showing">Now Showing</option>
+                        <option value="coming soon">Coming Soon</option>
+                        <option value="ended">Ended</option>
+                    </select>
+                    <label>Filter by Status</label>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <button class="btn btn-primary w-100" style="height: 58px;" type="submit">
+                    <i class="fas fa-search"></i> Search
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
 
-            <!-- Search Area -->
-            <div class="search-area">
-                <form>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-floating">
-                                <input type="text" class="form-control" placeholder="Search movies...">
-                                <label>Search Movies</label>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="form-floating">
-                                <select class="form-control">
-                                    <option value="">All Status</option>
-                                    <option value="now showing">Now Showing</option>
-                                    <option value="coming soon">Coming Soon</option>
-                                    <option value="ended">Ended</option>
-                                </select>
-                                <label>Filter by Status</label>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <button class="btn btn-primary w-100" style="height: 58px;" type="submit">
-                                <i class="fas fa-search"></i> Search
-                            </button>
-                        </div>
+<!-- Data Table -->
+<div class="data-table">
+    <table class="table mb-0">
+        <thead class="table-header">
+            <tr>
+                <th>Poster</th>
+                <th>Movie Details</th>
+                <th>Duration</th>
+                <th>Status</th>
+                <th>Rating</th>
+                <th class="text-center">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Item 1 -->
+            <tr>
+                <td>
+                    <img src="https://www.movieposters.com/cdn/shop/products/avatar-the-way-of-water_sncuhzap.jpg?v=1669382994" alt="Avatar"
+                        class="item-thumbnail">
+                </td>
+                <td>
+                    <div class="item-title">Avatar: The Way of Water</div>
+                    <div class="item-meta">
+                        <small><i class="fas fa-user"></i> James Cameron</small><br>
+                        <small><i class="fas fa-calendar"></i> 2022</small>
                     </div>
-                </form>
-            </div>
+                </td>
+                <td>
+                    <span class="badge bg-secondary">192 min</span>
+                </td>
+                <td>
+                    <span class="status-badge status-now-showing">Now Showing</span>
+                </td>
+                <td>
+                    <span class="badge bg-warning text-dark">
+                        <i class="fas fa-star"></i> PG-13
+                    </span>
+                </td>
+                <td>
+                    <div class="action-buttons">
+                        <button class="btn btn-action btn-edit" onclick="editMovie(1)">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                        <button class="btn btn-action btn-delete" onclick="deleteMovie(1, 'Avatar: The Way of Water')">
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
+                    </div>
+                </td>
+            </tr>
+            <!-- Item 2 -->
+            <tr>
+                <td>
+                    <img src="https://via.placeholder.com/60x80/dc2626/ffffff?text=SPIDER" alt="Spider-Man"
+                        class="item-thumbnail">
+                </td>
+                <td>
+                    <div class="item-title">Spider-Man: No Way Home</div>
+                    <div class="item-meta">
+                        <small><i class="fas fa-user"></i> Jon Watts</small><br>
+                        <small><i class="fas fa-calendar"></i> 2021</small>
+                    </div>
+                </td>
+                <td>
+                    <span class="badge bg-secondary">148 min</span>
+                </td>
+                <td>
+                    <span class="status-badge status-coming-soon">Coming Soon</span>
+                </td>
+                <td>
+                    <span class="badge bg-warning text-dark">
+                        <i class="fas fa-star"></i> PG-13
+                    </span>
+                </td>
+                <td>
+                    <div class="action-buttons">
+                        <button class="btn btn-action btn-edit" onclick="editMovie(2)">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                        <button class="btn btn-action btn-delete" onclick="deleteMovie(2, 'Spider-Man: No Way Home')">
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
+                    </div>
+                </td>
+            </tr> 
+            <!-- tem 3 -->
+<tr>
+                <td>
+                    <img src="https://via.placeholder.com/60x80/059669/ffffff?text=TOP+GUN" alt="Top Gun"
+                        class="item-thumbnail">
+                </td>
+                <td>
+                    <div class="item-title">Top Gun: Maverick</div>
+                    <div class="item-meta">
+                        <small><i class="fas fa-user"></i> Joseph Kosinski</small><br>
+                        <small><i class="fas fa-calendar"></i> 2022</small>
+                    </div>
+                </td>
+                <td>
+                    <span class="badge bg-secondary">131 min</span>
+                </td>
+                <td>
+                    <span class="status-badge status-ended">Ended</span>
+                </td>
+                <td>
+                    <span class="badge bg-warning text-dark">
+                        <i class="fas fa-star"></i> PG-13
+                    </span>
+                </td>
+                <td>
+                    <div class="action-buttons">
+                        <button class="btn btn-action btn-edit" onclick="editMovie(3)">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                        <button class="btn btn-action btn-delete" onclick="deleteMovie(3, 'Top Gun: Maverick')">
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
+                    </div>
+                </td>
+            </tr> 
+            <!-- Item 4 -->
+            <tr>
+                <td>
+                    <img src="https://via.placeholder.com/60x80/7c3aed/ffffff?text=BLACK" alt="Black Panther"
+                        class="item-thumbnail">
+                </td>
+                <td>
+                    <div class="item-title">Black Panther: Wakanda Forever</div>
+                    <div class="item-meta">
+                        <small><i class="fas fa-user"></i> Ryan Coogler</small><br>
+                        <small><i class="fas fa-calendar"></i> 2022</small>
+                    </div>
+                </td>
+                <td>
+                    <span class="badge bg-secondary">161 min</span>
+                </td>
+                <td>
+                    <span class="status-badge status-now-showing">Now Showing</span>
+                </td>
+                <td>
+                    <span class="badge bg-warning text-dark">
+                        <i class="fas fa-star"></i> PG-13
+                    </span>
+                </td>
+                <td>
+                    <div class="action-buttons">
+                        <button class="btn btn-action btn-edit" onclick="editMovie(4)">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                        <button class="btn btn-action btn-delete"
+                            onclick="deleteMovie(4, 'Black Panther: Wakanda Forever')">
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
 
-            <!-- Movies Table -->
-            <div class="movie-table">
-                <table class="table mb-0">
-                    <thead class="table-header">
-                        <tr>
-                            <th>Poster</th>
-                            <th>Movie Details</th>
-                            <th>Duration</th>
-                            <th>Status</th>
-                            <th>Rating</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <!-- Movie 1 -->
-                        <tr>
-                            <td>
-                                <img src="https://via.placeholder.com/60x80/4f46e5/ffffff?text=AVATAR" alt="Avatar" class="movie-poster">
-                            </td>
-                            <td>
-                                <div class="movie-title">Avatar: The Way of Water</div>
-                                <div class="movie-meta">
-                                    <small><i class="fas fa-user"></i> James Cameron</small><br>
-                                    <small><i class="fas fa-calendar"></i> 2022</small>
-                                </div>
-                            </td>
-                            <td>
-                                <span class="badge bg-secondary">192 min</span>
-                            </td>
-                            <td>
-                                <span class="status-badge status-now-showing">Now Showing</span>
-                            </td>
-                            <td>
-                                <span class="badge bg-warning text-dark">
-                                    <i class="fas fa-star"></i> PG-13
-                                </span>
-                            </td>
-                            <td>
-                                <div class="action-buttons">
-                                    <button class="btn btn-action btn-edit" onclick="editMovie(1)">
-                                        <i class="fas fa-edit"></i> Edit
-                                    </button>
-                                    <button class="btn btn-action btn-delete" onclick="deleteMovie(1, 'Avatar: The Way of Water')">
-                                        <i class="fas fa-trash"></i> Delete
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
+<!-- Pagination -->
 
-                        <!-- Movie 2 -->
-                        <tr>
-                            <td>
-                                <img src="https://via.placeholder.com/60x80/dc2626/ffffff?text=SPIDER" alt="Spider-Man" class="movie-poster">
-                            </td>
-                            <td>
-                                <div class="movie-title">Spider-Man: No Way Home</div>
-                                <div class="movie-meta">
-                                    <small><i class="fas fa-user"></i> Jon Watts</small><br>
-                                    <small><i class="fas fa-calendar"></i> 2021</small>
-                                </div>
-                            </td>
-                            <td>
-                                <span class="badge bg-secondary">148 min</span>
-                            </td>
-                            <td>
-                                <span class="status-badge status-coming-soon">Coming Soon</span>
-                            </td>
-                            <td>
-                                <span class="badge bg-warning text-dark">
-                                    <i class="fas fa-star"></i> PG-13
-                                </span>
-                            </td>
-                            <td>
-                                <div class="action-buttons">
-                                    <button class="btn btn-action btn-edit" onclick="editMovie(2)">
-                                        <i class="fas fa-edit"></i> Edit
-                                    </button>
-                                    <button class="btn btn-action btn-delete" onclick="deleteMovie(2, 'Spider-Man: No Way Home')">
-                                        <i class="fas fa-trash"></i> Delete
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-
-                        <!-- Movie 3 -->
-                        <tr>
-                            <td>
-                                <img src="https://via.placeholder.com/60x80/059669/ffffff?text=TOP+GUN" alt="Top Gun" class="movie-poster">
-                            </td>
-                            <td>
-                                <div class="movie-title">Top Gun: Maverick</div>
-                                <div class="movie-meta">
-                                    <small><i class="fas fa-user"></i> Joseph Kosinski</small><br>
-                                    <small><i class="fas fa-calendar"></i> 2022</small>
-                                </div>
-                            </td>
-                            <td>
-                                <span class="badge bg-secondary">131 min</span>
-                            </td>
-                            <td>
-                                <span class="status-badge status-ended">Ended</span>
-                            </td>
-                            <td>
-                                <span class="badge bg-warning text-dark">
-                                    <i class="fas fa-star"></i> PG-13
-                                </span>
-                            </td>
-                            <td>
-                                <div class="action-buttons">
-                                    <button class="btn btn-action btn-edit" onclick="editMovie(3)">
-                                        <i class="fas fa-edit"></i> Edit
-                                    </button>
-                                    <button class="btn btn-action btn-delete" onclick="deleteMovie(3, 'Top Gun: Maverick')">
-                                        <i class="fas fa-trash"></i> Delete
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-
-                        <!-- Movie 4 -->
-                        <tr>
-                            <td>
-                                <img src="https://via.placeholder.com/60x80/7c3aed/ffffff?text=BLACK" alt="Black Panther" class="movie-poster">
-                            </td>
-                            <td>
-                                <div class="movie-title">Black Panther: Wakanda Forever</div>
-                                <div class="movie-meta">
-                                    <small><i class="fas fa-user"></i> Ryan Coogler</small><br>
-                                    <small><i class="fas fa-calendar"></i> 2022</small>
-                                </div>
-                            </td>
-                            <td>
-                                <span class="badge bg-secondary">161 min</span>
-                            </td>
-                            <td>
-                                <span class="status-badge status-now-showing">Now Showing</span>
-                            </td>
-                            <td>
-                                <span class="badge bg-warning text-dark">
-                                    <i class="fas fa-star"></i> PG-13
-                                </span>
-                            </td>
-                            <td>
-                                <div class="action-buttons">
-                                    <button class="btn btn-action btn-edit" onclick="editMovie(4)">
-                                        <i class="fas fa-edit"></i> Edit
-                                    </button>
-                                    <button class="btn btn-action btn-delete" onclick="deleteMovie(4, 'Black Panther: Wakanda Forever')">
-                                        <i class="fas fa-trash"></i> Delete
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- Pagination -->
-            <nav>
-                <ul class="pagination justify-content-center mt-4">
-                    <li class="page-item disabled">
-                        <a class="page-link" href="#" tabindex="-1">
-                            <i class="fas fa-chevron-left"></i>
-                        </a>
-                    </li>
-                    <li class="page-item active">
-                        <a class="page-link" href="#">1</a>
-                    </li>
-                    <li class="page-item">
-                        <a class="page-link" href="#">2</a>
-                    </li>
-                    <li class="page-item">
-                        <a class="page-link" href="#">3</a>
-                    </li>
-                    <li class="page-item">
-                        <a class="page-link" href="#">
-                            <i class="fas fa-chevron-right"></i>
-                        </a>
-                    </li>
-                </ul>
-            </nav>
-        </div>
-    </div>
-
+<nav>
+    <ul class="pagination justify-content-center mt-4">
+        <li class="page-item disabled">
+            <a class="page-link" href="#" tabindex="-1">
+                <i class="fas fa-chevron-left"></i>
+            </a>
+        </li>
+        <li class="page-item active">
+            <a class="page-link" href="#">1</a>
+        </li>
+        <li class="page-item">
+            <a class="page-link" href="#">2</a>
+        </li>
+        <li class="page-item">
+            <a class="page-link" href="#">3</a>
+        </li>
+        <li class="page-item">
+            <a class="page-link" href="#">
+                <i class="fas fa-chevron-right"></i>
+            </a>
+        </li>
+    </ul>
+</nav>
+@section Modals {
     <!-- Create/Edit Modal -->
     <div class="modal fade" id="movieModal" tabindex="-1">
         <div class="modal-dialog modal-lg">
@@ -576,34 +330,36 @@
             </div>
         </div>
     </div>
+}
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+@section AdminScripts {
     <script>
+        // Ghi đè hàm openCreateModal chung từ layout
         function openCreateModal() {
             document.getElementById('modalTitle').textContent = 'Create New Movie';
             document.getElementById('movieForm').reset();
-            
+
             const modal = new bootstrap.Modal(document.getElementById('movieModal'));
             modal.show();
         }
 
         function editMovie(movieId) {
             document.getElementById('modalTitle').textContent = 'Edit Movie';
-            
+
             const sampleData = {
                 1: { title: 'Avatar: The Way of Water', director: 'James Cameron', duration: 192 },
                 2: { title: 'Spider-Man: No Way Home', director: 'Jon Watts', duration: 148 },
                 3: { title: 'Top Gun: Maverick', director: 'Joseph Kosinski', duration: 131 },
                 4: { title: 'Black Panther: Wakanda Forever', director: 'Ryan Coogler', duration: 161 }
             };
-            
+
             const movie = sampleData[movieId];
             if (movie) {
                 document.getElementById('title').value = movie.title;
                 document.getElementById('director').value = movie.director;
                 document.getElementById('duration').value = movie.duration;
             }
-            
+
             const modal = new bootstrap.Modal(document.getElementById('movieModal'));
             modal.show();
         }
@@ -615,7 +371,7 @@
 
         function deleteMovie(movieId, movieTitle) {
             document.getElementById('deleteMovieTitle').textContent = movieTitle;
-            
+
             const modal = new bootstrap.Modal(document.getElementById('deleteModal'));
             modal.show();
         }
@@ -625,5 +381,4 @@
             bootstrap.Modal.getInstance(document.getElementById('deleteModal')).hide();
         }
     </script>
-</body>
-</html>
+}
