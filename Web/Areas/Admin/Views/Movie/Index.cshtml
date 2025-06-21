@@ -59,8 +59,8 @@
             <!-- Item 1 -->
             <tr>
                 <td>
-                    <img src="https://www.movieposters.com/cdn/shop/products/avatar-the-way-of-water_sncuhzap.jpg?v=1669382994" alt="Avatar"
-                        class="item-thumbnail">
+                    <img src="https://www.movieposters.com/cdn/shop/products/avatar-the-way-of-water_sncuhzap.jpg?v=1669382994"
+                        alt="Avatar" class="item-thumbnail">
                 </td>
                 <td>
                     <div class="item-title">Avatar: The Way of Water</div>
@@ -125,9 +125,9 @@
                         </button>
                     </div>
                 </td>
-            </tr> 
-            <!-- tem 3 -->
-<tr>
+            </tr>
+            <!-- Item 3 -->
+            <tr>
                 <td>
                     <img src="https://via.placeholder.com/60x80/059669/ffffff?text=TOP+GUN" alt="Top Gun"
                         class="item-thumbnail">
@@ -160,7 +160,7 @@
                         </button>
                     </div>
                 </td>
-            </tr> 
+            </tr>
             <!-- Item 4 -->
             <tr>
                 <td>
@@ -203,29 +203,13 @@
 
 <!-- Pagination -->
 
-<nav>
-    <ul class="pagination justify-content-center mt-4">
-        <li class="page-item disabled">
-            <a class="page-link" href="#" tabindex="-1">
-                <i class="fas fa-chevron-left"></i>
-            </a>
-        </li>
-        <li class="page-item active">
-            <a class="page-link" href="#">1</a>
-        </li>
-        <li class="page-item">
-            <a class="page-link" href="#">2</a>
-        </li>
-        <li class="page-item">
-            <a class="page-link" href="#">3</a>
-        </li>
-        <li class="page-item">
-            <a class="page-link" href="#">
-                <i class="fas fa-chevron-right"></i>
-            </a>
-        </li>
-    </ul>
-</nav>
+<partial name="_Pagination" model="@(new PaginationVM
+                            {
+                                currentPage = 1,
+                                countPages = 5,
+                                generateUrl = (page) => $"/admin/movie?page={page}"
+                            })" />
+
 @section Modals {
     <!-- Create/Edit Modal -->
     <div class="modal fade" id="movieModal" tabindex="-1">

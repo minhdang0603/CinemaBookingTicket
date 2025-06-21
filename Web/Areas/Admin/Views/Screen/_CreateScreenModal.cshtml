@@ -1,0 +1,47 @@
+@model ScreenCreateDTO
+
+<div class="modal-header">
+    <h5 class="modal-title">Add New Screen</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+</div>
+<div class="modal-body">
+    <form id="createScreenForm" asp-area="Admin" asp-controller="Screen" asp-action="Create" method="post">
+        <div class="mb-3">
+            <label asp-for="Name" class="form-label">Screen Name</label>
+            <input asp-for="Name" class="form-control" required>
+            <span asp-validation-for="Name" class="text-danger"></span>
+        </div>
+        <div class="mb-3">
+            <label asp-for="Rows" class="form-label">Rows</label>
+            <input asp-for="Rows" class="form-control" type="number" min="1" required>
+            <span asp-validation-for="Rows" class="text-danger"></span>
+        </div>
+        <div class="mb-3">
+            <label asp-for="SeatsPerRow" class="form-label">Seats per Row</label>
+            <input asp-for="SeatsPerRow" class="form-control" type="number" min="1" required>
+            <span asp-validation-for="SeatsPerRow" class="text-danger"></span>
+        </div>
+        <div class="mb-3">
+            <label asp-for="TheaterId" class="form-label">Theater</label>
+            <select asp-for="TheaterId" class="form-control" required>
+                <option value="">-- Select theater --</option>
+                @if (ViewBag.Theaters != null)
+                {
+                    foreach (var theater in ViewBag.Theaters)
+                    {
+                        <option value="@theater.Id">@theater.Name</option>
+                    }
+                }
+            </select>
+            <span asp-validation-for="TheaterId" class="text-danger"></span>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save"></i> Save Screen
+            </button>
+        </div>
+    </form>
+</div>
+
+

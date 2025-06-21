@@ -22,7 +22,27 @@ namespace API.Controllers
             _screenService = screenService;
         }
 
-        [HttpPost("add-room-admin")]
+        [HttpGet("get-all-screens")]
+        public async Task<ActionResult<APIResponse<List<ScreenDTO>>>> GetAllScreensAsync()
+        {
+            var screens = await _screenService.GetAllScreensAsync();
+            return Ok(APIResponse<List<ScreenDTO>>.Builder()
+                .WithResult(screens)
+                .WithStatusCode(HttpStatusCode.OK)
+                .Build());
+        }
+
+        [HttpGet("get-all-screens-with-pagination")]
+        public async Task<ActionResult<APIResponse<List<ScreenDTO>>>> GetAllScreensWithPaginationAsync(int pageNumber = 1, int pageSize = 10)
+        {
+            var screens = await _screenService.GetAllScreensWithPaginationAsync(pageNumber, pageSize);
+            return Ok(APIResponse<List<ScreenDTO>>.Builder()
+                .WithResult(screens)
+                .WithStatusCode(HttpStatusCode.OK)
+                .Build());
+        }
+
+        [HttpPost("create")]
         [Authorize(Roles = Constant.Role_Admin)]
         public async Task<ActionResult<APIResponse<string>>> AddRoomAsync([FromBody] ScreenCreateDTO screenCreateDTO)
         {
@@ -53,7 +73,7 @@ namespace API.Controllers
             }
         }
 
-        [HttpPut("update-room-admin")]
+        [HttpPut("update/{id:int}")]
         [Authorize(Roles = Constant.Role_Admin)]
         public async Task<ActionResult<APIResponse<string>>> UpdateRoomAsync(int id, [FromBody] ScreenUpdateDTO screenUpdateDTO)
         {
@@ -84,7 +104,7 @@ namespace API.Controllers
             }
         }
 
-        [HttpDelete("delete-room-admin")]
+        [HttpDelete("delete/{id:int}")]
         [Authorize(Roles = Constant.Role_Admin)]
         public async Task<ActionResult<APIResponse<string>>> DeleteRoomAsync(int id)
         {

@@ -52,9 +52,8 @@ namespace API.Services
 
                 // Cập nhật thông tin cơ bản của screen
                 _mapper.Map(dto, screen);
-                screen.LastUpdatedAt = DateTime.UtcNow;
 
-                // Cập nhật screen
+                // Cập nhật screen 
                 await _unitOfWork.Screen.UpdateAsync(screen);
 
                 // Cập nhật trạng thái của các ghế nếu có
@@ -67,7 +66,6 @@ namespace API.Services
                         {
                             // Cập nhật thông tin ghế
                             _mapper.Map(seatDto, seat);
-                            seat.LastUpdatedAt = DateTime.UtcNow;
                         }
                     }
                 }
@@ -103,6 +101,26 @@ namespace API.Services
                 throw new AppException(ErrorCodes.ScreenNotFound(id));
 
             return _mapper.Map<ScreenDetailDTO>(screen);
+        }
+
+        public async Task<List<ScreenDTO>> GetAllScreensAsync(bool? isActive = true)
+        {
+            var screens = await _unitOfWork.Screen.GetAllAsync(
+                filter: s => s.IsActive == isActive,
+                includeProperties: "Theater");
+
+            return _mapper.Map<List<ScreenDTO>>(screens);
+        }
+
+        public async Task<List<ScreenDTO>> GetAllScreensWithPaginationAsync(int pageNumber, int pageSize, bool? isActive = true)
+        {
+            var screens = await _unitOfWork.Screen.GetAllAsync(
+                filter: s => s.IsActive == isActive,
+                includeProperties: "Theater, Seats",
+                pageNumber: pageNumber,
+                pageSize: pageSize);
+
+            return _mapper.Map<List<ScreenDTO>>(screens);
         }
     }
 }

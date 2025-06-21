@@ -10,5 +10,7 @@ namespace API.Services.IServices
         Task DeleteScreenAsync(int id);
 
         Task<ScreenDetailDTO> GetScreenByIdAsync(int id, bool? isActive = true);
+        Task<List<ScreenDTO>> GetAllScreensAsync(bool? isActive = true);
+        Task<List<ScreenDTO>> GetAllScreensWithPaginationAsync(int pageNumber, int pageSize, bool? isActive = true);
     }
 }

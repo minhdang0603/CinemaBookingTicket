@@ -87,5 +87,15 @@ namespace API.Controllers
                 .WithStatusCode(HttpStatusCode.OK)
                 .Build());
         }
+
+        [HttpGet]
+        public async Task<ActionResult<APIResponse<List<TheaterDTO>>>> GetAllTheatersAsync()
+        {
+            var theaters = await _theaterService.GetAllTheatersAsync();
+            return Ok(APIResponse<List<TheaterDTO>>.Builder()
+                .WithResult(theaters)
+                .WithStatusCode(HttpStatusCode.OK)
+                .Build());
+        }
     }
 }

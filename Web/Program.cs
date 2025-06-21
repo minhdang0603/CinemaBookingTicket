@@ -45,6 +45,8 @@ namespace Web
             });
             builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             builder.Services.AddScoped<IAuthService, AuthService>();
+            builder.Services.AddScoped<IScreenService, ScreenService>();
+            builder.Services.AddScoped<ITheaterService, TheaterService>();
 
             var app = builder.Build();
 

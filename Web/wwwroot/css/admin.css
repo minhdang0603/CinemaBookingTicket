@@ -297,7 +297,7 @@
 /* Item Media */
 .admin-container .item-thumbnail,
 .admin-container .movie-poster {
-    width: 60px;
+    width: auto;
     height: 80px;
     object-fit: cover;
     border-radius: 8px;
@@ -399,37 +399,6 @@
 .admin-container .btn-danger:hover {
     background-color: #c82333;
     border-color: #c82333;
-}
-
-/* Pagination styling */
-.admin-container .pagination {
-    margin-top: 20px;
-    display: flex;
-    justify-content: center;
-}
-
-.admin-container .pagination .page-item .page-link {
-    background-color: #2a2a2a;
-    border-color: #444;
-    color: #e0e0e0;
-}
-
-.admin-container .pagination .page-item.active .page-link {
-    background-color: #e50914;
-    border-color: #e50914;
-    color: #ffffff;
-}
-
-.admin-container .pagination .page-item .page-link:hover {
-    background-color: #444;
-    border-color: #555;
-    color: #ffffff;
-}
-
-.admin-container .pagination .page-item.disabled .page-link {
-    background-color: #222;
-    border-color: #333;
-    color: #666;
 }
 
 /* Cards styling */
