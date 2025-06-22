@@ -12,4 +12,6 @@ public interface IScreenService
     Task<T> CreateScreenAsync<T>(ScreenCreateDTO screen, string? token = null);
     Task<T> UpdateScreenAsync<T>(ScreenUpdateDTO screen, string? token = null);
     Task<T> DeleteScreenAsync<T>(int id, string? token = null);
+    Task<T> GetAllSeatTypesAsync<T>();
+    Task<T> GetSeatsByScreenIdAsync<T>(int screenId);
 }

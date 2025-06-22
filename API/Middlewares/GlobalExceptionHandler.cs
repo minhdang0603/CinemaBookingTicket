@@ -23,7 +23,7 @@ namespace API.Middlewares
                 .Build();
             if (exception is AppException e)
             {
-                // If the exception is a BaseException, we can extract the error details
+                // If the exception is a AppException, we can extract the error details
                 Error error = e.Error;
                 httpContext.Response.StatusCode = (int)error.StatusCode;
                 response.StatusCode = error.StatusCode;

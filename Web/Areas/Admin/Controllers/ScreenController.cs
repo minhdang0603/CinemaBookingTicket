@@ -1,6 +1,6 @@
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
+using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Newtonsoft.Json;
 using Utility;
 using Web.Models;
@@ -18,97 +18,240 @@ namespace Web.Areas.Admin.Controllers
         private readonly IScreenService _screenService;
         private readonly ITheaterService _theaterService;
         private readonly ILogger<ScreenController> _logger;
-        private const int PageSize = 10; // Define a constant for page size
+        private readonly IMapper _mapper;
 
-        public ScreenController(IScreenService screenService, ITheaterService theaterService, ILogger<ScreenController> logger)
+        public ScreenController(IScreenService screenService, IMapper mapper, ITheaterService theaterService, ILogger<ScreenController> logger)
         {
             _screenService = screenService;
+            _mapper = mapper;
             _theaterService = theaterService;
             _logger = logger;
         }
-
         public async Task<IActionResult> Index()
         {
-            // Fake data for demo
-            var theaters = new List<TheaterDTO>
-            {
-                new TheaterDTO { Id = 1, Name = "CGV Vincom Center" },
-                new TheaterDTO { Id = 2, Name = "Galaxy Cinema" },
-                new TheaterDTO { Id = 3, Name = "Lotte Cinema" }
-            };
-            ViewBag.Theaters = theaters;
+            // Try to get data from API
+            var screenResponse = await _screenService.GetAllScreensAsync<APIResponse>();
 
-            var screens = new List<ScreenDTO>
+            if (screenResponse == null || !screenResponse.IsSuccess)
             {
-                new ScreenDTO { Id = 101, Name = "Screen 1", Rows = 10, SeatsPerRow = 20, Theater = theaters[0] },
-                new ScreenDTO { Id = 102, Name = "Screen 2", Rows = 8, SeatsPerRow = 15, Theater = theaters[1] },
-                new ScreenDTO { Id = 103, Name = "Screen 3", Rows = 12, SeatsPerRow = 18, Theater = theaters[2] },
-                new ScreenDTO { Id = 104, Name = "Screen 4", Rows = 9, SeatsPerRow = 16, Theater = theaters[0] },
-                new ScreenDTO { Id = 105, Name = "Screen 5", Rows = 11, SeatsPerRow = 22, Theater = theaters[1] },
-                new ScreenDTO { Id = 106, Name = "Screen 6", Rows = 7, SeatsPerRow = 14, Theater = theaters[2] }
-            };
+                _logger.LogError("Failed to load screens from API");
+                TempData["error"] = screenResponse?.ErrorMessages?.FirstOrDefault() ?? "Không thể tải danh sách phòng chiếu.";
+                return View(new List<ScreenDTO>());
+            }
 
-            ScreenVM screenVM = new ScreenVM
-            {
-                ScreenList = screens
-            };
-            return View(screenVM);
+            ViewBag.Theaters = await LoadTheaterDropdown();
+
+            // Deserialize the response data into a list of ScreenDTO
+            var screens = JsonConvert.DeserializeObject<List<ScreenDTO>>(screenResponse.Result.ToString());
+
+            return View(screens);
         }
 
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
-            // Tạo ScreenCreateDTO mới và trả về PartialView
+            // Tạo ScreenCreateDTO mới và trả về Razor Page
             var model = new ScreenCreateDTO();
 
             // Load dữ liệu theaters vào ViewBag để dùng trong dropdown
-            LoadTheaterDropdown();
 
-            // Trả về partial view với model
-            return PartialView("_CreateScreenModal", model);
+            ViewBag.Theaters = await LoadTheaterDropdown();
+
+            // Trả về view với model
+            return View(model);
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
+        // [Authorize(Roles = Constant.Role_Admin)]
         public async Task<IActionResult> Create(ScreenCreateDTO model)
         {
-            if (ModelState.IsValid)
-            {
-                var response = await _screenService.CreateScreenAsync<APIResponse>(model);
+            _logger.LogInformation("Received screen creation request: {@model}", model);
 
-                if (response != null && response.IsSuccess)
+            if (!ModelState.IsValid)
+            {
+                // Log validation errors
+                foreach (var state in ModelState)
                 {
-                    // Trả về JSON result để xử lý AJAX
-                    return Json(new { success = true, message = "Thêm phòng chiếu mới thành công!" });
-                }
-                // Nếu có lỗi từ API
-                if (response?.ErrorMessages?.Any() == true)
-                {
-                    foreach (var error in response.ErrorMessages)
+                    foreach (var error in state.Value.Errors)
                     {
-                        ModelState.AddModelError("", error);
+                        _logger.LogWarning("Validation error for {Key}: {Error}",
+                            state.Key, error.ErrorMessage);
                     }
+                }
+                // Nếu ModelState không hợp lệ, trả về view với model và thông báo lỗi
+                ViewBag.Theaters = await LoadTheaterDropdown();
+                return View(model);
+            }
+
+            var token = HttpContext.Session.GetString(Constant.SessionToken);
+            var response = await _screenService.CreateScreenAsync<APIResponse>(model, token);
+
+            if (response != null && response.IsSuccess)
+            {
+                _logger.LogInformation("Screen created successfully: {Result}", response.Result);
+                TempData["success"] = "Tạo phòng chiếu thành công!";
+
+                return RedirectToAction("Index");
+            }
+
+            TempData["error"] = response?.ErrorMessages?.FirstOrDefault() ?? "Không thể tạo phòng chiếu.";
+            _logger.LogError("Failed to create screen: {ErrorMessages}", response?.ErrorMessages);
+
+            ViewBag.Theaters = await LoadTheaterDropdown();
+            return View(model);
+
+        }
+
+        // Phương thức hiển thị form sửa phòng chiếu
+        public async Task<IActionResult> Edit(int id)
+        {
+
+            var screenResponse = await _screenService.GetScreenByIdAsync<APIResponse>(id);
+
+            if (screenResponse == null || !screenResponse.IsSuccess)
+            {
+                _logger.LogError("Failed to load screen with ID: {Id}", id);
+                TempData["error"] = screenResponse?.ErrorMessages?.FirstOrDefault();
+                return RedirectToAction("Index");
+            }
+
+            var screen = JsonConvert.DeserializeObject<ScreenDetailDTO>(screenResponse.Result?.ToString() ?? "{}");
+
+            var model = _mapper.Map<ScreenUpdateDTO>(screen);
+
+            // Load danh sách rạp
+            ViewBag.Theaters = await LoadTheaterDropdown();
+
+            return View(model);
+        }
+
+        // Phương thức cập nhật phòng chiếu
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(ScreenUpdateDTO model)
+        {
+            if (!ModelState.IsValid)
+            {
+                // Load danh sách rạp và loại ghế lại nếu có lỗi
+                ViewBag.Theaters = await LoadTheaterDropdown();
+                return View(model);
+            }
+
+            var token = HttpContext.Session.GetString(Constant.SessionToken);
+            var response = await _screenService.UpdateScreenAsync<APIResponse>(model, token);
+
+            if (response != null && response.IsSuccess)
+            {
+                _logger.LogInformation("Screen updated successfully: {Id}", model.Id);
+                TempData["success"] = "Cập nhật phòng chiếu thành công!";
+
+                return RedirectToAction("Index");
+            }
+
+            TempData["error"] = response?.ErrorMessages?.First();
+            ViewBag.Theaters = await LoadTheaterDropdown();
+            return View(model);
+        }
+
+        // Phương thức lấy cấu hình ghế cho preview
+        public async Task<IActionResult> GetSeatConfiguration(int id, int rows, int seatsPerRow)
+        {
+            _logger.LogInformation("Loading seat configuration for screen ID: {Id}, rows: {Rows}, seatsPerRow: {SeatsPerRow}",
+                id, rows, seatsPerRow);
+
+            // Lấy thông tin cấu hình ghế hiện tại từ API (nếu có)
+            var seatResponse = await _screenService.GetSeatsByScreenIdAsync<APIResponse>(id);
+            var seatConfiguration = new List<SeatDTO>();
+
+            if (seatResponse != null && seatResponse.IsSuccess)
+            {
+                var seats = JsonConvert.DeserializeObject<List<SeatDTO>>(seatResponse.Result?.ToString() ?? "[]");
+                if (seats != null && seats.Count > 0)
+                {
+                    seatConfiguration = seats;
                 }
                 else
                 {
-                    ModelState.AddModelError("", "Có lỗi xảy ra khi tạo phòng chiếu.");
+
+                    TempData["error"] = "No seats available for this screen.";
                 }
             }
+            else
+            {
 
-            // Nếu ModelState không hợp lệ hoặc API trả về lỗi
-            LoadTheaterDropdown();
-            return PartialView("_CreateScreenModal", model);
+                TempData["error"] = seatResponse?.ErrorMessages?.FirstOrDefault() ?? "Failed to load seats.";
+            }
+
+            // Load danh sách loại ghế
+            ViewBag.SeatTypes = await LoadSeatTypeList();
+
+            // Tạo mô hình cho view
+            var model = new SeatConfigurationViewModel
+            {
+                ScreenId = id,
+                Rows = rows,
+                SeatsPerRow = seatsPerRow,
+                ExistingSeats = seatConfiguration
+            };
+
+            // Trả về partial view
+            return PartialView("_SeatConfigurationPartial", model);
+        }
+
+        // Phương thức xóa phòng chiếu
+        [HttpDelete]
+        public async Task<IActionResult> Delete(int id)
+        {
+            _logger.LogInformation("Received request to delete screen with ID: {Id}", id);
+            if (id <= 0)
+            {
+                TempData["error"] = "Invalid screen ID.";
+                return Json(new { });
+            }
+            var token = HttpContext.Session.GetString(Constant.SessionToken);
+            var response = await _screenService.DeleteScreenAsync<APIResponse>(id, token);
+            if (response != null && response.IsSuccess)
+            {
+                _logger.LogInformation("Screen deleted successfully: {Id}", id);
+                TempData["success"] = "Xóa phòng chiếu thành công!";
+                return Json(new { });
+            }
+            TempData["error"] = response?.ErrorMessages?.FirstOrDefault() ?? "Không thể xóa phòng chiếu.";
+            _logger.LogError("Failed to delete screen: {ErrorMessages}", response?.ErrorMessages);
+            return Json(new { });
+        }
+
+        // Helper method to load seat types
+        private async Task<List<SeatTypeDTO>> LoadSeatTypeList()
+        {
+            // Try to get seat types from API
+            var seatTypeResponse = await _screenService.GetAllSeatTypesAsync<APIResponse>();
+            if (seatTypeResponse != null && seatTypeResponse.IsSuccess && seatTypeResponse.Result != null)
+            {
+                var seatTypes = JsonConvert.DeserializeObject<List<SeatTypeDTO>>(seatTypeResponse.Result.ToString() ?? "[]");
+                return seatTypes;
+            }
+
+            TempData["error"] = seatTypeResponse?.ErrorMessages?.First();
+            return new List<SeatTypeDTO>();
         }
 
         // Helper method to load theaters for dropdown
-        private void LoadTheaterDropdown()
+        private async Task<IEnumerable<SelectListItem>> LoadTheaterDropdown()
         {
-            // TODO: Implement theater service and load real theaters
-            // For now, using sample data
-            ViewBag.Theaters = new List<dynamic>
+            // Try to get theaters from API
+            var theaterResponse = await _theaterService.GetAllTheatersAsync<APIResponse>();
+            if (theaterResponse != null && theaterResponse.IsSuccess && theaterResponse.Result != null)
             {
-                new { Id = 1, Name = "CGV Vincom Center" },
-                new { Id = 2, Name = "Galaxy Cinema" },
-                new { Id = 3, Name = "Lotte Cinema" }
-            };
+                var theaters = JsonConvert.DeserializeObject<List<TheaterDTO>>(theaterResponse.Result.ToString());
+                return theaters.Select(t => new SelectListItem
+                {
+                    Value = t.Id.ToString(),
+                    Text = t.Name
+                });
+            }
+            TempData["error"] = theaterResponse?.ErrorMessages?.FirstOrDefault() ?? "Không thể tải danh sách rạp.";
+            return new List<SelectListItem>();
         }
     }
 }

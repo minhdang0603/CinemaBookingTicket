@@ -4,27 +4,7 @@
 
 <!-- Thêm CSS cho Admin Layout trong phần head của trang-->
 <link rel="stylesheet" href="~/css/admin.css" asp-append-version="true" />
-
 <div class="admin-container">
-    @if (ViewData["Header"] != null)
-    {
-        <div class="admin-header">
-            @if (ViewData["ShowCreateButton"] == null || (ViewData["ShowCreateButton"] is bool showBtn && showBtn))
-            {
-                <button class="btn-create" onclick="@(ViewData["CreateButtonOnClick"] ?? "openCreateModal()")">
-                    <i class="@(ViewData["CreateButtonIcon"] ?? "fas fa-plus")"></i> @(ViewData["CreateButtonText"] ?? "Create New")
-                </button>
-            }
-            <h1>
-                @if (!string.IsNullOrEmpty(ViewData["HeaderIcon"]?.ToString()))
-                {
-                    <i class="@ViewData["HeaderIcon"]"></i>
-                }
-                @ViewData["Header"]
-            </h1>
-        </div>
-    }
-
     @RenderBody()
 </div>
 
@@ -34,30 +14,7 @@
 }
 
 @section Scripts {
-    <!-- Script chung cho Admin -->
-    <script>
-        // Hàm mở modal chung cho Admin
-        function openCreateModal() {
-            if (document.getElementById('modalTitle')) {
-                document.getElementById('modalTitle').textContent = 'Create New Item';
-            }
-            
-            if (document.getElementById('itemForm')) {
-                document.getElementById('itemForm').reset();
-            }
-            
-            // Tìm modal phù hợp để hiển thị
-            const modalElement = document.querySelector('.modal');
-            if (modalElement) {
-                const modal = new bootstrap.Modal(modalElement);
-                modal.show();
-            }
-        }
-        // Các hàm chung khác có thể được thêm ở đây
-    </script>
-    
+
     <!-- Render AdminScripts section từ các view con -->
     @await RenderSectionAsync("AdminScripts", required: false)
 }
-
-

@@ -1,53 +1,32 @@
-﻿@model ScreenVM
+﻿@model List<ScreenDTO>
 
-@{
-    ViewData["Title"] = "Screen Management";
-    ViewData["Header"] = "Screen List";
-    ViewData["HeaderIcon"] = "fas fa-tv";
-    ViewData["CreateButtonText"] = "Add Screen";
-    ViewData["CreateButtonIcon"] = "fas fa-plus";
-    ViewData["CreateButtonOnClick"] = "openCreateModal()";
-}
-
-<!-- Success Message Demo -->
-@if (TempData["SuccessMessage"] != null)
-{
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
-        @TempData["SuccessMessage"]
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
-}
+<div class="admin-header">
+    <a class="btn btn-create" asp-area="Admin" asp-controller="Screen" asp-action="Create">
+        <i class="fas fa-plus"></i> Create New
+    </a>
+    <h1>
+        <i class="fas fa-tv"></i>
+    </h1>
+</div>
 
 <!-- Search Area -->
 <div class="search-area">
     <form>
         <div class="row">
-            <div class="col-md-6">
+            <div class="col-md-8">
                 <div class="form-floating">
                     <input type="text" class="form-control" name="searchTerm" placeholder="Search screens..."
-                        asp-area="Admin" asp-controller="Screen" asp-action="Index" value="@ViewBag.SearchTerm" />
+                           asp-area="Admin" asp-controller="Screen" asp-action="Index" value="@ViewBag.SearchTerm" />
                     <label>Search Screens</label>
                 </div>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-4">
                 <div class="form-floating">
-                    <select class="form-control" name="theaterId">
+                    <select class="form-control" name="theaterId" asp-items="ViewBag.Theaters">
                         <option value="">All Theaters</option>
-                        @if (ViewBag.Theaters != null)
-                        {
-                            foreach (var theater in ViewBag.Theaters)
-                            {
-                                <option value="@theater.Id">@theater.Name</option>
-                            }
-                        }
                     </select>
                     <label>Filter by Theater</label>
                 </div>
-            </div>
-            <div class="col-md-3">
-                <button class="btn btn-primary w-100" style="height: 58px;" type="submit">
-                    <i class="fas fa-search"></i> Search
-                </button>
             </div>
         </div>
     </form>
@@ -67,9 +46,9 @@
             </tr>
         </thead>
         <tbody>
-            @if (Model.ScreenList != null && Model.ScreenList.Any())
+            @if (Model != null && Model.Any())
             {
-                foreach (var item in Model.ScreenList)
+                foreach (var item in Model)
                 {
                     <tr>
                         <td>
@@ -89,37 +68,22 @@
                         <td><span class="badge bg-info text-dark">@item.Theater?.Name</span></td>
                         <td>
                             <div class="action-buttons">
-                                <button class="btn btn-action btn-edit" onclick="editScreen(@item.Id)"><i
-                                        class="fas fa-edit"></i> Edit</button>
-                                <button class="btn btn-action btn-delete" onclick="deleteScreen(@item.Id, '@item.Name')"><i
-                                        class="fas fa-trash"></i> Delete</button>
+                                <a class="btn btn-action btn-edit" asp-area="Admin" asp-controller="Screen" asp-action="Edit" asp-route-id="@item.Id">
+                                    <i class="fas fa-edit"></i> Edit
+                                </a>
+                                <button class="btn btn-action btn-delete" onclick="deleteScreen(@item.Id, '@item.Name')">
+                                    <i class="fas fa-trash"></i> Delete
+                                </button>
                             </div>
                         </td>
                     </tr>
                 }
             }
-            else
-            {
-                <tr>
-                    <td colspan="6" class="text-center text-muted">No screens found.</td>
-                </tr>
-            }
         </tbody>
     </table>
 </div>
 
-<!-- Pagination -->
-<partial name="_Pagination" model="@Model.Pagination" />
-
 @section Modals {
-    <!-- Create/Edit Modal -->
-    <div class="modal fade" id="createModal" tabindex="-1">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content" id="createModalContent">
-                <!-- Partial view content will be loaded here -->
-            </div>
-        </div>
-    </div>
     <!-- Delete Confirmation Modal -->
     <div class="modal fade" id="deleteModal" tabindex="-1">
         <div class="modal-dialog">
@@ -135,9 +99,9 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-danger" onclick="confirmDeleteScreen()">
+                    <a class="btn btn-danger" onclick="confirmDeleteScreen('@Url.Action("Delete", "Screen", new { area = "Admin", id = "__id__" })')">
                         <i class="fas fa-trash"></i> Delete
-                    </button>
+                    </a>
                 </div>
             </div>
         </div>
@@ -145,15 +109,5 @@
 }
 
 @section AdminScripts {
-    <script>
-        // Open create screen modal and load partial view
-        function openCreateModal() {
-            var url = '/Admin/Screen/Create';
-            $('#createModalContent').load(url, function () {
-                var modal = new bootstrap.Modal(document.getElementById('createModal'));
-                modal.show();
-            });
-        }
-    </script>
     <script src="~/js/admin-screen-index.js"></script>
 }

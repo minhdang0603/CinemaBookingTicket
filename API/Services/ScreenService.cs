@@ -11,6 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Utility;
 
 namespace API.Services
 {
@@ -28,56 +29,52 @@ namespace API.Services
         public async Task AddScreenAsync(ScreenCreateDTO dto)
         {
             var screen = _mapper.Map<Screen>(dto);
-            screen.CreatedAt = DateTime.UtcNow;
-            screen.LastUpdatedAt = DateTime.UtcNow;
-            screen.IsActive = true;
 
             await _unitOfWork.Screen.CreateAsync(screen);
+            await _unitOfWork.SaveAsync();
+
+            // Thêm ghế dựa trên Seats và SeatPerRow
+            for (int row = 1; row <= dto.Rows; row++)
+            {
+                for (int seatNumber = 1; seatNumber <= screen.SeatsPerRow; seatNumber++)
+                {
+                    // Format ghế là "A1", "A2", ..., "B1", "B2", ...
+                    // Giả sử hàng ghế được đánh số từ A, B, C, ...
+                    var seatRow = (char)('A' + row - 1); // Chuyển đổi số hàng thành chữ cái
+                    var seat = new Seat
+                    {
+                        ScreenId = screen.Id,
+                        SeatRow = seatRow.ToString(),
+                        SeatNumber = seatNumber,
+                        IsActive = true,
+                        CreatedAt = DateTime.UtcNow,
+                        LastUpdatedAt = DateTime.UtcNow,
+                        SeatType = await _unitOfWork.SeatType.GetAsync(st => st.Name == Constant.Seat_Type_Standard)
+                    };
+
+                    await _unitOfWork.Seat.CreateAsync(seat);
+                }
+            }
             await _unitOfWork.SaveAsync();
         }
 
         public async Task UpdateScreenAsync(int id, ScreenUpdateDTO dto)
         {
-            // Bắt đầu transaction để đảm bảo tính nhất quán dữ liệu
-            using var transaction = await _unitOfWork.BeginTransactionAsync();
-            try
-            {
-                // Lấy screen hiện tại kèm theo danh sách ghế
-                var screen = await _unitOfWork.Screen.GetAsync(
-                    s => s.Id == id,
-                    includeProperties: "Seats");
 
-                if (screen == null)
-                    throw new Exception($"Screen with ID {id} not found");
+            // Lấy screen hiện tại kèm theo danh sách ghế
+            var screen = await _unitOfWork.Screen.GetAsync(
+                s => s.Id == id,
+                includeProperties: "Seats");
 
-                // Cập nhật thông tin cơ bản của screen
-                _mapper.Map(dto, screen);
+            if (screen == null)
+                throw new Exception($"Screen with ID {id} not found");
 
-                // Cập nhật screen 
-                await _unitOfWork.Screen.UpdateAsync(screen);
+            // Cập nhật thông tin cơ bản của screen
+            _mapper.Map(dto, screen);
 
-                // Cập nhật trạng thái của các ghế nếu có
-                if (dto.Seats != null && dto.Seats.Any())
-                {
-                    foreach (var seatDto in dto.Seats)
-                    {
-                        var seat = screen.Seats.FirstOrDefault(s => s.Id == seatDto.Id);
-                        if (seat != null)
-                        {
-                            // Cập nhật thông tin ghế
-                            _mapper.Map(seatDto, seat);
-                        }
-                    }
-                }
-
-                await _unitOfWork.SaveAsync();
-                await _unitOfWork.CommitAsync();
-            }
-            catch (Exception)
-            {
-                await _unitOfWork.RollbackAsync();
-                throw;
-            }
+            // Cập nhật screen 
+            await _unitOfWork.Screen.UpdateAsync(screen);
+            await _unitOfWork.SaveAsync();
         }
 
         public async Task DeleteScreenAsync(int id)
@@ -95,7 +92,7 @@ namespace API.Services
 
         public async Task<ScreenDetailDTO> GetScreenByIdAsync(int id, bool? isActive = true)
         {
-            var screen = await _unitOfWork.Screen.GetAsync(s => s.Id == id && s.IsActive == isActive, includeProperties: "Seats");
+            var screen = await _unitOfWork.Screen.GetAsync(s => s.Id == id && s.IsActive == isActive, includeProperties: "Seats,Theater");
 
             if (screen == null)
                 throw new AppException(ErrorCodes.ScreenNotFound(id));
@@ -121,6 +118,21 @@ namespace API.Services
                 pageSize: pageSize);
 
             return _mapper.Map<List<ScreenDTO>>(screens);
+        }
+
+        public async Task<List<SeatTypeDTO>> GetAllSeatTypesAsync()
+        {
+            var seatTypes = await _unitOfWork.SeatType.GetAllAsync();
+            return _mapper.Map<List<SeatTypeDTO>>(seatTypes);
+        }
+
+        public async Task<List<SeatDTO>> GetSeatsByScreenIdAsync(int screenId)
+        {
+            var seats = await _unitOfWork.Seat.GetAllAsync(
+                filter: s => s.ScreenId == screenId,
+                includeProperties: "SeatType");
+
+            return _mapper.Map<List<SeatDTO>>(seats);
         }
     }
 }

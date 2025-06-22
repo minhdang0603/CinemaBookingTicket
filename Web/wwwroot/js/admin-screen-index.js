@@ -5,7 +5,7 @@ $(document).ready(function () {
         "lengthMenu": [5, 10, 25, 50, 100],
         "order": [[0, "asc"]],
         // Thêm callback để style lại dropdown length
-        "initComplete": function() {
+        "initComplete": function () {
             $('.dt-length select').addClass('bg-dark text-white');
         }
     });
@@ -29,26 +29,6 @@ $(document).ready(function () {
 });
 
 
-// Handle create screen form submit
-$(document).on('submit', '#createScreenForm', function (e) {
-    e.preventDefault();
-    var $form = $(this);
-    $.ajax({
-        url: $form.attr('action'),
-        type: $form.attr('method'),
-        data: $form.serialize(),
-        success: function (res) {
-            if (res.success) {
-                location.reload();
-            } else {
-                $('#createModalContent').html(res);
-            }
-        },
-        error: function (xhr) {
-            alert('Error: ' + xhr.statusText);
-        }
-    });
-});
 // Handle delete screen
 let deleteScreenId = null;
 function deleteScreen(id, name) {
@@ -57,14 +37,14 @@ function deleteScreen(id, name) {
     const modal = new bootstrap.Modal(document.getElementById('deleteModal'));
     modal.show();
 }
-function confirmDeleteScreen() {
+function confirmDeleteScreen(url) {
     if (deleteScreenId) {
-        // TODO: Call API or submit form to delete screen
-        alert('Demo: Will delete screen ID ' + deleteScreenId);
-        bootstrap.Modal.getInstance(document.getElementById('deleteModal')).hide();
+        $.ajax({
+            type: "DELETE",
+            url: url.replace("__id__", deleteScreenId),
+            success: function (data) {
+                location.reload();
+            }
+        })
     }
-}
-// Demo: Edit screen (can open edit modal dynamically if needed)
-function editScreen(id) {
-    alert('Demo: Will open edit modal for screen ID ' + id);
 }

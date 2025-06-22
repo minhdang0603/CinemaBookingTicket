@@ -19,6 +19,17 @@ namespace API
 
             Configuration.Default.ApiKey.Add("api-key", builder.Configuration.GetValue<string>("BrevoApi:ApiKey"));
 
+            // Add CORS Config
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAll", policy =>
+                {
+                    policy.AllowAnyOrigin()
+                          .AllowAnyHeader()
+                          .AllowAnyMethod();
+                });
+            });
+
             // Add services to the container.
             builder.Services.AddControllers().AddJsonOptions(options =>
             {
@@ -75,8 +86,12 @@ namespace API
                 app.UseSwaggerUI();
             }
 
+            // Use CORS
+            app.UseCors("AllowAll");
+
             app.UseAuthentication();
             app.UseAuthorization();
+            
 
             SeedDatabase();
 

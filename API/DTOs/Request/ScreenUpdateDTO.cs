@@ -8,6 +8,7 @@ namespace API.DTOs.Request
         public string? Name { get; set; }
         public int? Rows { get; set; }
         public int? SeatsPerRow { get; set; }
+        public int? TheaterId { get; set; }
         public List<SeatUpdateDTO>? Seats { get; set; } = new List<SeatUpdateDTO>();
     }
 }

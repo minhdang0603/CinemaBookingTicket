@@ -12,5 +12,7 @@ namespace API.Services.IServices
         Task<ScreenDetailDTO> GetScreenByIdAsync(int id, bool? isActive = true);
         Task<List<ScreenDTO>> GetAllScreensAsync(bool? isActive = true);
         Task<List<ScreenDTO>> GetAllScreensWithPaginationAsync(int pageNumber, int pageSize, bool? isActive = true);
+        Task<List<SeatTypeDTO>> GetAllSeatTypesAsync();
+        Task<List<SeatDTO>> GetSeatsByScreenIdAsync(int screenId);
     }
 }

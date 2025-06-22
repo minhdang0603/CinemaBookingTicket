@@ -1,0 +1,134 @@
+@model SeatConfigurationViewModel
+
+<div class="seat-configuration">
+    <div class="screen-bar mb-4">
+        <i class="fas fa-tv me-2"></i> Screen
+    </div>
+    
+    <div class="seat-grid">
+        @{
+            var seatIndex = 0;
+        }
+        @for (int row = 0; row < Model.Rows; row++)
+        {
+            <div class="seat-row" style="--seats-per-row:@Model.SeatsPerRow">
+                <div class="row-selector" data-row="@row">
+                    @((char)('A' + row))
+                </div>
+                
+                @for (int col = 0; col < Model.SeatsPerRow; col++)
+                {
+                    var existingSeat = Model.ExistingSeats.FirstOrDefault(s => 
+                        s.SeatRow == ((char)('A' + row)).ToString() && 
+                        s.SeatNumber == col + 1);
+                    var seatTypeId = existingSeat?.SeatType.Id ?? 1; // Default to Standard if no existing seat
+                    var seatColor = existingSeat?.SeatType.Color ?? "#6c757d";
+                    var seatId = existingSeat?.Id ?? 0;
+                    var seatRow = ((char)('A' + row)).ToString();
+                    var seatNumber = col + 1;
+
+                    <input type="hidden" name="Seats[@seatIndex].Id" value="@seatId" />
+                    <input type="hidden" name="Seats[@seatIndex].SeatRow" value="@seatRow" />
+                    <input type="hidden" name="Seats[@seatIndex].SeatNumber" value="@seatNumber" />
+                    <input type="hidden" name="Seats[@seatIndex].SeatTypeId" value="@seatTypeId" class="seat-type-input" data-row="@row" data-col="@col" />
+
+                    <div class="seat-item" 
+                         data-row="@row" 
+                         data-col="@col" 
+                         data-seat-id="@seatId"
+                         data-seat-type-id="@seatTypeId"
+                         style="background-color: @seatColor">
+                        @((char)('A' + row))@(col + 1)
+                    </div>
+                    seatIndex++;
+                }
+            </div>
+        }
+    </div>
+    
+    <div class="mt-4">
+        <div class="seat-actions mb-3">
+            <button type="button" class="btn btn-sm btn-primary me-2" id="selectAllSeats">
+                <i class="fas fa-check-double"></i> Chọn tất cả
+            </button>
+            <button type="button" class="btn btn-sm btn-secondary me-2" id="clearSelection">
+                <i class="fas fa-times"></i> Bỏ chọn
+            </button>
+        </div>
+        
+        <div class="seat-type-selector">
+            <p class="mb-2">Chọn loại ghế cho (các) ghế được chọn:</p>
+            <div class="d-flex flex-wrap gap-2">
+                @if (ViewBag.SeatTypes != null)
+                {
+                    foreach (var seatType in ViewBag.SeatTypes)
+                    {
+                        var color = seatType.Color ?? "#6c757d";
+                        var priceMultiplier = seatType.PriceMultiplier.ToString("0.##");
+                        <div class="seat-type-option" 
+                             data-seat-type-id="@seatType.Id"
+                             data-color="@color"
+                             style="background-color: @color">
+                            @seatType.Name (x @seatType.PriceMultiplier.ToString("0.##"))
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .seat-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+    .seat-row {
+        display: grid;
+        grid-template-columns: 32px repeat(var(--seats-per-row), 32px);
+        gap: 8px;
+        align-items: center;
+    }
+    .seat-item {
+        width: 32px;
+        height: 32px;
+        background-color: #6c757d;
+        border-radius: 5px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-size: 0.8rem;
+        box-sizing: border-box;
+    }
+    .row-selector {
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #444;
+        border-radius: 5px;
+        cursor: pointer;
+        font-weight: bold;
+    }
+</style>
+
+<script>
+    $(document).ready(function() {
+        // Handle select all seats
+        $('#selectAllSeats').click(function() {
+            $('.seat-item').addClass('selected');
+        });
+        
+        // Handle clear selection
+        $('#clearSelection').click(function() {
+            $('.seat-item').removeClass('selected');
+        });
+        
+        // Initialize existing seat handlers (this function is in Edit.cshtml)
+        initializeSeatSelector();
+    });
+</script>

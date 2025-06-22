@@ -55,22 +55,11 @@ namespace API.Controllers
                     .Build());
             }
 
-            try
-            {
-                await _screenService.AddScreenAsync(screenCreateDTO);
-                return Ok(APIResponse<string>.Builder()
-                    .WithResult($"Room {screenCreateDTO.Name} created successfully.")
-                    .WithStatusCode(HttpStatusCode.OK)
-                    .Build());
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, APIResponse<string>.Builder()
-                    .WithErrorMessages(new List<string> { $"Error creating room: {ex.Message}" })
-                    .WithStatusCode(HttpStatusCode.InternalServerError)
-                    .WithSuccess(false)
-                    .Build());
-            }
+            await _screenService.AddScreenAsync(screenCreateDTO);
+            return Ok(APIResponse<string>.Builder()
+                .WithResult($"Room {screenCreateDTO.Name} created successfully.")
+                .WithStatusCode(HttpStatusCode.OK)
+                .Build());
         }
 
         [HttpPut("update/{id:int}")]
@@ -86,27 +75,16 @@ namespace API.Controllers
                     .Build());
             }
 
-            try
-            {
-                await _screenService.UpdateScreenAsync(id, screenUpdateDTO);
-                return Ok(APIResponse<string>.Builder()
-                    .WithResult($"Room {screenUpdateDTO.Name} and {screenUpdateDTO.Seats?.Count ?? 0} seats updated successfully.")
-                    .WithStatusCode(HttpStatusCode.OK)
-                    .Build());
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, APIResponse<string>.Builder()
-                    .WithErrorMessages(new List<string> { $"Error updating room: {ex.Message}" })
-                    .WithStatusCode(HttpStatusCode.InternalServerError)
-                    .WithSuccess(false)
-                    .Build());
-            }
+            await _screenService.UpdateScreenAsync(id, screenUpdateDTO);
+            return Ok(APIResponse<string>.Builder()
+                .WithResult($"Room {screenUpdateDTO.Name} and {screenUpdateDTO.Seats?.Count ?? 0} seats updated successfully.")
+                .WithStatusCode(HttpStatusCode.OK)
+                .Build());
         }
 
         [HttpDelete("delete/{id:int}")]
         [Authorize(Roles = Constant.Role_Admin)]
-        public async Task<ActionResult<APIResponse<string>>> DeleteRoomAsync(int id)
+        public async Task<ActionResult<APIResponse<string>>> DeleteRoomAsync([FromRoute] int id)
         {
             if (id == 0)
             {
@@ -117,22 +95,12 @@ namespace API.Controllers
                     .Build());
             }
 
-            try
-            {
-                await _screenService.DeleteScreenAsync(id);
-                return Ok(APIResponse<string>.Builder()
-                    .WithResult($"Room {id} deleted successfully.")
-                    .WithStatusCode(HttpStatusCode.OK)
-                    .Build());
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, APIResponse<string>.Builder()
-                    .WithErrorMessages(new List<string> { $"Error deleting room: {ex.Message}" })
-                    .WithStatusCode(HttpStatusCode.InternalServerError)
-                    .WithSuccess(false)
-                    .Build());
-            }
+            await _screenService.DeleteScreenAsync(id);
+            return Ok(APIResponse<string>.Builder()
+                .WithResult($"Room {id} deleted successfully.")
+                .WithStatusCode(HttpStatusCode.OK)
+                .Build());
+
         }
 
         [HttpGet("{id:int}")]
@@ -150,6 +118,34 @@ namespace API.Controllers
 
             return Ok(APIResponse<ScreenDetailDTO>.Builder()
                 .WithResult(screen)
+                .WithStatusCode(HttpStatusCode.OK)
+                .Build());
+        }
+
+        [HttpGet("get-all-seat-types")]
+        public async Task<ActionResult<APIResponse<List<SeatTypeDTO>>>> GetAllSeatTypesAsync()
+        {
+            var seatTypes = await _screenService.GetAllSeatTypesAsync();
+            return Ok(APIResponse<List<SeatTypeDTO>>.Builder()
+                .WithResult(seatTypes)
+                .WithStatusCode(HttpStatusCode.OK)
+                .Build());
+        }
+
+        [HttpGet("get-seats-by-screen/{id:int}")]
+        public async Task<ActionResult<APIResponse<List<SeatDTO>>>> GetSeatsByScreenAsync(int id)
+        {
+            if (id <= 0)
+            {
+                return BadRequest(APIResponse<List<SeatDTO>>.Builder()
+                    .WithErrorMessages(new List<string> { "Invalid screen ID." })
+                    .WithStatusCode(HttpStatusCode.BadRequest)
+                    .Build());
+            }
+
+            var seats = await _screenService.GetSeatsByScreenIdAsync(id);
+            return Ok(APIResponse<List<SeatDTO>>.Builder()
+                .WithResult(seats)
                 .WithStatusCode(HttpStatusCode.OK)
                 .Build());
         }

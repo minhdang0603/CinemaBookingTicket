@@ -6,6 +6,5 @@ namespace Web.Models.DTOs.Request
         public string SeatRow { get; set; } = null!;
         public int SeatNumber { get; set; }
         public int SeatTypeId { get; set; }
-        public bool IsActive { get; set; }
     }
 }

@@ -1,0 +1,67 @@
+@model ScreenCreateDTO
+
+@{
+    ViewData["Title"] = "Create New Screen";
+    ViewData["Header"] = "Create New Screen";
+    ViewData["HeaderIcon"] = "fas fa-plus-circle";
+}
+
+<div class="admin-form-container">
+    <form id="createScreenForm" asp-area="Admin" asp-controller="Screen" asp-action="Create" method="post">
+        @Html.AntiForgeryToken()
+        <div class="card">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label asp-for="Name" class="form-label">Screen Name</label>
+                            <input asp-for="Name" class="form-control" required>
+                            <span asp-validation-for="Name" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Rows" class="form-label">Rows</label>
+                            <input asp-for="Rows" class="form-control" type="number" min="1" max="26" required>
+                            <span asp-validation-for="Rows" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="SeatsPerRow" class="form-label">Seats per Row</label>
+                            <input asp-for="SeatsPerRow" class="form-control" type="number" min="1" max="20" required>
+                            <span asp-validation-for="SeatsPerRow" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label asp-for="TheaterId" class="form-label">Theater</label>
+                            <select asp-for="TheaterId" class="form-control" asp-items="ViewBag.Theaters">
+                                <option value="">-- Select theater --</option>
+                            </select>
+                            <span asp-validation-for="TheaterId" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle"></i> All seats will be created as standard seats by default.
+                                You can modify seat types later in the Edit screen.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer text-end">
+                <a asp-action="Index" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to List
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Create Screen
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section AdminScripts {
+    <partial name="_ValidationScriptsPartial" />
+}

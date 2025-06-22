@@ -126,8 +126,7 @@ public class MappingConfig : Profile
 
         CreateMap<Screen, ScreenDTO>();
         CreateMap<Screen, ScreenLiteDTO>();
-        CreateMap<Screen, ScreenDetailDTO>()
-            .ForMember(dest => dest.Seats, opt => opt.Ignore());
+        CreateMap<Screen, ScreenDetailDTO>();
 
         CreateMap<ScreenCreateDTO, Screen>()
             .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src =>
@@ -138,13 +137,12 @@ public class MappingConfig : Profile
                 true));
         CreateMap<ScreenUpdateDTO, Screen>()
             .ForMember(dest => dest.LastUpdatedAt, opt => opt.MapFrom(src =>
-                DateTime.Now))
-            .ForMember(dest => dest.Seats, opt => opt.Ignore());
+                DateTime.Now));
 
         // ===================== SEAT MAPPING =====================
         CreateMap<Seat, SeatDTO>()
-            .ForMember(dest => dest.SeatTypeName, opt => opt.MapFrom(src =>
-                src.SeatType.Name));
+            .ForMember(dest => dest.SeatType, opt => opt.MapFrom(src => 
+                src.SeatType));
 
         CreateMap<SeatUpdateDTO, Seat>()
             .ForMember(dest => dest.LastUpdatedAt, opt => opt.MapFrom(src =>
@@ -178,5 +176,10 @@ public class MappingConfig : Profile
         CreateMap<ShowTimeUpdateDTO, ShowTime>()
                 .ForMember(dest => dest.LastUpdatedAt, opt => opt.MapFrom(src =>
                     DateTime.Now));
+
+        // ===================== SEAT TYPE MAPPING =====================
+        CreateMap<SeatType, SeatTypeDTO>()
+            .ForMember(dest => dest.Color, opt => opt.MapFrom(src =>
+                src.Color));
     }
 }

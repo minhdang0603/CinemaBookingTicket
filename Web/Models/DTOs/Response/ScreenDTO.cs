@@ -1,4 +1,6 @@
-﻿namespace Web.Models.DTOs.Response
+﻿using System.Collections.Generic;
+
+namespace Web.Models.DTOs.Response
 {
     public class ScreenDTO
     {
@@ -10,8 +12,8 @@
 
         public int SeatsPerRow { get; set; }
 
-        public TheaterDTO Theater { get; set; } = null!;
+        public TheaterDTO? Theater { get; set; }
 
-        public bool IsActive { get; set; }
+        public List<SeatDTO> Seats { get; set; } = new List<SeatDTO>();
     }
 }

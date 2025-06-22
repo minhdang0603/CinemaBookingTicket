@@ -57,12 +57,30 @@ public class ScreenService : BaseService, IScreenService
         });
     }
 
+    public Task<T> GetAllSeatTypesAsync<T>()
+    {
+        return SendAsync<T>(new APIRequest()
+        {
+            ApiType = Constant.ApiType.GET,
+            Url = _baseUrl + "/api/Screen/get-all-seat-types"
+        });
+    }
+
     public Task<T> GetScreenByIdAsync<T>(int id)
     {
         return SendAsync<T>(new APIRequest()
         {
             ApiType = Constant.ApiType.GET,
             Url = _baseUrl + $"/api/Screen/{id}"
+        });
+    }
+
+    public Task<T> GetSeatsByScreenIdAsync<T>(int screenId)
+    {
+        return SendAsync<T>(new APIRequest()
+        {
+            ApiType = Constant.ApiType.GET,
+            Url = _baseUrl + $"/api/Screen/get-seats-by-screen/{screenId}"
         });
     }
 
