@@ -1,4 +1,5 @@
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Newtonsoft.Json;
@@ -12,7 +13,7 @@ using Web.Services.IServices;
 namespace Web.Areas.Admin.Controllers
 {
     [Area("Admin")]
-    // [Authorize(Roles = Constant.Role_Admin)]
+    [Authorize(Roles = Constant.Role_Admin)]
     public class ScreenController : Controller
     {
         private readonly IScreenService _screenService;
@@ -35,7 +36,7 @@ namespace Web.Areas.Admin.Controllers
             if (screenResponse == null || !screenResponse.IsSuccess)
             {
                 _logger.LogError("Failed to load screens from API");
-                TempData["error"] = screenResponse?.ErrorMessages?.FirstOrDefault() ?? "Không thể tải danh sách phòng chiếu.";
+                TempData["error"] = screenResponse?.ErrorMessages?.FirstOrDefault() ?? "Unable to load screen list.";
                 return View(new List<ScreenDTO>());
             }
 
@@ -89,12 +90,12 @@ namespace Web.Areas.Admin.Controllers
             if (response != null && response.IsSuccess)
             {
                 _logger.LogInformation("Screen created successfully: {Result}", response.Result);
-                TempData["success"] = "Tạo phòng chiếu thành công!";
+                TempData["success"] = "Screen created successfully!";
 
                 return RedirectToAction("Index");
             }
 
-            TempData["error"] = response?.ErrorMessages?.FirstOrDefault() ?? "Không thể tạo phòng chiếu.";
+            TempData["error"] = response?.ErrorMessages?.FirstOrDefault() ?? "Unable to create screen.";
             _logger.LogError("Failed to create screen: {ErrorMessages}", response?.ErrorMessages);
 
             ViewBag.Theaters = await LoadTheaterDropdown();
@@ -143,12 +144,12 @@ namespace Web.Areas.Admin.Controllers
             if (response != null && response.IsSuccess)
             {
                 _logger.LogInformation("Screen updated successfully: {Id}", model.Id);
-                TempData["success"] = "Cập nhật phòng chiếu thành công!";
+                TempData["success"] = "Screen updated successfully!";
 
                 return RedirectToAction("Index");
             }
 
-            TempData["error"] = response?.ErrorMessages?.First();
+            TempData["error"] = response?.ErrorMessages?.FirstOrDefault() ?? "Unable to update screen.";
             ViewBag.Theaters = await LoadTheaterDropdown();
             return View(model);
         }
@@ -172,13 +173,11 @@ namespace Web.Areas.Admin.Controllers
                 }
                 else
                 {
-
                     TempData["error"] = "No seats available for this screen.";
                 }
             }
             else
             {
-
                 TempData["error"] = seatResponse?.ErrorMessages?.FirstOrDefault() ?? "Failed to load seats.";
             }
 
@@ -213,10 +212,10 @@ namespace Web.Areas.Admin.Controllers
             if (response != null && response.IsSuccess)
             {
                 _logger.LogInformation("Screen deleted successfully: {Id}", id);
-                TempData["success"] = "Xóa phòng chiếu thành công!";
+                TempData["success"] = "Screen deleted successfully!";
                 return Json(new { });
             }
-            TempData["error"] = response?.ErrorMessages?.FirstOrDefault() ?? "Không thể xóa phòng chiếu.";
+            TempData["error"] = response?.ErrorMessages?.FirstOrDefault() ?? "Unable to delete screen.";
             _logger.LogError("Failed to delete screen: {ErrorMessages}", response?.ErrorMessages);
             return Json(new { });
         }
@@ -250,7 +249,7 @@ namespace Web.Areas.Admin.Controllers
                     Text = t.Name
                 });
             }
-            TempData["error"] = theaterResponse?.ErrorMessages?.FirstOrDefault() ?? "Không thể tải danh sách rạp.";
+            TempData["error"] = theaterResponse?.ErrorMessages?.FirstOrDefault() ?? "Unable to load theater list.";
             return new List<SelectListItem>();
         }
     }
