@@ -6,240 +6,9 @@
     <title>Movie Management</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <style>
-        body {
-            background-color: #f8f9fa;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
+    <link href="~/css/admin.css" rel="stylesheet">
 
-        .main-container {
-            margin: 20px auto;
-            max-width: 1200px;
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 0 20px rgba(0,0,0,0.1);
-            overflow: hidden;
-        }
-
-        .page-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 30px;
-            text-align: center;
-            position: relative;
-        }
-
-        .page-header h1 {
-            margin: 0;
-            font-size: 2.5rem;
-            font-weight: 300;
-        }
-
-        .btn-create {
-            position: absolute;
-            top: 50%;
-            left: 30px;
-            transform: translateY(-50%);
-            background: #28a745;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 25px;
-            color: white;
-            font-weight: 500;
-            transition: all 0.3s ease;
-        }
-
-        .btn-create:hover {
-            background: #218838;
-            transform: translateY(-50%) scale(1.05);
-            color: white;
-        }
-
-        .content-area {
-            padding: 30px;
-        }
-
-        .search-area {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 30px;
-        }
-
-        .movie-table {
-            background: white;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-
-        .table-header {
-            background: #343a40;
-            color: white;
-        }
-
-        .table-header th {
-            padding: 20px 15px;
-            font-weight: 600;
-            border: none;
-            text-transform: uppercase;
-            font-size: 0.9rem;
-            letter-spacing: 0.5px;
-        }
-
-        .table tbody tr {
-            transition: all 0.3s ease;
-            border: none;
-        }
-
-        .table tbody tr:hover {
-            background-color: #f8f9fa;
-            transform: scale(1.02);
-        }
-
-        .table tbody td {
-            padding: 20px 15px;
-            vertical-align: middle;
-            border: none;
-            border-bottom: 1px solid #eee;
-        }
-
-        .movie-poster {
-            width: 60px;
-            height: 80px;
-            object-fit: cover;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-        }
-
-        .movie-title {
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 5px;
-        }
-
-        .movie-meta {
-            font-size: 0.9rem;
-            color: #666;
-        }
-
-        .status-badge {
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            text-transform: uppercase;
-        }
-
-        .status-now-showing {
-            background: #d4edda;
-            color: #155724;
-        }
-
-        .status-coming-soon {
-            background: #fff3cd;
-            color: #856404;
-        }
-
-        .status-ended {
-            background: #f8d7da;
-            color: #721c24;
-        }
-
-        .action-buttons {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-        }
-
-        .btn-action {
-            padding: 8px 15px;
-            border: none;
-            border-radius: 20px;
-            font-size: 0.9rem;
-            font-weight: 500;
-            transition: all 0.3s ease;
-            min-width: 70px;
-        }
-
-        .btn-edit {
-            background: #fd7e14;
-            color: white;
-        }
-
-        .btn-edit:hover {
-            background: #e86100;
-            color: white;
-            transform: scale(1.1);
-        }
-
-        .btn-delete {
-            background: #dc3545;
-            color: white;
-        }
-
-        .btn-delete:hover {
-            background: #c82333;
-            color: white;
-            transform: scale(1.1);
-        }
-
-        .modal-content {
-            border: none;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-        }
-
-        .modal-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border-radius: 15px 15px 0 0;
-            padding: 20px 30px;
-        }
-
-        .modal-header h5 {
-            font-weight: 300;
-            font-size: 1.5rem;
-        }
-
-        .btn-close {
-            filter: invert(1);
-        }
-
-        .modal-body {
-            padding: 30px;
-        }
-
-        .form-floating {
-            margin-bottom: 20px;
-        }
-
-        .form-control {
-            border: 2px solid #e9ecef;
-            border-radius: 10px;
-            padding: 12px 15px;
-            transition: all 0.3s ease;
-        }
-
-        .form-control:focus {
-            border-color: #667eea;
-            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 80px;
-            color: #666;
-        }
-
-        .empty-state i {
-            font-size: 4rem;
-            margin-bottom: 20px;
-            color: #ddd;
-        }
-
-       
-    </style>
+   
 </head>
 <body>
     <div class="main-container">
@@ -579,6 +348,7 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
     <script>
+        // Simple demo functions - no actual logic
         function openCreateModal() {
             document.getElementById('modalTitle').textContent = 'Create New Movie';
             document.getElementById('movieForm').reset();
@@ -590,6 +360,7 @@
         function editMovie(movieId) {
             document.getElementById('modalTitle').textContent = 'Edit Movie';
             
+            // Demo data for editing
             const sampleData = {
                 1: { title: 'Avatar: The Way of Water', director: 'James Cameron', duration: 192 },
                 2: { title: 'Spider-Man: No Way Home', director: 'Jon Watts', duration: 148 },
