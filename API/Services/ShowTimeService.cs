@@ -5,7 +5,6 @@ using API.Exceptions;
 using API.Repositories.IRepositories;
 using API.Services.IServices;
 using AutoMapper;
-using Microsoft.EntityFrameworkCore;
 
 namespace API.Services
 {
@@ -136,10 +135,7 @@ namespace API.Services
                 // Get the added showtimes and map them to DTOs
                 var addedShowTimes = await _unitOfWork.ShowTime.GetAllAsync(
                     s => showTimes.Select(st => st.Id).Contains(s.Id),
-                    include: q => q.Include(x => x.Movie)
-                                   .Include(x => x.Screen)
-                                       .ThenInclude(s => s.Theater)
-                );
+                    includeProperties: "Movie,Screen");
 
                 createdShowTimes = _mapper.Map<List<ShowTimeDTO>>(addedShowTimes);
             }
@@ -153,12 +149,7 @@ namespace API.Services
 
         public async Task<ShowTimeDTO> DeleteShowTimeAsync(int id)
         {
-            var showTime = await _unitOfWork.ShowTime.GetAsync(
-                s => s.Id == id && s.IsActive == true,
-                include: q => q.Include(x => x.Movie)
-                               .Include(x => x.Screen)
-                                   .ThenInclude(s => s.Theater)
-            );
+            var showTime = await _unitOfWork.ShowTime.GetAsync(s => s.Id == id && s.IsActive == true);
             if (showTime == null)
             {
                 _logger.LogError($"ShowTime with ID {id} not found.");
@@ -177,10 +168,7 @@ namespace API.Services
         {
             var showTimes = await _unitOfWork.ShowTime.GetAllAsync(
                 m => m.IsActive == isActive,
-                include: q => q.Include(x => x.Movie)
-                               .Include(x => x.Screen)
-                                   .ThenInclude(s => s.Theater)
-            );
+                includeProperties: "Movie,Screen");
             if (showTimes == null || !showTimes.Any())
             {
                 _logger.LogWarning("No showtimes found.");
@@ -201,12 +189,9 @@ namespace API.Services
 
             var showTimes = await _unitOfWork.ShowTime.GetAllAsync(
                 m => m.IsActive == isActive,
-                include: q => q.Include(x => x.Movie)
-                               .Include(x => x.Screen)
-                                   .ThenInclude(s => s.Theater),
                 pageNumber: pageNumber,
-                pageSize: pageSize
-            );
+                pageSize: pageSize,
+                includeProperties: "Movie,Screen");
 
             if (showTimes == null || !showTimes.Any())
             {
@@ -226,12 +211,7 @@ namespace API.Services
                 throw new ArgumentNullException(nameof(dto));
             }
 
-            var showTime = await _unitOfWork.ShowTime.GetAsync(
-                s => s.Id == id && s.IsActive == true,
-                include: q => q.Include(x => x.Movie)
-                               .Include(x => x.Screen)
-                                   .ThenInclude(s => s.Theater)
-            );
+            var showTime = await _unitOfWork.ShowTime.GetAsync(s => s.Id == id && s.IsActive == true, includeProperties: "Movie,Screen");
             if (showTime == null)
             {
                 _logger.LogError($"ShowTime with ID {id} not found.");
@@ -243,12 +223,7 @@ namespace API.Services
             await _unitOfWork.ShowTime.UpdateAsync(showTime);
             await _unitOfWork.SaveAsync();
             _logger.LogInformation($"ShowTime with ID {id} updated successfully.");
-            var updatedShowTime = await _unitOfWork.ShowTime.GetAsync(
-                s => s.Id == id && s.IsActive == true,
-                include: q => q.Include(x => x.Movie)
-                               .Include(x => x.Screen)
-                                   .ThenInclude(s => s.Theater)
-            );
+            var updatedShowTime = await _unitOfWork.ShowTime.GetAsync(s => s.Id == id && s.IsActive == true, includeProperties: "Movie,Screen");
             return _mapper.Map<ShowTimeDTO>(updatedShowTime);
         }
 
