@@ -260,6 +260,28 @@
                 const seatTypeColor = $(`.seat-type-option[data-seat-type-id="${seatTypeId}"]`).data('color');
                 seatElement.css('background-color', seatTypeColor);
             }
+            
+            // Form validation
+            $('#editScreenForm').submit(function(e) {
+                const name = $('#Name').val();
+                const rows = $('#Rows').val();
+                const seatsPerRow = $('#SeatsPerRow').val();
+                const theaterId = $('#TheaterId').val();
+                
+                if (!name || !rows || !seatsPerRow || !theaterId) {
+                    toastr.error('Please fill in all  fields');
+                    e.preventDefault();
+                    return false;
+                }
+                
+                if (parseInt(rows) < 1 || parseInt(seatsPerRow) < 1) {
+                    toastr.error('Rows and Seats per Row must be greater than 0');
+                    e.preventDefault();
+                    return false;
+                }
+                
+                return true;
+            });
         });
     </script>
 }
