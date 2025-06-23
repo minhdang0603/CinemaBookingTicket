@@ -60,11 +60,10 @@ namespace API.Services
 
         public async Task UpdateScreenAsync(int id, ScreenUpdateDTO dto)
         {
-
             // Lấy screen hiện tại kèm theo danh sách ghế
             var screen = await _unitOfWork.Screen.GetAsync(
                 s => s.Id == id,
-                includeProperties: "Seats");
+                include: q => q.Include(x => x.Seats));
 
             if (screen == null)
                 throw new Exception($"Screen with ID {id} not found");
@@ -92,7 +91,7 @@ namespace API.Services
 
         public async Task<ScreenDetailDTO> GetScreenByIdAsync(int id, bool? isActive = true)
         {
-            var screen = await _unitOfWork.Screen.GetAsync(s => s.Id == id && s.IsActive == isActive, includeProperties: "Seats,Theater");
+            var screen = await _unitOfWork.Screen.GetAsync(s => s.Id == id && s.IsActive == isActive, include: q => q.Include(x => x.Seats).Include(x => x.Theater));
 
             if (screen == null)
                 throw new AppException(ErrorCodes.ScreenNotFound(id));
@@ -104,7 +103,7 @@ namespace API.Services
         {
             var screens = await _unitOfWork.Screen.GetAllAsync(
                 filter: s => s.IsActive == isActive,
-                includeProperties: "Theater");
+                include: q => q.Include(x => x.Theater));
 
             return _mapper.Map<List<ScreenDTO>>(screens);
         }
@@ -113,7 +112,7 @@ namespace API.Services
         {
             var screens = await _unitOfWork.Screen.GetAllAsync(
                 filter: s => s.IsActive == isActive,
-                includeProperties: "Theater, Seats",
+                include: q => q.Include(x => x.Theater).Include(x => x.Seats),
                 pageNumber: pageNumber,
                 pageSize: pageSize);
 
@@ -130,7 +129,7 @@ namespace API.Services
         {
             var seats = await _unitOfWork.Seat.GetAllAsync(
                 filter: s => s.ScreenId == screenId,
-                includeProperties: "SeatType");
+                include: q => q.Include(x => x.SeatType));
 
             return _mapper.Map<List<SeatDTO>>(seats);
         }

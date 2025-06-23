@@ -7,6 +7,7 @@ using API.Repositories.IRepositories;
 using API.Services.IServices;
 using AutoMapper;
 using Utility;
+using Microsoft.EntityFrameworkCore;
 
 namespace API.Services;
 
@@ -97,7 +98,10 @@ public class BookingService : IBookingService
 
     public async Task<List<BookingDTO>> GetAllBookingsAsync()
     {
-        var bookings = await _unitOfWork.Booking.GetAllAsync(includeProperties: "BookingDetails,ShowTime,ApplicationUser");
+        var bookings = await _unitOfWork.Booking.GetAllAsync(
+            include: q => q.Include(x => x.BookingDetails)
+                           .Include(x => x.ShowTime)
+                           .Include(x => x.ApplicationUser));
 
         var bookingDTOs = _mapper.Map<List<BookingDTO>>(bookings);
 
@@ -106,7 +110,11 @@ public class BookingService : IBookingService
 
     public async Task<BookingDTO> GetBookingByIdAsync(int bookingId)
     {
-        var booking = await _unitOfWork.Booking.GetAsync(b => b.Id == bookingId, includeProperties: "BookingDetails,ShowTime,ApplicationUser");
+        var booking = await _unitOfWork.Booking.GetAsync(
+            b => b.Id == bookingId,
+            include: q => q.Include(x => x.BookingDetails)
+                           .Include(x => x.ShowTime)
+                           .Include(x => x.ApplicationUser));
 
         if (booking == null)
         {
@@ -137,7 +145,9 @@ public class BookingService : IBookingService
         // Get bookings for the current user
         var bookings = await _unitOfWork.Booking.GetAllAsync(
             b => b.ApplicationUser.Id == userId,
-            includeProperties: "BookingDetails,ShowTime, ApplicationUser");
+            include: q => q.Include(x => x.BookingDetails)
+                           .Include(x => x.ShowTime)
+                           .Include(x => x.ApplicationUser));
 
         var bookingDTOs = _mapper.Map<List<BookingDTO>>(bookings);
         bookingDTOs.ForEach(b =>
@@ -168,7 +178,7 @@ public class BookingService : IBookingService
                         bd => bd.SeatId == detail.SeatId &&
                               bd.Booking.ShowTimeId == bookingCreateDTO.ShowTimeId &&
                               bd.Booking.BookingStatus != Constant.Booking_Status_Cancelled,
-                        includeProperties: "Booking");
+                        include: q => q.Include(x => x.Booking));
 
                     if (existingBooking != null)
                     {

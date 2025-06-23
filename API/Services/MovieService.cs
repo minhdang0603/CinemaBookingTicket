@@ -5,12 +5,12 @@ using API.Exceptions;
 using API.Repositories.IRepositories;
 using API.Services.IServices;
 using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 
 namespace API.Services;
 
 public class MovieService : IMovieService
 {
-
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
     private readonly ILogger<MovieService> _logger;
@@ -21,7 +21,6 @@ public class MovieService : IMovieService
         _mapper = mapper;
         _logger = logger;
     }
-
 
     public async Task<MovieDTO> CreateMovieAsync(MovieCreateDTO movieCreateDTO)
     {
@@ -81,7 +80,8 @@ public class MovieService : IMovieService
     {
         var movies = await _unitOfWork.Movie.GetAllAsync(
             m => m.IsActive == isActive,
-            includeProperties: "MovieGenres.Genre,ShowTimes");
+            include: q => q.Include(x => x.MovieGenres).ThenInclude(mg => mg.Genre)
+                           .Include(x => x.ShowTimes));
         if (movies == null || !movies.Any())
         {
             _logger.LogInformation("No movies found");
@@ -95,9 +95,10 @@ public class MovieService : IMovieService
     {
         var movies = await _unitOfWork.Movie.GetAllAsync(
             m => m.IsActive == isActive,
+            include: q => q.Include(x => x.MovieGenres).ThenInclude(mg => mg.Genre)
+                           .Include(x => x.ShowTimes),
             pageSize: pageSize,
-            pageNumber: pageNumber,
-            includeProperties: "MovieGenres.Genre,ShowTimes");
+            pageNumber: pageNumber);
         return _mapper.Map<List<MovieDTO>>(movies);
     }
 
@@ -105,7 +106,8 @@ public class MovieService : IMovieService
     {
         var movie = await _unitOfWork.Movie.GetAsync(
             m => m.Id == id && m.IsActive == isActive,
-            includeProperties: "MovieGenres.Genre,ShowTimes");
+            include: q => q.Include(x => x.MovieGenres).ThenInclude(mg => mg.Genre)
+                           .Include(x => x.ShowTimes));
         if (movie == null)
         {
             _logger.LogError($"Movie with ID {id} not found");
@@ -118,7 +120,8 @@ public class MovieService : IMovieService
     {
         var movies = await _unitOfWork.Movie.GetAllAsync(
             m => m.MovieGenres.Any(mg => mg.GenreId == genreId) && m.IsActive == isActive,
-            includeProperties: "MovieGenres.Genre,ShowTimes");
+            include: q => q.Include(x => x.MovieGenres).ThenInclude(mg => mg.Genre)
+                           .Include(x => x.ShowTimes));
         return _mapper.Map<List<MovieDTO>>(movies);
     }
 
@@ -126,7 +129,8 @@ public class MovieService : IMovieService
     {
         var movies = await _unitOfWork.Movie.GetAllAsync(
             m => m.Title.Contains(searchTerm) && m.IsActive == isActive,
-            includeProperties: "MovieGenres.Genre,ShowTimes");
+            include: q => q.Include(x => x.MovieGenres).ThenInclude(mg => mg.Genre)
+                           .Include(x => x.ShowTimes));
         return _mapper.Map<List<MovieDTO>>(movies);
     }
 
@@ -134,7 +138,7 @@ public class MovieService : IMovieService
     {
         var movie = await _unitOfWork.Movie.GetAsync(
             m => m.Id == id && m.IsActive == true,
-            includeProperties: "MovieGenres"
+            include: q => q.Include(x => x.MovieGenres)
         );
         if (movie == null)
         {
@@ -174,7 +178,8 @@ public class MovieService : IMovieService
         // Lấy lại movie đã update kèm genres
         var updatedMovie = await _unitOfWork.Movie.GetAsync(
             m => m.Id == movie.Id,
-            includeProperties: "MovieGenres.Genre,ShowTimes"
+            include: q => q.Include(x => x.MovieGenres).ThenInclude(mg => mg.Genre)
+                           .Include(x => x.ShowTimes)
         );
 
         _logger.LogInformation($"Movie {movie.Title} updated successfully with ID {movie.Id}");
