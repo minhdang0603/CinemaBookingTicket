@@ -1,5 +1,116 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@{
+﻿@model List<ShowTimeDTO>
+
+<div class="admin-header">
+    <a class="btn btn-create" asp-area="Admin" asp-controller="Showtime" asp-action="Create">
+        <i class="fas fa-plus"></i> Create New
+    </a>
+    <h1>
+        <i class="fas fa-film"></i> Showtimes
+    </h1>
+</div>
+
+<!-- Search Area -->
+<div class="search-area">
+    <form>
+        <div class="row">
+            <div class="col-md-8">
+                <div class="form-floating">
+                    <input type="text" class="form-control" name="searchTerm" placeholder="Search showtimes..." />
+                    <label>Search Showtimes</label>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-floating">
+                    <select class="form-control" name="theaterId" asp-items="ViewBag.Theaters">
+                        <option value="">All Theaters</option>
+                    </select>
+                    <label>Filter by Theater</label>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- Data Table -->
+<div class="data-table">
+    <table id="showtimeTable" class="table mb-0">
+        <thead class="table-header">
+            <tr>
+                <th>Movie</th>
+                <th>Screen</th>
+                <th>Theater</th>
+                <th>Date</th>
+                <th>Start</th>
+                <th>End</th>
+                <th class="text-center">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model != null && Model.Any())
+            {
+                foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@item.Movie?.Title</td>
+                        <td>@item.Screen?.Name</td>
+                        <td>@item.Screen?.Theater?.Name</td>
+                        <td>@item.ShowDate.ToString("yyyy-MM-dd")</td>
+                        <td>@item.StartTime.ToString(@"hh\:mm")</td>
+                        <td>@item.EndTime.ToString(@"hh\:mm")</td>
+                        <td>
+                            <div class="action-buttons">
+                                <a class="btn btn-action btn-edit" asp-area="Admin" asp-controller="Showtime" asp-action="Edit" asp-route-id="@item.Id">
+                                    <i class="fas fa-edit"></i> Edit
+                                </a>
+                                <button class="btn btn-action btn-delete" onclick="deleteShowtime(@item.Id, '@item.Movie?.Title')">
+                                    <i class="fas fa-trash"></i> Delete
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="7" class="text-center text-muted">No showtimes found.</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@section Modals {
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade" id="deleteModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">Confirm Delete</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to delete this showtime?</p>
+                    <p><strong id="deleteShowtimeTitle"></strong></p>
+                    <p class="text-muted">This action cannot be undone.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <a class="btn btn-danger" href="#">
+                        <i class="fas fa-trash"></i> Delete
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@section AdminScripts {
+    <script>
+        function deleteShowtime(id, title) {
+            document.getElementById('deleteShowtimeTitle').textContent = title;
+            const modal = new bootstrap.Modal(document.getElementById('deleteModal'));
+            modal.show();
+        }
+    </script>
 }

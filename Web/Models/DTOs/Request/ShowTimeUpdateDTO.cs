@@ -2,6 +2,7 @@
 {
     public class ShowTimeUpdateDTO
     {
+        public int Id { get; set; }
         public int MovieId { get; set; }
         public int ScreenId { get; set; }
         public DateOnly ShowDate { get; set; }
