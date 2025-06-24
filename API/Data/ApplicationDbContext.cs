@@ -262,7 +262,7 @@ public partial class ApplicationDbContext : IdentityDbContext<ApplicationUser>
 
             entity.HasIndex(e => e.ShowDate, "IX_ShowTimes_ShowDate");
 
-            entity.HasIndex(e => new { e.MovieId, e.ScreenId, e.ShowDate, e.StartTime })
+            entity.HasIndex(e => new { e.MovieId, e.ScreenId, e.ShowDate, e.StartTime, e.IsActive })
               .HasDatabaseName("UK_ShowTimes_Movie_Screen_Date_Time")
               .IsUnique();
 

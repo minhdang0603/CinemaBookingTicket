@@ -4,7 +4,6 @@ using API.Exceptions;
 using API.Middlewares;
 using brevo_csharp.Client;
 using System.Text.Json;
-using Utilities;
 
 namespace API
 {

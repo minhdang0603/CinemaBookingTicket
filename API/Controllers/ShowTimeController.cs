@@ -4,7 +4,9 @@ using API.DTOs.Request;
 using API.DTOs.Response;
 using API.Services.IServices;
 using brevo_csharp.Client;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Utility;
 
 namespace API.Controllers
 {
@@ -19,18 +21,10 @@ namespace API.Controllers
             _showTimeService = showTimeService;
         }
 
-        [HttpGet("get-all-showtimes")]
+        [HttpGet]
         public async Task<ActionResult<APIResponse<List<ShowTimeDTO>>>> GetAllShowTimesAsync()
         {
             var showTimes = await _showTimeService.GetAllShowTimesAsync();
-            if (showTimes == null || !showTimes.Any())
-            {
-                return NotFound(APIResponse<List<ShowTimeDTO>>.Builder()
-                    .WithStatusCode(HttpStatusCode.NotFound)
-                    .WithSuccess(false)
-                    .WithErrorMessages(new List<string> { "Showtimes is null or empty." })
-                    .Build());
-            }
 
             return Ok(APIResponse<List<ShowTimeDTO>>.Builder()
                 .WithStatusCode(HttpStatusCode.OK)
@@ -38,7 +32,9 @@ namespace API.Controllers
                 .WithResult(showTimes)
                 .Build());
         }
+
         [HttpPost("add-showtimes")]
+        [Authorize(Roles = Constant.Role_Admin)]
         public async Task<ActionResult<APIResponse<ShowTimeBulkResultDTO>>> AddShowTimes([FromBody] List<ShowTimeCreateDTO> newShowTimes)
         {
             if (newShowTimes == null || !newShowTimes.Any())
@@ -57,7 +53,7 @@ namespace API.Controllers
             {
                 var message = $"Added {result.SuccessfulShowTimes.Count} showtimes successfully, {result.FailedShowTimes.Count} showtimes failed.";
                 return StatusCode(207, APIResponse<ShowTimeBulkResultDTO>.Builder()
-                    .WithStatusCode((HttpStatusCode)207) // Multi-Status
+                    .WithStatusCode(HttpStatusCode.MultiStatus) // Multi-Status
                     .WithSuccess(true)
                     .WithResult(result)
                     .WithErrorMessages(new List<string> { message })
@@ -86,7 +82,30 @@ namespace API.Controllers
             }
         }
 
-        [HttpPut("update-showtime/{id}")]
+        [HttpPost]
+        [Authorize(Roles = Constant.Role_Admin)]
+        public async Task<ActionResult<APIResponse<ShowTimeDTO>>> AddShowTime([FromBody] ShowTimeCreateDTO dto)
+        {
+            if (dto == null)
+            {
+                return BadRequest(APIResponse<ShowTimeDTO>.Builder()
+                    .WithStatusCode(HttpStatusCode.BadRequest)
+                    .WithSuccess(false)
+                    .WithErrorMessages(new List<string> { "Showtime data is null." })
+                    .Build());
+            }
+
+            var newShowTime = await _showTimeService.AddShowTimeAsync(dto);
+
+            return CreatedAtAction(nameof(GetShowTimeById), new { id = newShowTime.Id }, APIResponse<ShowTimeDTO>.Builder()
+                .WithStatusCode(HttpStatusCode.Created)
+                .WithSuccess(true)
+                .WithResult(newShowTime)
+                .Build());
+        }
+
+        [HttpPut("{id:int}")]
+        [Authorize(Roles = Constant.Role_Admin)]
         public async Task<ActionResult<APIResponse<ShowTimeDTO>>> UpdateShowTime([FromRoute] int id, [FromBody] ShowTimeUpdateDTO dto)
         {
             if (dto == null || id <= 0)
@@ -107,7 +126,8 @@ namespace API.Controllers
                 .Build());
         }
 
-        [HttpPut("delete-showtime/{id}")]
+        [HttpDelete("{id:int}")]
+        [Authorize(Roles = Constant.Role_Admin)]
         public async Task<ActionResult<APIResponse<ShowTimeDTO>>> DeleteShowTime([FromRoute] int id)
         {
             if (id <= 0)
@@ -126,6 +146,7 @@ namespace API.Controllers
                 .WithResult(deletedShowtime)
                 .Build());
         }
+
         [HttpGet("get-all-showtimes-with-pagination")]
         public async Task<ActionResult<APIResponse<List<ShowTimeDTO>>>> GetAllShowTimes(int pageNumber, int pageSize, bool? isActive = true)
         {
@@ -152,6 +173,27 @@ namespace API.Controllers
                 .WithStatusCode(HttpStatusCode.OK)
                 .WithSuccess(true)
                 .WithResult(showTimes)
+                .Build());
+        }
+
+        [HttpGet("{id:int}")]
+        public async Task<ActionResult<APIResponse<ShowTimeDTO>>> GetShowTimeById([FromRoute] int id)
+        {
+            if (id <= 0)
+            {
+                return BadRequest(APIResponse<ShowTimeDTO>.Builder()
+                    .WithStatusCode(HttpStatusCode.BadRequest)
+                    .WithSuccess(false)
+                    .WithErrorMessages(new List<string> { "Invalid showtime ID." })
+                    .Build());
+            }
+
+            var showTime = await _showTimeService.GetShowTimeByIdAsync(id);
+
+            return Ok(APIResponse<ShowTimeDTO>.Builder()
+                .WithStatusCode(HttpStatusCode.OK)
+                .WithSuccess(true)
+                .WithResult(showTime)
                 .Build());
         }
     }

@@ -1,5 +1,9 @@
 ﻿@model List<ShowTimeDTO>
 
+@{
+    ViewData["Title"] = "Showtime List";
+}
+
 <div class="admin-header">
     <a class="btn btn-create" asp-area="Admin" asp-controller="Showtime" asp-action="Create">
         <i class="fas fa-plus"></i> Create New
@@ -7,26 +11,49 @@
     <h1>
         <i class="fas fa-film"></i> Showtimes
     </h1>
+    <a class="btn right-btn" asp-area="Admin" asp-controller="Showtime" asp-action="CreateBulk">
+        <i class="fas fa-layer-group"></i> Create Multiple
+    </a>
 </div>
 
 <!-- Search Area -->
-<div class="search-area">
-    <form>
-        <div class="row">
-            <div class="col-md-8">
+<div class="search-area mb-3">
+    <form id="showtimeFilterForm" autocomplete="off">
+        <div class="row g-2 align-items-end">
+            <div class="col-md-3">
                 <div class="form-floating">
-                    <input type="text" class="form-control" name="searchTerm" placeholder="Search showtimes..." />
-                    <label>Search Showtimes</label>
+                    <input type="text" class="form-control" name="searchTerm" id="searchTerm"
+                        placeholder="Search showtimes..." />
+                    <label for="searchTerm">Search Showtimes</label>
                 </div>
             </div>
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <div class="form-floating">
-                    <select class="form-control" name="theaterId" asp-items="ViewBag.Theaters">
+                    <select class="form-control" name="theaterId" id="theaterId" asp-items="ViewBag.Theaters">
                         <option value="">All Theaters</option>
                     </select>
-                    <label>Filter by Theater</label>
+                    <label for="theaterId">Filter by Theater</label>
                 </div>
             </div>
+            <div class="col-md-3">
+                <div class="form-floating">
+                    <select class="form-control" name="movieId" id="movieId" asp-items="ViewBag.Movies">
+                        <option value="">All Movies</option>
+                    </select>
+                    <label for="movieId">Filter by Movie</label>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-floating">
+                    <input type="date" class="form-control" name="showDate" id="showDate" />
+                    <label for="showDate">Date</label>
+                </div>
+            </div>
+        </div>
+        <div class="align-items-start">
+            <button type="button" class="btn btn-primary" id="clearFilterBtn" title="Clear filters">
+                Clear Filter
+            </button>
         </div>
     </form>
 </div>
@@ -54,27 +81,23 @@
                         <td>@item.Movie?.Title</td>
                         <td>@item.Screen?.Name</td>
                         <td>@item.Screen?.Theater?.Name</td>
-                        <td>@item.ShowDate.ToString("yyyy-MM-dd")</td>
-                        <td>@item.StartTime.ToString(@"hh\:mm")</td>
-                        <td>@item.EndTime.ToString(@"hh\:mm")</td>
+                        <td>@item.ShowDate.ToString("dd-MM-yyyy")</td>
+                        <td>@item.StartTime.ToString("HH:mm")</td>
+                        <td>@item.EndTime.ToString("HH:mm")</td>
                         <td>
                             <div class="action-buttons">
-                                <a class="btn btn-action btn-edit" asp-area="Admin" asp-controller="Showtime" asp-action="Edit" asp-route-id="@item.Id">
+                                <a class="btn btn-action btn-edit" asp-area="Admin" asp-controller="Showtime" asp-action="Edit"
+                                    asp-route-id="@item.Id">
                                     <i class="fas fa-edit"></i> Edit
                                 </a>
-                                <button class="btn btn-action btn-delete" onclick="deleteShowtime(@item.Id, '@item.Movie?.Title')">
+                                <button class="btn btn-action btn-delete"
+                                    onclick="deleteShowtime(@item.Id, '@($"{item?.Movie?.Title} - {item?.Screen?.Name} - {item?.Screen?.Theater?.Name}")')">
                                     <i class="fas fa-trash"></i> Delete
                                 </button>
                             </div>
                         </td>
                     </tr>
                 }
-            }
-            else
-            {
-                <tr>
-                    <td colspan="7" class="text-center text-muted">No showtimes found.</td>
-                </tr>
             }
         </tbody>
     </table>
@@ -96,7 +119,8 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <a class="btn btn-danger" href="#">
+                    <a class="btn btn-danger"
+                        onclick="confirmDeleteShowtime('@Url.Action("Delete", "Showtime", new { area = "Admin", id = "__id__" })')">
                         <i class="fas fa-trash"></i> Delete
                     </a>
                 </div>
@@ -106,11 +130,5 @@
 }
 
 @section AdminScripts {
-    <script>
-        function deleteShowtime(id, title) {
-            document.getElementById('deleteShowtimeTitle').textContent = title;
-            const modal = new bootstrap.Modal(document.getElementById('deleteModal'));
-            modal.show();
-        }
-    </script>
+    <script src="~/js/showtime/index.js"></script>
 }

@@ -1,10 +1,10 @@
 @model ScreenUpdateDTO
 
-@{
-    ViewData["Title"] = "Edit Screen";
-    ViewData["Header"] = "Edit Screen";
-    ViewData["HeaderIcon"] = "fas fa-edit";
-}
+<div class="admin-header">
+    <h1>
+        <i class="fas fa-edit"></i> Edit Screen
+    </h1>
+</div>
 
 <div class="admin-form-container">
     <form id="editScreenForm" asp-area="Admin" asp-controller="Screen" asp-action="Edit" method="post">

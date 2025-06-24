@@ -1,7 +1,10 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Web.Configurations;
+using Web.Middlewares;
 using Web.Services;
 using Web.Services.IServices;
+using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 
 namespace Web
 {
@@ -10,43 +13,24 @@ namespace Web
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
-
             // Add services to the container.
-            builder.Services.AddControllersWithViews();
+            builder.Services.AddControllersWithViews().AddJsonOptions(options =>
+            {
+                options.JsonSerializerOptions.Converters.Add(new TimeOnlyJsonConverter());
+                options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve;
+			});
 
             // Đăng ký AutoMapper
             builder.Services.AddAutoMapper(typeof(MappingConfig));
 
+            // Đăng ký Session
+            builder.Services.AddAuthenticationConfiguration();
 
-            builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-              .AddCookie(options =>
-              {
-                  options.Cookie.HttpOnly = true;
-                  options.ExpireTimeSpan = TimeSpan.FromMinutes(30);
-                  options.LoginPath = "/Public/Auth/Login";
-                  options.LogoutPath = "/Public/Auth/Logout";
-                  options.AccessDeniedPath = "/Public/Auth/AccessDenied";
-                  options.SlidingExpiration = true;
-              });
-
-            builder.Services.AddSession(options =>
-            {
-                options.IdleTimeout = TimeSpan.FromMinutes(100);
-                options.Cookie.HttpOnly = true;
-                options.Cookie.IsEssential = true;
-            });
             // Đăng ký HttpClient
-            builder.Services.AddHttpClient();
-            builder.Services.AddHttpClient("CinemaBookingTicketAPI", c =>
-            {
-                string apiUrl = builder.Configuration["ServiceUrls:CinemaBookingTicketAPI"] ?? "http://localhost:5000";
-                c.BaseAddress = new Uri(apiUrl);
-                c.DefaultRequestHeaders.Add("Accept", "application/json");
-            });
-            builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
-            builder.Services.AddScoped<IAuthService, AuthService>();
-            builder.Services.AddScoped<IScreenService, ScreenService>();
-            builder.Services.AddScoped<ITheaterService, TheaterService>();
+            builder.Services.AddHttpClientConfiguration(builder.Configuration);
+
+            // Đăng ký các dịch vụ
+            builder.Services.AddDependencyInjectionConfiguration();
 
             var app = builder.Build();
 
@@ -62,10 +46,12 @@ namespace Web
 
             app.UseStaticFiles();
             app.UseRouting();
+            app.UseSession();
 
             app.UseAuthentication();
+            // Đăng ký middleware đồng bộ token vào session
+            app.UseMiddleware<TokenSyncMiddleware>();
             app.UseAuthorization();
-            app.UseSession();
             app.MapControllerRoute(
                 name: "default",
                 pattern: "{area=Public}/{controller=Home}/{action=Index}/{id?}");
