@@ -13,6 +13,10 @@ namespace Web.Configurations
                 .ForMember(dest => dest.Seats, opt => opt.MapFrom(src => src.Seats));
 
             CreateMap<SeatDTO, SeatUpdateDTO>();
+
+            CreateMap<ProvinceDetailDTO, ProvinceUpdateDTO>();
+            
+            CreateMap<SeatDTO, SeatUpdateDTO>();
         }
     }
 }

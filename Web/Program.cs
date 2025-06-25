@@ -47,6 +47,8 @@ namespace Web
             builder.Services.AddScoped<IAuthService, AuthService>();
             builder.Services.AddScoped<IScreenService, ScreenService>();
             builder.Services.AddScoped<ITheaterService, TheaterService>();
+            builder.Services.AddScoped<IProvinceService, ProvinceService>();
+
 
             var app = builder.Build();
 

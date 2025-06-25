@@ -80,9 +80,9 @@ namespace API.Controllers
                 .Build());
         }
 
-        [HttpDelete("delete-province")]
+        [HttpDelete("delete/{id}")]
         [Authorize(Roles = Constant.Role_Admin)]
-        public async Task<ActionResult<APIResponse<string>>> DeleteProvinceAsync(int id)
+        public async Task<ActionResult<APIResponse<string>>> DeleteProvinceAsync([FromRoute]int id)
         {
             if (id == 0)
             {
