@@ -8,9 +8,9 @@
         border: 1px solid #444;
     }
 
-        .input-group-text i {
-            color: #fff !important;
-        }
+    .input-group-text i {
+        color: #fff !important;
+    }
 
     .showtime-template {
         background-color: rgba(33, 33, 33, 0.8);
@@ -51,15 +51,15 @@
         transition: all 0.2s;
     }
 
-        .time-preset:hover {
-            background-color: #0d6efd;
-            border-color: #0d6efd;
-        }
+    .time-preset:hover {
+        background-color: #0d6efd;
+        border-color: #0d6efd;
+    }
 
-        .time-preset.active {
-            background-color: #0d6efd;
-            border-color: #0d6efd;
-        }
+    .time-preset.active {
+        background-color: #0d6efd;
+        border-color: #0d6efd;
+    }
 </style>
 
 <div class="admin-header">
@@ -82,7 +82,7 @@
                         <div class="form-floating">
                             <select class="form-control" id="movieId">
                                 <option value="">-- Select a movie --</option>
-                                @foreach(var movie in ViewBag.Movies)
+                                @foreach (var movie in ViewBag.Movies)
                                 {
                                     <option value="@movie.Value">@movie.Text</option>
                                 }
@@ -104,13 +104,16 @@
                     </div>
                     <div class="col-md-4">
                         <div class="form-floating">
-                            <input type="date" class="form-control" id="showDate" value="@DateTime.Now.AddDays(1).ToString("yyyy-MM-dd")" min="@DateTime.Now.ToString("yyyy-MM-dd")" />
+                            <input type="date" class="form-control" id="showDate"
+                                value="@DateTime.Now.AddDays(1).ToString("yyyy-MM-dd")"
+                                min="@DateTime.Now.ToString("yyyy-MM-dd")" />
                             <label>Date</label>
                         </div>
                     </div>
                     <div class="col-md-4">
                         <div class="form-floating">
-                            <input type="number" class="form-control" id="basePrice" min="1000" step="1000" value="90000" />
+                            <input type="number" class="form-control" id="basePrice" min="1000" step="1000"
+                                value="90000" />
                             <label>Base Price (VND)</label>
                         </div>
                     </div>
@@ -120,16 +123,26 @@
                     <div class="row g-2 mb-2">
                         <div class="col-md-12">
                             <div class="d-flex flex-wrap gap-2">
-                                <button type="button" class="btn btn-outline-light time-preset" data-time="09:00">09:00</button>
-                                <button type="button" class="btn btn-outline-light time-preset" data-time="10:30">10:30</button>
-                                <button type="button" class="btn btn-outline-light time-preset" data-time="12:00">12:00</button>
-                                <button type="button" class="btn btn-outline-light time-preset" data-time="13:30">13:30</button>
-                                <button type="button" class="btn btn-outline-light time-preset" data-time="15:00">15:00</button>
-                                <button type="button" class="btn btn-outline-light time-preset" data-time="16:30">16:30</button>
-                                <button type="button" class="btn btn-outline-light time-preset" data-time="18:00">18:00</button>
-                                <button type="button" class="btn btn-outline-light time-preset" data-time="19:30">19:30</button>
-                                <button type="button" class="btn btn-outline-light time-preset" data-time="21:00">21:00</button>
-                                <button type="button" class="btn btn-outline-light time-preset" data-time="22:30">22:30</button>
+                                <button type="button" class="btn btn-outline-light time-preset"
+                                    data-time="09:00">09:00</button>
+                                <button type="button" class="btn btn-outline-light time-preset"
+                                    data-time="10:30">10:30</button>
+                                <button type="button" class="btn btn-outline-light time-preset"
+                                    data-time="12:00">12:00</button>
+                                <button type="button" class="btn btn-outline-light time-preset"
+                                    data-time="13:30">13:30</button>
+                                <button type="button" class="btn btn-outline-light time-preset"
+                                    data-time="15:00">15:00</button>
+                                <button type="button" class="btn btn-outline-light time-preset"
+                                    data-time="16:30">16:30</button>
+                                <button type="button" class="btn btn-outline-light time-preset"
+                                    data-time="18:00">18:00</button>
+                                <button type="button" class="btn btn-outline-light time-preset"
+                                    data-time="19:30">19:30</button>
+                                <button type="button" class="btn btn-outline-light time-preset"
+                                    data-time="21:00">21:00</button>
+                                <button type="button" class="btn btn-outline-light time-preset"
+                                    data-time="22:30">22:30</button>
                             </div>
                         </div>
                     </div>
@@ -171,6 +184,10 @@
         </form>
     </div>
 </div>
+
+@section Modals {
+    <partial name="_ShowtimeResultModal" />
+}
 
 @section AdminScripts {
     <script src="~/js/admin/showtime/createBulk.js"></script>

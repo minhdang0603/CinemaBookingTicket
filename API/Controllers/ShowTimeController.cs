@@ -51,33 +51,27 @@ namespace API.Controllers
             // Nếu có cả thành công và thất bại, trả về mã 207 Multi-Status
             if (result.SuccessfulShowTimes.Any() && result.FailedShowTimes.Any())
             {
-                var message = $"Added {result.SuccessfulShowTimes.Count} showtimes successfully, {result.FailedShowTimes.Count} showtimes failed.";
                 return StatusCode(207, APIResponse<ShowTimeBulkResultDTO>.Builder()
                     .WithStatusCode(HttpStatusCode.MultiStatus) // Multi-Status
                     .WithSuccess(true)
                     .WithResult(result)
-                    .WithErrorMessages(new List<string> { message })
                     .Build());
             }
             // Nếu tất cả đều thành công
             else if (result.SuccessfulShowTimes.Any() && !result.FailedShowTimes.Any())
             {
-                var message = $"Added all {result.SuccessfulShowTimes.Count} showtimes successfully.";
                 return Ok(APIResponse<ShowTimeBulkResultDTO>.Builder()
                     .WithStatusCode(HttpStatusCode.OK)
                     .WithSuccess(true)
-                    .WithResult(result)
                     .Build());
             }
             // Nếu tất cả đều thất bại
             else
             {
-                var failureMessages = result.FailedShowTimes.Select(f => f.ErrorMessage).ToList();
                 return BadRequest(APIResponse<ShowTimeBulkResultDTO>.Builder()
                     .WithStatusCode(HttpStatusCode.BadRequest)
                     .WithSuccess(false)
-                    .WithResult(result)
-                    .WithErrorMessages(failureMessages)
+                    .WithErrorMessages(result.FailedShowTimes)
                     .Build());
             }
         }

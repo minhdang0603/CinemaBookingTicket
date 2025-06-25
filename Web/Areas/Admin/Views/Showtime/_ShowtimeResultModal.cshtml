@@ -1,0 +1,30 @@
+<!-- Success Modal -->
+<div class="modal fade" id="showtimeResultModal" tabindex="-1" aria-labelledby="showtimeResultModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="showtimeResultModalTitle">Showtime Creation Results</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="showtimeSuccessMessage" class="alert alert-success mb-3">
+                    <!-- Success message will be inserted here -->
+                </div>
+                <div id="showtimeErrorsContainer" class="d-none mb-3">
+                    <h6>Some showtimes could not be created:</h6>
+                    <ul id="showtimeErrorsList" class="text-danger">
+                        <!-- Error messages will be inserted here -->
+                    </ul>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="goToShowtimeListBtn">
+                    <i class="fas fa-list"></i> Go to Showtime List
+                </button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-edit"></i> Continue Editing
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

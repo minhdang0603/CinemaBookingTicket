@@ -28,8 +28,8 @@ namespace API.Configurations
                   IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(key)),
                   ValidateIssuer = false,
                   ValidateAudience = false,
-                  //ValidIssuer = builder.Configuration.GetValue<string>("JwtSettings:ValidIssuer"),
-                  //ValidAudience = builder.Configuration.GetValue<string>("JwtSettings:ValidAudience")
+                  ValidIssuer = configuration.GetValue<string>("JwtSettings:ValidIssuer"),
+                  ValidAudience = configuration.GetValue<string>("JwtSettings:ValidAudience")
               };
 
               option.Events = new JwtBearerEvents

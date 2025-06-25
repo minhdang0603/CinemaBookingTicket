@@ -103,6 +103,7 @@ namespace Web.Areas.Admin.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreateBulk([FromBody] List<ShowTimeCreateDTO> showtimes)
         {
             if (showtimes == null || !showtimes.Any())
@@ -121,15 +122,36 @@ namespace Web.Areas.Admin.Controllers
                 return Json(new { isSuccess = false, errorMessages = new[] { "No response from server. Please try again." } });
             }
 
-            var result = JsonConvert.DeserializeObject<ShowTimeBulkResultDTO>(Convert.ToString(response.Result));
+			var result = JsonConvert.DeserializeObject<ShowTimeBulkResultDTO>(Convert.ToString(response.Result));
 
-            return Json(new
+			if (response.StatusCode == System.Net.HttpStatusCode.OK)
+			{
+                _logger.LogInformation("All showtimes created successfully");
+
+                return Json(new
+                {
+                    isSuccess = true,
+                    message = "All showtimes created successfully"
+                });
+			} 
+            else if(response.StatusCode == System.Net.HttpStatusCode.MultiStatus)
             {
-                isSuccess = response.IsSuccess,
-                message = response.ErrorMessages,
-                errorMessages = result.FailedShowTimes.Select(f => f.ErrorMessage),
-                result = result
-            });
+                _logger.LogWarning("Some showtimes failed to create");
+                return Json(new
+                {
+                    isSuccess = true,
+                    message = $"Create {result.SuccessfulShowTimes.Count} showtimes successfully!",
+                    errorMessage = result.FailedShowTimes
+				});
+			} 
+            else
+            {
+                return Json(new
+                {
+                    isSuccess = false,
+					errorMessage = response.ErrorMessages
+				});
+			}
         }
 
         public async Task<ActionResult> Edit(int id)

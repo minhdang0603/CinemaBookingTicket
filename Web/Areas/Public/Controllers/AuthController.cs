@@ -9,6 +9,7 @@ using Utility;
 using Web.Models;
 using Web.Models.DTOs.Request;
 using Web.Models.DTOs.Response;
+using Web.Models.ViewModels;
 using Web.Services.IServices;
 
 namespace Web.Areas.Public.Controllers
@@ -39,6 +40,83 @@ namespace Web.Areas.Public.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Register(RegisterViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                model.Password = string.Empty;
+                model.ConfirmPassword = string.Empty;
+                return View(model);
+            }
+
+            // Convert ViewModel to DTO
+            var userCreateDTO = new UserCreateDTO
+            {
+                Email = model.Email,
+                Password = model.Password,
+                Name = model.Name,
+                PhoneNumber = model.PhoneNumber
+            };
+
+            var response = await _authService.RegisterAsync<APIResponse>(userCreateDTO);
+
+            if (response != null && response.IsSuccess)
+            {
+                // Registration successful
+                if (response.Result != null)
+                {
+                    var resultStr = Convert.ToString(response.Result);
+                    if (!string.IsNullOrEmpty(resultStr))
+                    {
+                        var loginResponse = JsonConvert.DeserializeObject<LoginResponseDTO>(resultStr);
+
+                        if (loginResponse != null && !string.IsNullOrEmpty(loginResponse.Token))
+                        {
+                            _logger.LogInformation($"User {model.Email} registered successfully.");
+
+                            // Automatically log the user in after successful registration
+                            var handler = new JwtSecurityTokenHandler();
+                            var jwt = handler.ReadJwtToken(loginResponse.Token);
+
+                            var identity = new ClaimsIdentity(CookieAuthenticationDefaults.AuthenticationScheme);
+
+                            var uniqueNameClaim = jwt.Claims.FirstOrDefault(u => u.Type == "unique_name");
+                            var roleClaim = jwt.Claims.FirstOrDefault(u => u.Type == "role");
+
+                            if (uniqueNameClaim != null)
+                            {
+                                identity.AddClaim(new Claim(ClaimTypes.Name, uniqueNameClaim.Value));
+                            }
+
+                            if (roleClaim != null)
+                            {
+                                identity.AddClaim(new Claim(ClaimTypes.Role, roleClaim.Value));
+                            }
+
+                            identity.AddClaim(new Claim("access_token", loginResponse.Token));
+                            var principal = new ClaimsPrincipal(identity);
+                            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
+
+                            HttpContext.Session.SetString(Constant.SessionToken, loginResponse.Token);
+                            return RedirectToAction("Index", "Home");
+                        }
+                    }
+                }
+
+                TempData["success"] = "Registration successful! Please login.";
+                return RedirectToAction(nameof(Login));
+            }
+            else
+            {
+                TempData["error"] = response?.ErrorMessages?.FirstOrDefault() ?? "Registration failed. Please try again.";
+                model.Password = string.Empty;
+                model.ConfirmPassword = string.Empty;
+                return View(model);
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(LoginRequestDTO requestDTO)
         {
             if (!ModelState.IsValid)
@@ -49,33 +127,59 @@ namespace Web.Areas.Public.Controllers
 
             var response = await _authService.LoginAsync<APIResponse>(requestDTO);
 
-            if (response != null && response.IsSuccess)
+            if (response != null && response.IsSuccess && response.Result != null)
             {
-                LoginResponseDTO model = JsonConvert.DeserializeObject<LoginResponseDTO>(Convert.ToString(response.Result));
+                var resultStr = Convert.ToString(response.Result);
+                if (string.IsNullOrEmpty(resultStr))
+                {
+                    TempData["error"] = "Login failed. Invalid response from server.";
+                    requestDTO.Password = string.Empty;
+                    return View(requestDTO);
+                }
+
+                var loginResponse = JsonConvert.DeserializeObject<LoginResponseDTO>(resultStr);
+                if (loginResponse == null || string.IsNullOrEmpty(loginResponse.Token))
+                {
+                    TempData["error"] = "Login failed. Invalid token received.";
+                    requestDTO.Password = string.Empty;
+                    return View(requestDTO);
+                }
 
                 var handler = new JwtSecurityTokenHandler();
-                var jwt = handler.ReadJwtToken(model.Token);
+                var jwt = handler.ReadJwtToken(loginResponse.Token);
 
-                _logger.LogInformation($"User {jwt.Claims.FirstOrDefault(u => u.Type == "unique_name")?.Value} logged in successfully.");
+                var uniqueNameClaim = jwt.Claims.FirstOrDefault(u => u.Type == "unique_name");
+                _logger.LogInformation($"User {uniqueNameClaim?.Value} logged in successfully.");
 
                 var identity = new ClaimsIdentity(CookieAuthenticationDefaults.AuthenticationScheme);
-                identity.AddClaim(new Claim(ClaimTypes.Name, jwt.Claims.FirstOrDefault(u => u.Type == "unique_name").Value));
-                identity.AddClaim(new Claim(ClaimTypes.Role, jwt.Claims.FirstOrDefault(u => u.Type == "role").Value));
+
+                if (uniqueNameClaim != null)
+                {
+                    identity.AddClaim(new Claim(ClaimTypes.Name, uniqueNameClaim.Value));
+                }
+
+                var roleClaim = jwt.Claims.FirstOrDefault(u => u.Type == "role");
+                if (roleClaim != null)
+                {
+                    identity.AddClaim(new Claim(ClaimTypes.Role, roleClaim.Value));
+                }
+
                 // Lưu token vào claim để đồng bộ lại session khi cần
-                identity.AddClaim(new Claim("access_token", model.Token));
+                identity.AddClaim(new Claim("access_token", loginResponse.Token));
                 var principal = new ClaimsPrincipal(identity);
                 await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
 
-                HttpContext.Session.SetString(Constant.SessionToken, model.Token);
+                HttpContext.Session.SetString(Constant.SessionToken, loginResponse.Token);
                 return RedirectToAction("Index", "Home");
             }
             else
             {
-                ModelState.AddModelError("CustomError", response.ErrorMessages.FirstOrDefault());
+                TempData["error"] = response?.ErrorMessages?.FirstOrDefault() ?? "Login failed. Please try again.";
                 requestDTO.Password = string.Empty;
                 return View(requestDTO);
             }
         }
+
 
         public async Task<IActionResult> Logout()
         {

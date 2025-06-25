@@ -12,6 +12,8 @@ namespace Web.Models.ViewModels
         [Required(ErrorMessage = "Password is required")]
         [StringLength(100, MinimumLength = 6, ErrorMessage = "Password must be at least 6 characters")]
         [DataType(DataType.Password)]
+        [RegularExpression(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$",
+            ErrorMessage = "Password must contain at least one uppercase letter, one lowercase letter, and one number")]
         [Display(Name = "Password")]
         public string Password { get; set; } = string.Empty;
 
@@ -28,6 +30,8 @@ namespace Web.Models.ViewModels
 
         [Phone(ErrorMessage = "Invalid phone number format")]
         [Display(Name = "Phone Number")]
+        [RegularExpression(@"^(\+\d{1,2}\s)?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}$",
+            ErrorMessage = "Phone number format is invalid")]
         public string? PhoneNumber { get; set; }
     }
 }
