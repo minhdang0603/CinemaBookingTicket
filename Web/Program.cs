@@ -1,3 +1,8 @@
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Web.Configurations;
+using Web.Services;
+using Web.Services.IServices;
+
 namespace Web
 {
     public class Program
@@ -9,15 +14,39 @@ namespace Web
             // Add services to the container.
             builder.Services.AddControllersWithViews();
 
-            // Add simple authentication (temporary)
-            builder.Services.AddAuthentication("Cookies")
-                .AddCookie("Cookies", options =>
-                {
-                    options.LoginPath = "/Account/Login";
-                    options.AccessDeniedPath = "/Account/AccessDenied";
-                });
+            // Đăng ký AutoMapper
+            builder.Services.AddAutoMapper(typeof(MappingConfig));
 
-            builder.Services.AddAuthorization();
+
+            builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+              .AddCookie(options =>
+              {
+                  options.Cookie.HttpOnly = true;
+                  options.ExpireTimeSpan = TimeSpan.FromMinutes(30);
+                  options.LoginPath = "/Public/Auth/Login";
+                  options.LogoutPath = "/Public/Auth/Logout";
+                  options.AccessDeniedPath = "/Public/Auth/AccessDenied";
+                  options.SlidingExpiration = true;
+              });
+
+            builder.Services.AddSession(options =>
+            {
+                options.IdleTimeout = TimeSpan.FromMinutes(100);
+                options.Cookie.HttpOnly = true;
+                options.Cookie.IsEssential = true;
+            });
+            // Đăng ký HttpClient
+            builder.Services.AddHttpClient();
+            builder.Services.AddHttpClient("CinemaBookingTicketAPI", c =>
+            {
+                string apiUrl = builder.Configuration["ServiceUrls:CinemaBookingTicketAPI"] ?? "http://localhost:5000";
+                c.BaseAddress = new Uri(apiUrl);
+                c.DefaultRequestHeaders.Add("Accept", "application/json");
+            });
+            builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+            builder.Services.AddScoped<IAuthService, AuthService>();
+            builder.Services.AddScoped<IScreenService, ScreenService>();
+            builder.Services.AddScoped<ITheaterService, TheaterService>();
 
             var app = builder.Build();
 
@@ -36,10 +65,10 @@ namespace Web
 
             app.UseAuthentication();
             app.UseAuthorization();
-
+            app.UseSession();
             app.MapControllerRoute(
                 name: "default",
-                pattern: "{controller=Home}/{action=Index}/{id?}");
+                pattern: "{area=Public}/{controller=Home}/{action=Index}/{id?}");
 
             app.Run();
         }

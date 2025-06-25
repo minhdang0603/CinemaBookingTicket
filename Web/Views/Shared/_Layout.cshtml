@@ -1,5 +1,6 @@
 ﻿<!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -7,39 +8,54 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/Web.styles.css" asp-append-version="true" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css">
+    <!-- DataTables CDN -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/2.3.2/css/dataTables.dataTables.css" />
 </head>
+
 <body>
-    <div class="container">
+    <div>
         <!-- Sidebar -->
         <nav class="sidebar" id="sidebar">
             <div class="logo">
                 <div class="logo-text">🎬 CINEMA</div>
             </div>
             <ul class="sidebar-menu">
-                <li><a asp-area="" asp-controller="Home" asp-action="Index"><span class="icon">🏠</span>Trang chủ</a></li>
-                <li><a asp-area="" asp-controller="Account" asp-action="Login"><span class="icon">👤</span>Đăng nhập</a></li>
-                <li><a asp-area="" asp-controller="Cinema" asp-action="Index"><span class="icon">🎭</span>Tìm rạp chiếu phim</a></li>
-                <li><a asp-area="" asp-controller="Movie" asp-action="Index"><span class="icon">🎬</span>Tìm tác phẩm</a></li>
-                <li><a asp-area="" asp-controller="Cinema" asp-action="All"><span class="icon">📋</span>Tất cả các rạp chiếu phim</a></li>
-                <li><a asp-area="" asp-controller="Cinema" asp-action="IMAX"><span class="icon">🎪</span>Danh sách rạp chiếu phim IMAX</a></li>
+                <li><a asp-area="public" asp-controller="Home" asp-action="Index"><span class="icon">🏠</span>Trang
+                        chủ</a></li>
+                @if (!User.Identity.IsAuthenticated)
+                {
+                    <li><a asp-area="public" asp-controller="Auth" asp-action="Login"><span class="icon">👤</span>Đăng
+                            nhập</a></li>
+                }
+                <li><a asp-area="" asp-controller="Cinema" asp-action="Index"><span class="icon">🎭</span>Tìm rạp chiếu
+                        phim</a></li>
+                <li><a asp-area="" asp-controller="Movie" asp-action="Index"><span class="icon">🎬</span>Tìm tác
+                        phẩm</a></li>
+                <li><a asp-area="" asp-controller="Cinema" asp-action="All"><span class="icon">📋</span>Tất cả các rạp
+                        chiếu phim</a></li>
+                <li><a asp-area="" asp-controller="Cinema" asp-action="IMAX"><span class="icon">🎪</span>Danh sách rạp
+                        chiếu phim IMAX</a></li>
                 <li class="dropdown">
                     <a href="#" class="dropdown-toggle" onclick="toggleDropdown(event)">
                         <span class="icon">🎫</span>Quản lí rạp
                     </a>
                     <ul class="dropdown-menu">
-                        <li><a asp-controller="Genre" asp-action="Index">Genre</a></li>
-                        <li><a asp-controller="Director" asp-action="Index">Director</a></li>
-                        <li><a asp-controller="AdminMovie" asp-action="Index">Movie</a></li>
-                        <li><a asp-controller="Session" asp-action="Index">Session</a></li>
-                        <li><a asp-controller="Room" asp-action="Index">Room</a></li>
-                        <li><a asp-controller="Booking" asp-action="Index">Booking</a></li>
+                        <li><a asp-area="Admin" asp-controller="Genre" asp-action="Index">Genre</a></li>
+                        <li><a asp-area="Admin" asp-controller="Movie" asp-action="Index">Movie</a></li>
+                        <li><a asp-area="Admin" asp-controller="Session" asp-action="Index">Session</a></li>
+                        <li><a asp-area="Admin" asp-controller="Room" asp-action="Index">Room</a></li>
+                        <li><a asp-area="Admin" asp-controller="Booking" asp-action="Index">Booking</a></li>
+                        <li><a asp-area="Admin" asp-controller="Showtime" asp-action="Index">Showtime</a></li>
+                        <li><a asp-area="Admin" asp-controller="Screen" asp-action="Index">Screen</a></li>
                     </ul>
                 </li>
             </ul>
         </nav>
 
         <!-- Main Content -->
-        <main class="main-content"> 
+        <main class="main-content">
             <!-- Header -->
             <header class="header">
                 <div class="logo-main">
@@ -55,7 +71,7 @@
                         <div class="search-group">
                             <label>Thể loại</label>
                             <select name="genre" class="search-input">
-                                <option value="">Tất cả</option>
+                                <option value="">Tấtt cả</option>
                                 <option value="action">Hành động</option>
                                 <option value="comedy">Hài</option>
                                 <option value="drama">Chính kịch</option>
@@ -70,11 +86,11 @@
                     @if (User.Identity.IsAuthenticated)
                     {
                         <span>Xin chào, @User.Identity.Name</span>
-                        <a asp-area="" asp-controller="Account" asp-action="Logout">Đăng xuất</a>
+                        <a asp-area="" asp-controller="Auth" asp-action="Logout">Đăng xuất</a>
                     }
                     else
                     {
-                        <a asp-area="" asp-controller="Account" asp-action="Login">Đăng nhập</a>
+                        <a asp-area="" asp-controller="Auth" asp-action="Login">Đăng nhập</a>
                     }
                 </div>
             </header>
@@ -83,11 +99,16 @@
             <div class="page-content">
                 @RenderBody()
             </div>
+
         </main>
     </div>
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://kit.fontawesome.com/your-fontawesome-kit.js" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    <script src="https://cdn.datatables.net/2.3.2/js/dataTables.js"></script>
+
     <script src="~/js/site.js" asp-append-version="true"></script>
     <script>
         function toggleDropdown(event) {
@@ -96,7 +117,8 @@
             parent.classList.toggle("open");
         }
     </script>
-
+    <partial name="_Notification" />
     @await RenderSectionAsync("Scripts", required: false)
 </body>
+
 </html>

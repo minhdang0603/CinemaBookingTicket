@@ -1,0 +1,20 @@
+@{
+    Layout = "_Layout"; // Kế thừa từ layout chung
+}
+
+<!-- Thêm CSS cho Admin Layout trong phần head của trang-->
+<link rel="stylesheet" href="~/css/admin.css" asp-append-version="true" />
+<div class="admin-container">
+    @RenderBody()
+</div>
+
+@if (IsSectionDefined("Modals"))
+{
+    @RenderSection("Modals", required: false)
+}
+
+@section Scripts {
+
+    <!-- Render AdminScripts section từ các view con -->
+    @await RenderSectionAsync("AdminScripts", required: false)
+}

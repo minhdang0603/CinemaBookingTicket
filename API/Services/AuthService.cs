@@ -112,7 +112,7 @@ public class AuthService : IAuthService
         var claims = new List<Claim>
         {
             new Claim(ClaimTypes.NameIdentifier, user.Id),
-            new Claim(ClaimTypes.Name, user.Email.ToString()),
+            new Claim(ClaimTypes.Name, user.Name.ToString()),
             new Claim(ClaimTypes.Role, roles.FirstOrDefault()),
         };
 

@@ -1,6 +1,7 @@
 ﻿using API.Data;
 using API.Data.Models;
 using API.Repositories.IRepositories;
+using Microsoft.EntityFrameworkCore.Storage;
 
 namespace API.Repositories
 {
@@ -49,6 +50,21 @@ namespace API.Repositories
         public async Task SaveAsync()
         {
             await _context.SaveChangesAsync();
+        }
+
+        public async Task<IDbContextTransaction> BeginTransactionAsync()
+        {
+            return await _context.Database.BeginTransactionAsync();
+        }
+
+        public async Task RollbackAsync()
+        {
+            await _context.Database.RollbackTransactionAsync();
+        }
+
+        public async Task CommitAsync()
+        {
+            await _context.Database.CommitTransactionAsync();
         }
     }
 }

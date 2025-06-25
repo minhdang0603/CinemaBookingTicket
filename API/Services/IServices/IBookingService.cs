@@ -1,10 +1,14 @@
+using API.DTOs.Request;
 using API.DTOs.Response;
 
 namespace API.Services.IServices;
 
 public interface IBookingService
 {
-    Task<IEnumerable<BookingHistoryDTO>> GetUserBookingHistoryAsync(string userId, int page = 1, int pageSize = 10);
-    Task<BookingDetailDTO> GetBookingDetailAsync(int bookingId, string userId);
-    Task<int> GetUserBookingCountAsync(string userId);
+    Task<BookingDTO> GetBookingByIdAsync(int bookingId);
+    Task<List<BookingDTO>> GetAllBookingsAsync();
+    Task<List<BookingDTO>> GetMyBookingsAsync();
+    Task DeleteBookingAsync(int bookingId);
+    Task CancelBookingAsync(int bookingId);
+    Task<string> CreateBookingWithPaymentAsync(BookingCreateDTO bookingCreateDTO);
 }

@@ -7,7 +7,7 @@ namespace API.DTOs
     {
         public HttpStatusCode StatusCode { get; set; }
         public bool IsSuccess { get; set; } = true;
-        public string? ErrorMessages { get; set; }
+        public List<string>? ErrorMessages { get; set; }
         public T? Result { get; set; }
         private APIResponse() { }
 
@@ -20,6 +20,7 @@ namespace API.DTOs
             public APIResponseBuilder()
             {
                 _response = new APIResponse<TBuilder>();
+                _response.ErrorMessages = new List<string>();
             }
 
             public APIResponseBuilder<TBuilder> WithStatusCode(HttpStatusCode statusCode)
@@ -34,7 +35,7 @@ namespace API.DTOs
                 return this;
             }
 
-            public APIResponseBuilder<TBuilder> WithErrorMessages(string errorMessages)
+            public APIResponseBuilder<TBuilder> WithErrorMessages(List<string> errorMessages)
             {
                 _response.ErrorMessages = errorMessages;
                 return this;

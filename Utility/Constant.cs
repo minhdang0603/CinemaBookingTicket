@@ -36,5 +36,9 @@ namespace Utility
         public const string Booking_Status_Pending = "pending";
         public const string Booking_Status_Confirmed = "confirmed";
         public const string Booking_Status_Cancelled = "cancelled";
+
+        public const string Seat_Type_Standard = "Standard";
+        public const string Seat_Type_Premium = "Premium";
+        public const string Seat_Type_VIP = "VIP";
     }
 }

@@ -1,21 +1,10 @@
-using System.Text;
-using API.Data.Models;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
-using brevo_csharp.Client;
-using API.Services;
-using API.Services.IServices;
-using API.Repositories;
-using API.Repositories.IRepositories;
-using API.Middlewares;
-using API.Exceptions;
-using Microsoft.AspNetCore.Authorization;
-using API.DTOs;
-using System.Net;
+using API.Configurations;
 using API.Data.DbInitializer;
-
+using API.Exceptions;
+using API.Middlewares;
+using brevo_csharp.Client;
+using System.Text.Json;
+using Utilities;
 
 namespace API
 {
@@ -25,101 +14,46 @@ namespace API
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            builder.Configuration
-                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-                .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true)
-                .AddEnvironmentVariables();
+            // Add Appsettings Config
+            builder.Configuration.ConfigureAppSettings(builder);
 
             Configuration.Default.ApiKey.Add("api-key", builder.Configuration.GetValue<string>("BrevoApi:ApiKey"));
 
+            // Add CORS Config
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAll", policy =>
+                {
+                    policy.AllowAnyOrigin()
+                          .AllowAnyHeader()
+                          .AllowAnyMethod();
+                });
+            });
+
             // Add services to the container.
-            builder.Services.AddControllers();
+            builder.Services.AddControllers().AddJsonOptions(options =>
+            {
+                options.JsonSerializerOptions.Converters.Add(new TimeOnlyJsonConverter());
+                options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve;
+            });
 
 
             builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
             builder.Services.AddProblemDetails();
             builder.Services.AddAutoMapper(typeof(MappingConfig));
 
-            // Booking
-            builder.Services.AddScoped<IBookingRepository, BookingRepository>();
-            builder.Services.AddScoped<IBookingService, BookingService>();
+            // Add DbContext Config
+            builder.Services.AddDbContextConfiguration(builder.Configuration);
 
-            builder.Services.AddDbContext<ApplicationDbContext>(options =>
-             options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-            builder.Services.AddScoped<IDbInitializer, DbInitializer>();
             // Register Identity services
-            builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
-            {
-                options.Password.RequireDigit = true;
-                options.Password.RequiredLength = 6;
-                options.Password.RequireLowercase = true;
-                options.Password.RequireUppercase = true;
-                options.Password.RequireNonAlphanumeric = false;
-                options.User.RequireUniqueEmail = true;
-                // Lockout settings
-                options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
-                options.Lockout.MaxFailedAccessAttempts = 5;
-            })
-                .AddEntityFrameworkStores<ApplicationDbContext>();
+            builder.Services.AddIdentityConfig();
 
-            builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-            builder.Services.AddTransient<IEmailService, BrevoEmailService>();
-
+            // Add Dependency Injection Config
+            builder.Services.AddDependencyInjectionConfiguration();
             builder.Services.AddResponseCaching();
 
-
-            var key = builder.Configuration.GetValue<string>("JwtSettings:Secret");
-
-            builder.Services.AddAuthentication(option =>
-            {
-                option.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                option.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            })
-                .AddJwtBearer(option =>
-                {
-                    option.RequireHttpsMetadata = false;
-                    option.SaveToken = true;
-                    option.TokenValidationParameters = new TokenValidationParameters()
-                    {
-                        ValidateIssuerSigningKey = true,
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key)),
-                        ValidateIssuer = false,
-                        ValidateAudience = false,
-                        ValidateLifetime = true,
-                        ClockSkew = TimeSpan.Zero,
-                        //ValidIssuer = builder.Configuration.GetValue<string>("JwtSettings:ValidIssuer"),
-                        //ValidAudience = builder.Configuration.GetValue<string>("JwtSettings:ValidAudience")
-                    };
-
-                    option.Events = new JwtBearerEvents
-                    {
-                        OnChallenge = context =>
-                        {
-                            context.HandleResponse();
-                            context.HttpContext.Response.StatusCode = StatusCodes.Status401Unauthorized;
-                            context.HttpContext.Response.ContentType = "application/json";
-                            var response = APIResponse<object>.Builder()
-                                .WithStatusCode(HttpStatusCode.Unauthorized)
-                                .WithErrorMessages("Authentication failed")
-                                .WithSuccess(false)
-                                .Build();
-                            return context.HttpContext.Response.WriteAsJsonAsync(response);
-                        },
-                        OnForbidden = context =>
-                        {
-                            context.HttpContext.Response.StatusCode = StatusCodes.Status403Forbidden;
-                            context.HttpContext.Response.ContentType = "application/json";
-                            var response = APIResponse<object>.Builder()
-                                .WithStatusCode(HttpStatusCode.Forbidden)
-                                .WithErrorMessages("You do not have permission to access this resource.")
-                                .WithSuccess(false)
-                                .Build();
-                            return context.HttpContext.Response.WriteAsJsonAsync(response);
-                        }
-                    };
-
-                });
-
+            // Add Authentication Config
+            builder.Services.ConfigureAuthentication(builder.Configuration);
 
             builder.Services.AddControllers(options =>
             {
@@ -128,7 +62,13 @@ namespace API
                     {
                         Duration = 60 // Cache for 60 seconds
                     });
-            }).AddNewtonsoftJson().AddXmlDataContractSerializerFormatters();
+            })
+            .AddJsonOptions(options =>
+            {
+                options.JsonSerializerOptions.Converters.Add(new TimeOnlyJsonConverter());
+            })
+            .AddNewtonsoftJson()
+            .AddXmlDataContractSerializerFormatters();
 
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
@@ -146,8 +86,12 @@ namespace API
                 app.UseSwaggerUI();
             }
 
+            // Use CORS
+            app.UseCors("AllowAll");
+
             app.UseAuthentication();
             app.UseAuthorization();
+            
 
             SeedDatabase();
 
@@ -165,6 +109,5 @@ namespace API
                 }
             }
         }
-
     }
 }

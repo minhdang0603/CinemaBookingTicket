@@ -1,0 +1,287 @@
+@model ScreenUpdateDTO
+
+@{
+    ViewData["Title"] = "Edit Screen";
+    ViewData["Header"] = "Edit Screen";
+    ViewData["HeaderIcon"] = "fas fa-edit";
+}
+
+<div class="admin-form-container">
+    <form id="editScreenForm" asp-area="Admin" asp-controller="Screen" asp-action="Edit" method="post">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="Id" />
+        
+        <div class="card">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label asp-for="Name" class="form-label">Screen Name</label>
+                            <input asp-for="Name" class="form-control" >
+                            <span asp-validation-for="Name" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label asp-for="Rows" class="form-label">Rows</label>
+                            <input asp-for="Rows" class="form-control" type="number" min="1" max="26" >
+                            <span asp-validation-for="Rows" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label asp-for="SeatsPerRow" class="form-label">Seats per Row</label>
+                            <input asp-for="SeatsPerRow" class="form-control" type="number" min="1" max="20" >
+                            <span asp-validation-for="SeatsPerRow" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label asp-for="TheaterId" class="form-label">Theater</label>
+                            <select asp-for="TheaterId" class="form-control" asp-items="ViewBag.Theaters">
+                                <option value="">-- Select theater --</option>
+                            </select>
+                            <span asp-validation-for="TheaterId" class="text-danger"></span>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-8">
+                        <div class="mb-3">
+                            <label class="form-label">Seat Configuration</label>
+                            <div class="seat-config-container" id="seatConfigContainer">
+                                <!-- Seat configuration UI will be loaded here via JavaScript -->
+                                <div class="text-center py-5">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                    <p class="mt-2">Loading seat configuration...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer text-end">
+                <a asp-action="Index" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to List
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Save Changes
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section AdminScripts {
+    <style>
+        .admin-form-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background-color: #222;
+            border: 1px solid #333;
+        }
+
+        .card-footer {
+            background-color: #1a1a1a;
+            border-top: 1px solid #333;
+        }
+
+        /* Seat Configuration Styles */
+        .seat-config-container {
+            background-color: #1a1a1a;
+            border-radius: 8px;
+            padding: 10px;
+            min-height: 300px;
+        }
+
+        .screen-bar {
+            background: linear-gradient(to bottom, #777, #444);
+            color: #fff;
+            text-align: center;
+            padding: 5px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+        }
+
+        .seat-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .seat-row {
+            display: flex;
+            gap: 5px;
+        }
+
+        .row-selector {
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #444;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .seat-item {
+            width: 30px;
+            height: 30px;
+            background-color: #6c757d;
+            border-radius: 5px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 0.7rem;
+        }
+
+            .seat-item.selected {
+                border: 2px solid #dc3545;
+                box-shadow: 0 0 5px #dc3545;
+            }
+
+        .seat-type-selector {
+            margin-top: 15px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .seat-type-option {
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            color: #fff;
+        }
+
+        .seat-type-indicator {
+            display: inline-block;
+            width: 15px;
+            height: 15px;
+            border-radius: 3px;
+            margin-right: 5px;
+        }
+    </style>
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        $(document).ready(function() {
+            // Load seat configuration when page loads
+            loadSeatConfiguration();
+            
+            // Update seat configuration when rows or seats per row changes
+            $('#Rows, #SeatsPerRow').change(function() {
+                loadSeatConfiguration();
+            });
+            
+            function loadSeatConfiguration() {
+                const screenId = @Html.Raw(Model.Id);
+                const rows = $('#Rows').val();
+                const seatsPerRow = $('#SeatsPerRow').val();
+                
+                if (rows > 0 && seatsPerRow > 0) {
+                    $('#seatConfigContainer').html('<div class="text-center py-5"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div><p class="mt-2">Loading seat configuration...</p></div>');
+                    
+                    $.ajax({
+                        url: '@Url.Action("GetSeatConfiguration", "Screen", new { area = "Admin" })',
+                        type: 'GET',
+                        data: {
+                            id: screenId,
+                            rows: rows,
+                            seatsPerRow: seatsPerRow
+                        },
+                        success: function(result) {
+                            $('#seatConfigContainer').html(result);
+                            initializeSeatSelector();
+                        },
+                        error: function(error) {
+                            $('#seatConfigContainer').html('<div class="alert alert-danger">Failed to load seat configuration. Please try again.</div>');
+                            console.error('Error loading seat configuration:', error);
+                        }
+                    });
+                }
+            }
+            
+            function initializeSeatSelector() {
+                // Handle click on individual seats
+                $('.seat-item').click(function() {
+                    toggleSeatSelection($(this));
+                });
+                
+                // Handle click on row selector
+                $('.row-selector').click(function() {
+                    const rowIndex = $(this).data('row');
+                    $('.seat-item[data-row="' + rowIndex + '"]').each(function() {
+                        toggleSeatSelection($(this));
+                    });
+                });
+                
+                // Handle click on seat type option
+                $('.seat-type-option').click(function() {
+                    const seatTypeId = $(this).data('seat-type-id');
+                    
+                    // Apply selected seat type to all selected seats
+                    $('.seat-item.selected').each(function() {
+                        applySeatType($(this), seatTypeId);
+                    });
+                    
+                    // Clear selection
+                    $('.seat-item.selected').removeClass('selected');
+                });
+            }
+            
+            function toggleSeatSelection(seatElement) {
+                seatElement.toggleClass('selected');
+            }
+            
+            function applySeatType(seatElement, seatTypeId) {
+                const seatId = seatElement.data('seat-id');
+                const rowIndex = seatElement.data('row');
+                const colIndex = seatElement.data('col');
+                
+                // Update hidden input for this seat
+                const inputName = `Seats[${rowIndex * parseInt($('#SeatsPerRow').val()) + colIndex}].SeatTypeId`;
+                
+                // Create or update hidden input
+                let input = $(`input[name="${inputName}"]`);
+                if (input.length === 0) {
+                    input = $('<input>').attr({
+                        type: 'hidden',
+                        name: inputName
+                    }).appendTo('#editScreenForm');
+                }
+                input.val(seatTypeId);
+                
+                // Update seat appearance based on seat type
+                const seatTypeColor = $(`.seat-type-option[data-seat-type-id="${seatTypeId}"]`).data('color');
+                seatElement.css('background-color', seatTypeColor);
+            }
+            
+            // Form validation
+            $('#editScreenForm').submit(function(e) {
+                const name = $('#Name').val();
+                const rows = $('#Rows').val();
+                const seatsPerRow = $('#SeatsPerRow').val();
+                const theaterId = $('#TheaterId').val();
+                
+                if (!name || !rows || !seatsPerRow || !theaterId) {
+                    toastr.error('Please fill in all  fields');
+                    e.preventDefault();
+                    return false;
+                }
+                
+                if (parseInt(rows) < 1 || parseInt(seatsPerRow) < 1) {
+                    toastr.error('Rows and Seats per Row must be greater than 0');
+                    e.preventDefault();
+                    return false;
+                }
+                
+                return true;
+            });
+        });
+    </script>
+}

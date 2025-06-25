@@ -1,0 +1,145 @@
+Cinema Booking - Place Order Flow
+┌─────────────────┐
+│   User Frontend │
+└─────────┬───────┘
+          │
+          ▼
+┌─────────────────┐
+│  1. Select Movie│
+│     & Seats     │
+└─────────┬───────┘
+          │
+          ▼
+┌─────────────────┐
+│ 2. Create Order │
+│   (Booking)     │
+└─────────┬───────┘
+          │
+          ▼
+┌─────────────────┐
+│ 3. POST /api/   │
+│   bookings      │
+└─────────┬───────┘
+          │
+          ▼
+┌─────────────────────────────┐
+│     Backend API             │
+│                             │
+│ 4. Create Booking Record    │
+│    - Status: "Pending"      │
+│    - Reserve Seats          │
+│    - Calculate Total        │
+└─────────┬───────────────────┘
+          │
+          ▼
+┌─────────────────────────────┐
+│ 5. Create Payment Record    │
+│    - Status: "Pending"      │
+│    - Amount: Total          │
+│    - OrderCode: Generated   │
+└─────────┬───────────────────┘
+          │
+          ▼
+┌─────────────────────────────┐
+│ 6. Call VNPay Service       │
+│    CreateVNPayPaymentUrl()  │
+└─────────┬───────────────────┘
+          │
+          ▼
+┌─────────────────────────────┐
+│ 7. Return Payment URL       │
+│    to Frontend              │
+└─────────┬───────────────────┘
+          │
+          ▼
+┌─────────────────┐
+│ 8. User clicks  │
+│   "Pay Now"     │
+│   → Redirect    │
+└─────────┬───────┘
+          │
+          ▼
+┌─────────────────────────────┐
+│        VNPay Portal         │
+│                             │
+│ 9. User enters payment info │
+│    - Bank account           │
+│    - OTP verification       │
+│    - Confirms payment       │
+└─────────┬───────────────────┘
+          │
+    ┌─────┴─────┐
+    ▼           ▼
+┌─────────┐ ┌─────────────┐
+│Payment  │ │Payment      │
+│Success  │ │Failed       │
+└─────┬───┘ └─────┬───────┘
+      │           │
+      ▼           ▼
+┌─────────────────────────────┐
+│    10. VNPay sends          │
+│        - Return URL         │
+│        - IPN Notification   │
+└─────────┬───────────────────┘
+          │
+    ┌─────┴─────┐
+    ▼           ▼
+┌─────────┐ ┌─────────────┐
+│Return   │ │IPN          │
+│Handler  │ │Handler      │
+│         │ │             │
+│Display  │ │Update DB    │
+│Result   │ │Send Email   │
+│to User  │ │Confirm Seat │
+└─────────┘ └─────────────┘
+
+Detailed Backend Flow
+Backend Service Layer:
+
+1. BookingController.CreateBooking()
+   ├── Validate seats availability
+   ├── Calculate total amount
+   ├── Create Booking (Status: "Pending")
+   └── Call PaymentService
+
+2. PaymentService.CreatePayment()
+   ├── Create Payment record
+   ├── Generate OrderCode
+   └── Call VNPayService
+
+3. VNPayService.CreatePaymentUrl()
+   ├── Prepare VNPay parameters
+   ├── Generate secure hash
+   └── Return payment URL
+
+4. VNPay IPN Handler (Background)
+   ├── Validate signature
+   ├── Update Payment status
+   ├── Update Booking status
+   ├── Confirm seat reservation
+   └── Send confirmation email
+
+5. VNPay Return Handler (User facing)
+   ├── Validate signature
+   ├── Display result to user
+   └── Redirect to success/fail page
+
+Database State Changes
+
+Initial State:
+┌─────────┐    ┌─────────┐    ┌─────────┐
+│ Booking │    │ Payment │    │  Seats  │
+│ Pending │    │ Pending │    │Reserved │
+└─────────┘    └─────────┘    └─────────┘
+
+After Payment Success (IPN):
+┌─────────┐    ┌─────────┐    ┌─────────┐
+│ Booking │    │ Payment │    │  Seats  │
+│Confirmed│    │Completed│    │ Booked  │
+└─────────┘    └─────────┘    └─────────┘
+
+After Payment Failure:
+┌─────────┐    ┌─────────┐    ┌─────────┐
+│ Booking │    │ Payment │    │  Seats  │
+│Cancelled│    │ Failed  │    │Available│
+└─────────┘    └─────────┘    └─────────┘

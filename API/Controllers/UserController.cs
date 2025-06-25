@@ -32,6 +32,7 @@ public class UserController : ControllerBase
         return Ok(APIResponse<UserDTO>.Builder()
             .WithResult(user)
             .WithStatusCode(HttpStatusCode.OK)
+            .WithSuccess(true)
             .Build());
     }
 
@@ -43,6 +44,7 @@ public class UserController : ControllerBase
         return Ok(APIResponse<UserDTO>.Builder()
             .WithResult(user)
             .WithStatusCode(HttpStatusCode.OK)
+            .WithSuccess(true)
             .Build());
     }
 
@@ -53,7 +55,7 @@ public class UserController : ControllerBase
         if (id.ToString() != updateUserRequest.UserId)
         {
             return BadRequest(APIResponse<UserDTO>.Builder()
-                .WithErrorMessages("User ID mismatch.")
+                .WithErrorMessages(new List<string> { "User ID mismatch." })
                 .WithStatusCode(HttpStatusCode.BadRequest)
                 .WithSuccess(false)
                 .Build());
@@ -64,6 +66,7 @@ public class UserController : ControllerBase
         return Ok(APIResponse<UserDTO>.Builder()
             .WithResult(updatedUser)
             .WithStatusCode(HttpStatusCode.OK)
+            .WithSuccess(true)
             .Build());
     }
 
@@ -82,6 +85,7 @@ public class UserController : ControllerBase
         return Ok(APIResponse<UserDTO>.Builder()
             .WithResult(updatedUser)
             .WithStatusCode(HttpStatusCode.OK)
+            .WithSuccess(true)
             .Build());
     }
 
@@ -94,6 +98,7 @@ public class UserController : ControllerBase
         return Ok(APIResponse<List<UserDTO>>.Builder()
             .WithResult(users)
             .WithStatusCode(HttpStatusCode.OK)
+            .WithSuccess(true)
             .Build());
     }
 
@@ -104,6 +109,7 @@ public class UserController : ControllerBase
         await _userService.DeleteUserAsync(userId);
         return Ok(APIResponse<object>.Builder()
             .WithStatusCode(HttpStatusCode.NoContent)
+            .WithSuccess(true)
             .Build());
     }
 }

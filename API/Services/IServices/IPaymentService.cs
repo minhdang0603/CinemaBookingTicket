@@ -7,13 +7,13 @@ namespace API.Services.IServices;
 public interface IPaymentService
 {
     // VNPay methods
-    string CreateVNPayPaymentUrl(VNPayRequestDTO request);
+    Task<string> CreateVNPayPaymentUrl(VNPayRequestDTO request);
     Task<VNPayResponseDTO> ProcessVNPayReturnAsync(IQueryCollection queryParams);
     Task<VNPayIPNResponseDTO> ProcessVNPayIPNAsync(IQueryCollection queryParams);
 
     // Common methods
     Task<PaymentDTO> GetPaymentsByBookingIdAsync(int bookingId);
-    Task<PaymentDTO> UpdatePaymentStatusAsync(int paymentId, string status, string transactionId = null);
+    Task<PaymentDTO> UpdatePaymentStatusAsync(int paymentId, string status, string? transactionId = null);
 
     Task<PaymentDTO> CreatePaymentAsync(int bookingId);
 }
