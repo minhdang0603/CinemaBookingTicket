@@ -992,3 +992,8 @@ body {
 .d-flex {
     display: flex;
 }
+
+a {
+    all: unset;
+    cursor: pointer;
+}

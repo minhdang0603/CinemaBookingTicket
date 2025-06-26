@@ -1,0 +1,194 @@
+@{
+    ViewData["Title"] = "Create Multiple Showtimes";
+}
+
+<style>
+    .input-group-text {
+        background-color: #333 !important;
+        border: 1px solid #444;
+    }
+
+    .input-group-text i {
+        color: #fff !important;
+    }
+
+    .showtime-template {
+        background-color: rgba(33, 33, 33, 0.8);
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 15px;
+        border-left: 4px solid #dc3545;
+    }
+
+    .showtime-row {
+        background-color: rgba(33, 33, 33, 0.5);
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 10px;
+        border-left: 4px solid #0d6efd;
+        position: relative;
+    }
+
+    .remove-btn {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background-color: #dc3545;
+        border: none;
+        color: white;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .time-preset {
+        font-size: 0.9rem;
+        padding: 5px 10px;
+        min-width: 70px;
+        transition: all 0.2s;
+    }
+
+    .time-preset:hover {
+        background-color: #0d6efd;
+        border-color: #0d6efd;
+    }
+
+    .time-preset.active {
+        background-color: #0d6efd;
+        border-color: #0d6efd;
+    }
+</style>
+
+<div class="admin-header">
+    <h1>
+        <i class="fas fa-layer-group"></i> Create Multiple Showtimes
+    </h1>
+</div>
+
+<div class="admin-form-container">
+    <div class="card">
+        <form id="createShowtimesForm" class="card-body">
+            @Html.AntiForgeryToken()
+            <h5 class="card-title mb-4">Configure Showtimes</h5>
+
+            <!-- Showtime Template Section -->
+            <div class="showtime-template mb-4">
+                <h6 class="mb-3">Showtime Template</h6>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <select class="form-control" id="movieId">
+                                <option value="">-- Select a movie --</option>
+                                @foreach (var movie in ViewBag.Movies)
+                                {
+                                    <option value="@movie.Value">@movie.Text</option>
+                                }
+                            </select>
+                            <label>Movie</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <select class="form-control" id="screenId">
+                                <option value="">-- Select a screen --</option>
+                                @foreach (var movie in ViewBag.Screens)
+                                {
+                                    <option value="@movie.Value">@movie.Text</option>
+                                }
+                            </select>
+                            <label>Screen</label>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-floating">
+                            <input type="date" class="form-control" id="showDate"
+                                value="@DateTime.Now.AddDays(1).ToString("yyyy-MM-dd")"
+                                min="@DateTime.Now.ToString("yyyy-MM-dd")" />
+                            <label>Date</label>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-floating">
+                            <input type="number" class="form-control" id="basePrice" min="1000" step="1000"
+                                value="90000" />
+                            <label>Base Price (VND)</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <h6 class="mb-2">Add Showtimes for Selected Day</h6>
+                    <div class="row g-2 mb-2">
+                        <div class="col-md-12">
+                            <div class="d-flex flex-wrap gap-2">
+                                <button type="button" class="btn btn-outline-light time-preset"
+                                    data-time="09:00">09:00</button>
+                                <button type="button" class="btn btn-outline-light time-preset"
+                                    data-time="10:30">10:30</button>
+                                <button type="button" class="btn btn-outline-light time-preset"
+                                    data-time="12:00">12:00</button>
+                                <button type="button" class="btn btn-outline-light time-preset"
+                                    data-time="13:30">13:30</button>
+                                <button type="button" class="btn btn-outline-light time-preset"
+                                    data-time="15:00">15:00</button>
+                                <button type="button" class="btn btn-outline-light time-preset"
+                                    data-time="16:30">16:30</button>
+                                <button type="button" class="btn btn-outline-light time-preset"
+                                    data-time="18:00">18:00</button>
+                                <button type="button" class="btn btn-outline-light time-preset"
+                                    data-time="19:30">19:30</button>
+                                <button type="button" class="btn btn-outline-light time-preset"
+                                    data-time="21:00">21:00</button>
+                                <button type="button" class="btn btn-outline-light time-preset"
+                                    data-time="22:30">22:30</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row g-2">
+                        <div class="col-md-3">
+                            <div class="form-floating">
+                                <input type="time" class="form-control" id="newStartTime" />
+                                <label>Custom Time</label>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <button type="button" class="btn btn-primary" id="addCustomTimeBtn">
+                                <i class="fas fa-plus"></i> Add Time
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Showtimes Container -->
+            <h6 class="mb-3">Showtimes to Create</h6>
+            <div id="showtimesContainer" class="mb-4">
+                <div class="text-muted text-center py-4" id="noShowtimesMsg">
+                    <i class="fas fa-film fa-3x mb-3"></i>
+                    <p>No showtimes added yet. Add showtimes using the template above.</p>
+                </div>
+            </div>
+
+            <hr class="my-4" />
+
+            <div class="text-center">
+                <button type="button" id="submitShowtimesBtn" class="btn btn-success" disabled>
+                    <i class="fas fa-save"></i> Create All Showtimes
+                </button>
+                <a class="btn btn-secondary mt-0" asp-area="Admin" asp-controller="Showtime" asp-action="Index">
+                    <i class="fas fa-arrow-left"></i> Back to List
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Modals {
+    <partial name="_ShowtimeResultModal" />
+}
+
+@section AdminScripts {
+    <script src="~/js/admin/showtime/createBulk.js"></script>
+}

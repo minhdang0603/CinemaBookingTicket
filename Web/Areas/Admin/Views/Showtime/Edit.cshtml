@@ -1,0 +1,89 @@
+﻿@model ShowTimeUpdateDTO
+
+@{
+    ViewData["Title"] = "Edit Showtime";
+}
+
+<style>
+    /* Đổi màu các span trong input field cho phù hợp với nền đỏ-đen */
+    .input-group span {
+        color: #e0e0e0;
+    }
+
+    .input-group-text {
+        background-color: #333 !important; /* Nền xám đậm đồng bộ admin */
+        border: 1px solid #444;
+    }
+
+        .input-group-text i {
+            color: #fff !important;
+        }
+</style>
+
+<div class="admin-header">
+    <h1>
+        <i class="fas fa-edit"></i> Edit Showtime
+    </h1>
+</div>
+
+<div class="admin-form-container">
+    <form asp-area="Admin" asp-controller="Showtime" asp-action="Edit" method="post">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="Id" />
+        <div class="card">
+            <div class="card-body">
+                <div class="mb-3">
+                    <label asp-for="MovieId" class="form-label">Movie</label>
+                    <select asp-for="MovieId" class="form-control" asp-items="ViewBag.Movies">
+                        <option value="">-- Select a movie --</option>
+                    </select>
+                    <span asp-validation-for="MovieId" class="text-danger"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="ScreenId" class="form-label">Screen</label>
+                    <select asp-for="ScreenId" class="form-control" asp-items="ViewBag.Screens">
+                        <option value="">-- Select a screen --</option>
+                    </select>
+                    <span asp-validation-for="ScreenId" class="text-danger"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="BasePrice" class="form-label">Base Price</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-money-bill"></i></span>
+                        <input asp-for="BasePrice" class="form-control" autocomplete="off" />
+                        <span class="input-group-text">VND</span>
+                    </div>
+                    <span asp-validation-for="BasePrice" class="text-danger"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="ShowDate" class="form-label">Show Date</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
+                        <input asp-for="ShowDate" class="form-control" type="date" min="@DateTime.Now.ToString("yyyy-MM-dd")"/>
+                    </div>
+                    <span asp-validation-for="ShowDate" class="text-danger"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="StartTime" class="form-label">Start Time</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-clock"></i></span>
+                        <input asp-for="StartTime" class="form-control" type="time" />
+                    </div>
+                    <span asp-validation-for="StartTime" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="card-footer text-end">
+                <a class="btn btn-secondary" asp-area="Admin" asp-controller="Showtime" asp-action="Index">
+                    <i class="fas fa-arrow-left"></i> Back to List
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Save Changes
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section AdminScripts {
+    <partial name="_ValidationScriptsPartial" />
+}

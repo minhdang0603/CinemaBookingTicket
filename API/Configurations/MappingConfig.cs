@@ -149,11 +149,7 @@ public class MappingConfig : Profile
                 DateTime.Now));
 
         // ===================== SHOWTIME MAPPING =====================
-        CreateMap<ShowTime, ShowTimeDTO>()
-            .ForMember(dest => dest.Movie, opt => opt.MapFrom(src =>
-                src.Movie))
-            .ForMember(dest => dest.Screen, opt => opt.MapFrom(src =>
-                src.Screen));
+        CreateMap<ShowTime, ShowTimeDTO>();
 
         CreateMap<ShowTime, ShowTimeLiteDTO>()
             .ForMember(dest => dest.Screen, opt => opt.MapFrom(src =>
@@ -172,7 +168,8 @@ public class MappingConfig : Profile
                 .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src =>
                     DateTime.Now))
                 .ForMember(dest => dest.LastUpdatedAt, opt => opt.MapFrom(src =>
-                    DateTime.Now));
+                    DateTime.Now))
+                .ForMember(dest => dest.IsActive, opt => opt.MapFrom(src => true));
         CreateMap<ShowTimeUpdateDTO, ShowTime>()
                 .ForMember(dest => dest.LastUpdatedAt, opt => opt.MapFrom(src =>
                     DateTime.Now));

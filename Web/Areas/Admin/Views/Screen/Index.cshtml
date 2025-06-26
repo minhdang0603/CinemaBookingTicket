@@ -1,5 +1,6 @@
 ﻿@model List<ScreenDTO>
 
+<!-- Header -->
 <div class="admin-header">
     <a class="btn btn-create" asp-area="Admin" asp-controller="Screen" asp-action="Create">
         <i class="fas fa-plus"></i> Create New
@@ -11,25 +12,23 @@
 
 <!-- Search Area -->
 <div class="search-area">
-    <form>
-        <div class="row">
-            <div class="col-md-8">
-                <div class="form-floating">
-                    <input type="text" class="form-control" name="searchTerm" placeholder="Search screens..."
-                           asp-area="Admin" asp-controller="Screen" asp-action="Index" value="@ViewBag.SearchTerm" />
-                    <label>Search Screens</label>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="form-floating">
-                    <select class="form-control" name="theaterId" asp-items="ViewBag.Theaters">
-                        <option value="">All Theaters</option>
-                    </select>
-                    <label>Filter by Theater</label>
-                </div>
+    <div class="row">
+        <div class="col-md-8">
+            <div class="form-floating">
+                <input type="text" class="form-control" name="searchTerm" placeholder="Search screens..."
+                       asp-area="Admin" asp-controller="Screen" asp-action="Index" value="@ViewBag.SearchTerm" />
+                <label>Search Screens</label>
             </div>
         </div>
-    </form>
+        <div class="col-md-4">
+            <div class="form-floating">
+                <select class="form-control" name="theaterId" asp-items="ViewBag.Theaters">
+                    <option value="">All Theaters</option>
+                </select>
+                <label>Filter by Theater</label>
+            </div>
+        </div>
+    </div>
 </div>
 
 <!-- Data Table -->
@@ -109,5 +108,5 @@
 }
 
 @section AdminScripts {
-    <script src="~/js/admin-screen-index.js"></script>
+    <script src="~/js/admin/screen/index.js"></script>
 }

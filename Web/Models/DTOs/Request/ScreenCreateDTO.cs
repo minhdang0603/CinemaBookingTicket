@@ -5,18 +5,19 @@ namespace Web.Models.DTOs.Request
 {
     public class ScreenCreateDTO
     {
-        [Required(ErrorMessage = "Tên phòng chiếu là bắt buộc")]
-        [StringLength(50, ErrorMessage = "Tên phòng chiếu không được vượt quá 50 ký tự")]
+        [Required(ErrorMessage = "Screen name is required.")]
+        [StringLength(50, ErrorMessage = "Screen name must not exceed 50 characters.")]
         public string? Name { get; set; }
 
-        [Required(ErrorMessage = "Vui lòng chọn rạp chiếu")]
+        [Required(ErrorMessage = "Please select a theater.")]
         public int? TheaterId { get; set; }
 
-        [Required(ErrorMessage = "Số hàng là bắt buộc")]
-        [Range(1, 26, ErrorMessage = "Số hàng phải từ 1 đến 26")]
+        [Required(ErrorMessage = "Number of rows is required.")]
+        [Range(1, 26, ErrorMessage = "Number of rows must be between 1 and 26.")]
         public int? Rows { get; set; }
-        [Required(ErrorMessage = "Số ghế mỗi hàng là bắt buộc")]
-        [Range(1, 20, ErrorMessage = "Số ghế mỗi hàng phải từ 1 đến 20")]
+
+        [Required(ErrorMessage = "Seats per row is required.")]
+        [Range(1, 20, ErrorMessage = "Seats per row must be between 1 and 20.")]
         public int? SeatsPerRow { get; set; }
     }
 }

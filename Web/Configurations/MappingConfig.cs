@@ -13,6 +13,10 @@ namespace Web.Configurations
                 .ForMember(dest => dest.Seats, opt => opt.MapFrom(src => src.Seats));
 
             CreateMap<SeatDTO, SeatUpdateDTO>();
+
+            CreateMap<ShowTimeDTO, ShowTimeUpdateDTO>()
+                .ForMember(dest => dest.MovieId, opt => opt.MapFrom(src => src.Movie.Id))
+                .ForMember(dest => dest.ScreenId, opt => opt.MapFrom(src => src.Screen.Id));
         }
     }
 }

@@ -63,7 +63,6 @@ namespace Web.Areas.Admin.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        // [Authorize(Roles = Constant.Role_Admin)]
         public async Task<IActionResult> Create(ScreenCreateDTO model)
         {
             _logger.LogInformation("Received screen creation request: {@model}", model);
