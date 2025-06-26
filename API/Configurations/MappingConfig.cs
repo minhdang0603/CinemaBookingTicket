@@ -182,5 +182,36 @@ public class MappingConfig : Profile
         CreateMap<SeatType, SeatTypeDTO>()
             .ForMember(dest => dest.Color, opt => opt.MapFrom(src =>
                 src.Color));
+
+        // ====================== CONCESSION CATEGORY MAPPING =====================
+        CreateMap<ConcessionCategory, ConcessionCategoryDTO>();
+        CreateMap<ConcessionCategoryCreateDTO, ConcessionCategory>()
+            .ForMember(dest => dest.IsActive, opt => opt.MapFrom(src =>
+                true));
+        CreateMap<ConcessionCategoryUpdateDTO, ConcessionCategory>();
+
+        // ====================== CONCESSION Order DETAIL MAPPING =====================
+        CreateMap<ConcessionOrderDetail, ConcessionOrderDetailDTO>()
+            .ForMember(dest => dest.Name, opt => opt.MapFrom(src =>
+                src.Concession != null ? src.Concession.Name : string.Empty))
+            .ForMember(dest => dest.Description, opt => opt.MapFrom(src =>
+                src.Concession != null ? src.Concession.Description : string.Empty))
+            .ForMember(dest => dest.UnitPrice, opt => opt.MapFrom(src =>
+                src.Concession != null ? src.Concession.Price : 0))
+            .ForMember(dest => dest.ImageUrl, opt => opt.MapFrom(src =>
+                src.Concession != null ? src.Concession.ImageUrl : string.Empty));
+        // ====================== CONCESSION MAPPING =====================
+        CreateMap<Concession, ConcessionDTO>()
+            .ForMember(dest => dest.Category, opt => opt.MapFrom(src =>
+                src.Category));
+        CreateMap<ConcessionCreateDTO, Concession>()
+            .ForMember(dest => dest.IsActive, opt => opt.MapFrom(src => true))
+            .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => DateTime.Now))
+            .ForMember(dest => dest.LastUpdatedAt, opt => opt.MapFrom(src => DateTime.Now))
+            .ForMember(dest => dest.ConcessionOrderDetails, opt => opt.Ignore());
+        CreateMap<ConcessionUpdateDTO, Concession>()
+            .ForMember(dest => dest.LastUpdatedAt, opt => opt.MapFrom(src => DateTime.Now))
+            .ForMember(dest => dest.ConcessionOrderDetails, opt => opt.Ignore());
+
     }
 }

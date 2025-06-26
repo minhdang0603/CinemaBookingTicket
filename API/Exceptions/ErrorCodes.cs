@@ -27,5 +27,10 @@ namespace API.Exceptions
         public static Error ShowTimeNotFound(int ShowTimId) => new($"The showtime with id = {ShowTimId} was not", HttpStatusCode.NotFound);
         public static Error InvalidShowTimeRange(int movieId, int screenId) => new($"The showtime range for movie with id = {movieId} and screen with id = {screenId} is invalid. Start time must be before end time.", HttpStatusCode.BadRequest);
         public static Error InvalidStartForShowTime(int screenId, TimeOnly previousEndTime, TimeOnly startTime) => new($"The showtime for screen with id = {screenId} must start at least 30 minutes after the previous showtime end at {previousEndTime}. Current start time is {startTime}.", HttpStatusCode.BadRequest);
+        public static Error ConcessionCategoryAlreadyExists(string name) => new($"The concession category with name = {name} already exists", HttpStatusCode.Conflict);
+        public static Error ConcessionCategoryNotFound(int id) => new($"The concession category with id = {id} was not found", HttpStatusCode.NotFound);
+        public static Error ConcessionNotFound(int id) => new($"The concession with id = {id} was not found", HttpStatusCode.NotFound);
+
+        public static Error ConcessionAlreadyExists(string name) => new($"The concession with name = {name} already exists", HttpStatusCode.Conflict);
     }
 }

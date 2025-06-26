@@ -1,0 +1,71 @@
+﻿@model ConcessionCreateDTO
+
+@{
+    ViewData["Title"] = "Create Concession";
+    ViewData["Header"] = "Create Concession";
+    ViewData["HeaderIcon"] = "fas fa-edit";
+}
+
+<div class="admin-form-container">
+    <form id="CreateConcessionForm" asp-area="Admin" asp-controller="Concession" asp-action="Create" method="post">
+        @Html.AntiForgeryToken()
+        <div class="card">
+            <div class="card-body">
+                <div class="row g-4"><!-- g-4: thêm khoảng cách giữa cột -->
+                    <!-- Cột trái -->
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label asp-for="Name" class="form-label">Concession Name</label>
+                            <input asp-for="Name" class="form-control" required>
+                            <span asp-validation-for="Name" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Price" class="form-label">Price</label>
+                            <div class="input-group">
+                                <input asp-for="Price" class="form-control" type="number" min="0" required>
+                            </div>
+                            <span asp-validation-for="Price" class="text-danger"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="CategoryId" class="form-label">Category</label>
+                            <select asp-for="CategoryId" class="form-select" asp-items="ViewBag.Categories" required>
+                                <option value="">-- Select Category --</option>
+                            </select>
+                            <span asp-validation-for="CategoryId" class="text-danger"></span>
+                        </div>
+
+                        <!-- Cột phải -->
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label asp-for="Description" class="form-label">Description</label>
+                                <textarea asp-for="Description" class="form-control" rows="4"
+                                    placeholder="Enter concession description"></textarea>
+                                <span asp-validation-for="Description" class="text-danger"></span>
+                            </div>
+
+                            <div class="mb-3">
+                                <label asp-for="ImageUrl" class="form-label">Image URL</label>
+                                <input asp-for="ImageUrl" class="form-control" type="url"
+                                    placeholder="https://example.com/image.jpg">
+                                <span asp-validation-for="ImageUrl" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div> <!-- end row -->
+
+                    <div class="card-footer text-end mt-4">
+                        <a asp-action="Index" class="btn btn-secondary me-2">
+                            <i class="fas fa-arrow-left"></i> Back to List
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Create Concession
+                        </button>
+                    </div>
+                </div>
+            </div>
+    </form>
+</div>
+
+@section AdminScripts {
+    <partial name="_ValidationScriptsPartial" />
+}

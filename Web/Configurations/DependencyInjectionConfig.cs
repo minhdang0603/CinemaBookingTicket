@@ -14,6 +14,8 @@ namespace Web.Configurations
             services.AddScoped<IShowtimeService, ShowtimeService>();
             services.AddScoped<IMovieService, MovieService>();
             services.AddScoped<IGenreService, GenreService>();
+            services.AddScoped<IConcessionCategoryService, ConcessionCategoryService>();
+            services.AddScoped<IConcessionService, ConcessionService>();
         }
     }
 }
