@@ -70,7 +70,7 @@ namespace API.Services
 
         public async Task<TheaterDetailDTO> GetTheaterByIdAsync(int id, bool? isActive = true)
         {
-            var theater = await _unitOfWork.Theater.GetAsync(t => t.Id == id && t.IsActive == isActive);
+            var theater = await _unitOfWork.Theater.GetAsync(t => t.Id == id && t.IsActive == isActive, includeProperties: "Province,Screens");
 
             if (theater == null)
                 throw new AppException(ErrorCodes.TheaterNotFound(id));

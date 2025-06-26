@@ -40,7 +40,8 @@
             <tr>
                 <th>Theater</th>
                 <th>Theater Details</th>
-                <th>Address</th>
+                <th>Opening Time</th>
+                <th>Closing Time</th>
                 <th>Province</th>
                 <th class="text-center">Actions</th>
             </tr>
@@ -63,7 +64,8 @@
                                 <small><i class="fas fa-hashtag"></i> ID: @item.Id</small>
                             </div>
                         </td>
-                        <td>@item.Address</td>
+                        <td>@item.OpeningTime</td>
+                        <td>@item.ClosingTime</td>
                         <td><span class="badge bg-info text-dark">@item.Province?.Name</span></td>
                         <td>
                             <div class="action-buttons">
