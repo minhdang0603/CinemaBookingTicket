@@ -26,8 +26,8 @@ namespace API.Configurations
               {
                   ValidateIssuerSigningKey = true,
                   IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(key)),
-                  ValidateIssuer = false,
-                  ValidateAudience = false,
+                  ValidateIssuer = true,
+                  ValidateAudience = true,
                   ValidIssuer = configuration.GetValue<string>("JwtSettings:ValidIssuer"),
                   ValidAudience = configuration.GetValue<string>("JwtSettings:ValidAudience")
               };

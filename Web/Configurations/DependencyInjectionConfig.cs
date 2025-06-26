@@ -13,6 +13,7 @@ namespace Web.Configurations
             services.AddScoped<ITheaterService, TheaterService>();
             services.AddScoped<IShowtimeService, ShowtimeService>();
             services.AddScoped<IMovieService, MovieService>();
+            services.AddScoped<IProvinceService, ProvinceService>();
         }
     }
 }

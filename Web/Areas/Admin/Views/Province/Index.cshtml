@@ -11,8 +11,8 @@
 </div>
 
 <!-- Data Table -->
-<div class="data-table mt-4">
-    <table id="provinceTable" class="table table-striped table-bordered">
+<div class="data-table">
+    <table id="provinceTable" class="table mb-0">
         <thead class="table-header">
             <tr>
                 <th>ID</th>
@@ -26,15 +26,15 @@
             {
                 foreach (var item in Model)
                 {
-                    <tr class="text-white bg-dark">
+                    <tr>
                         <td>@item.Id</td>
                         <td>@item.Name</td>
                         <td>@item.Code</td>
                         <td class="text-center">
-                            <a class="btn btn-sm btn-primary me-1" asp-area="Admin" asp-controller="Province" asp-action="Edit" asp-route-id="@item.Id">
+                            <a class="btn btn-action btn-edit" asp-area="Admin" asp-controller="Province" asp-action="Edit" asp-route-id="@item.Id">
                                 <i class="fas fa-edit"></i> Edit
                             </a>
-                            <button class="btn btn-sm btn-danger" onclick="deleteProvince(@item.Id, '@item.Name')">
+                            <button class="btn btn-action btn-delete" onclick="deleteProvince(@item.Id, '@item.Name')">
                                 <i class="fas fa-trash-alt"></i> Delete
                             </button>
                         </td>
