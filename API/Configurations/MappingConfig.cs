@@ -96,20 +96,34 @@ public class MappingConfig : Profile
                 src.SeatPrice));
 
         // ===================== THEATER MAPPING =====================
-        CreateMap<Theater, TheaterDTO>();
-        CreateMap<Theater, TheaterDetailDTO>().ForMember(dest => dest.Screens, opt => opt.MapFrom(src =>
-                src.Screens != null ? src.Screens.Select(s => new ScreenLiteDTO
-                {
-                    Id = s.Id,
-                    Name = s.Name,
-                    Rows = s.Rows,
-                    SeatsPerRow = s.SeatsPerRow
-                }) : null));
+        CreateMap<Theater, TheaterDTO>()
+    .ForMember(dest => dest.OpeningTime, opt => opt.MapFrom(src =>
+        src.OpeningTime.HasValue ? DateTime.Today.Add(src.OpeningTime.Value.ToTimeSpan()) : (DateTime?)null))
+    .ForMember(dest => dest.ClosingTime, opt => opt.MapFrom(src =>
+        src.ClosingTime.HasValue ? DateTime.Today.Add(src.ClosingTime.Value.ToTimeSpan()) : (DateTime?)null))
+    .ForMember(dest => dest.Province, opt => opt.MapFrom(src => src.Province));
+
+        CreateMap<Theater, TheaterDetailDTO>()
+    .ForMember(dest => dest.OpeningTime, opt => opt.MapFrom(src =>
+        src.OpeningTime.HasValue ? DateTime.Today.Add(src.OpeningTime.Value.ToTimeSpan()) : (DateTime?)null))
+    .ForMember(dest => dest.ClosingTime, opt => opt.MapFrom(src =>
+        src.ClosingTime.HasValue ? DateTime.Today.Add(src.ClosingTime.Value.ToTimeSpan()) : (DateTime?)null))
+    .ForMember(dest => dest.Screens, opt => opt.MapFrom(src =>
+        src.Screens != null ? src.Screens.Select(s => new ScreenLiteDTO
+        {
+            Id = s.Id,
+            Name = s.Name,
+            Rows = s.Rows,
+            SeatsPerRow = s.SeatsPerRow
+        }) : new List<ScreenLiteDTO>()));
+
         CreateMap<TheaterCreateDTO, Theater>()
             .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src =>
                 DateTime.Now))
             .ForMember(dest => dest.LastUpdatedAt, opt => opt.MapFrom(src =>
                 DateTime.Now))
+            .ForMember(dest => dest.IsActive, opt => opt.MapFrom(src =>
+                true))
             .ForMember(dest => dest.OpeningTime, opt => opt.MapFrom(src =>
                 TimeOnly.FromDateTime(src.OpeningTime!.Value)))
             .ForMember(dest => dest.ClosingTime, opt => opt.MapFrom(src =>

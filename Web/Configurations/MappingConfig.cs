@@ -19,7 +19,8 @@ namespace Web.Configurations
                 .ForMember(dest => dest.ScreenId, opt => opt.MapFrom(src => src.Screen.Id));
             CreateMap<ProvinceDetailDTO, ProvinceUpdateDTO>();
             
-            CreateMap<SeatDTO, SeatUpdateDTO>();
+            CreateMap<TheaterDetailDTO, TheaterUpdateDTO>();
+
         }
     }
 }

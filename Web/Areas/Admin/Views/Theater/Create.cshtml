@@ -1,0 +1,72 @@
+﻿@model TheaterCreateDTO
+
+@{
+    ViewData["Title"] = "Create New Theater";
+    ViewData["Header"] = "Create New Theater";
+    ViewData["HeaderIcon"] = "fas fa-plus-circle";
+}
+
+<div class="admin-form-container">
+    <form id="createTheaterForm" asp-area="Admin" asp-controller="Theater" asp-action="Create" method="post">
+        @Html.AntiForgeryToken()
+        <div class="card">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label asp-for="Name" class="form-label">Theater Name</label>
+                            <input asp-for="Name" class="form-control" required>
+                            <span asp-validation-for="Name" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Address" class="form-label">Address</label>
+                            <input asp-for="Address" class="form-control" required>
+                            <span asp-validation-for="Address" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="ProvinceId" class="form-label">Province</label>
+                            <select asp-for="ProvinceId" class="form-control" asp-items="ViewBag.Provinces">
+                                <option value="">-- Select province --</option>
+                            </select>
+                            <span asp-validation-for="ProvinceId" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label asp-for="OpeningTime" class="form-label">Opening Time</label>
+                            <input asp-for="OpeningTime" class="form-control" type="time">
+                            <span asp-validation-for="OpeningTime" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="ClosingTime" class="form-label">Closing Time</label>
+                            <input asp-for="ClosingTime" class="form-control" type="time">
+                            <span asp-validation-for="ClosingTime" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Description" class="form-label">Description</label>
+                            <textarea asp-for="Description" class="form-control" rows="4"></textarea>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer text-end">
+                <a asp-action="Index" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to List
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Create Theater
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section AdminScripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -64,7 +64,7 @@ namespace API.Services
 
         public async Task<List<TheaterDTO>> GetAllTheatersAsync(bool? isActive = true)
         {
-            var theaters = await _unitOfWork.Theater.GetAllAsync(t => t.IsActive == isActive);
+            var theaters = await _unitOfWork.Theater.GetAllAsync(t => t.IsActive == isActive, includeProperties: "Province");
             return _mapper.Map<List<TheaterDTO>>(theaters);
         }
 
