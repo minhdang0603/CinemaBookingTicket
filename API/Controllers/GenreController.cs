@@ -52,7 +52,7 @@ namespace API.Controllers
             return Ok(APIResponse<List<GenreDTO>>.Builder().WithResult(genres).WithStatusCode(HttpStatusCode.OK).Build());
         }
 
-        [HttpPost("create-genre")]
+        [HttpPost("create")]
         [Authorize(Roles = Constant.Role_Admin)]
         public async Task<ActionResult<APIResponse<GenreDTO>>> CreateGenreAsync([FromBody] GenreCreateDTO genreCreateDTO)
         {
@@ -69,9 +69,9 @@ namespace API.Controllers
             return Ok(APIResponse<GenreDTO>.Builder().WithResult(genreDTO).WithStatusCode(HttpStatusCode.OK).Build());
         }
 
-        [HttpPut("update-genre")]
+        [HttpPut("update/{id}")]
         [Authorize(Roles = Constant.Role_Admin)]
-        public async Task<ActionResult<APIResponse<GenreDTO>>> UpdateGenreAsync(int id, [FromBody] GenreUpdateDTO genreUpdateDTO)
+        public async Task<ActionResult<APIResponse<GenreDTO>>> UpdateGenreAsync([FromRoute] int id, [FromBody] GenreUpdateDTO genreUpdateDTO)
         {
             if (id == 0 || genreUpdateDTO == null)
             {
@@ -95,8 +95,8 @@ namespace API.Controllers
             return Ok(APIResponse<GenreDTO>.Builder().WithResult(genreDTO).WithStatusCode(HttpStatusCode.OK).Build());
         }
 
-        [HttpGet("get-genre-by-id")]
-        public async Task<ActionResult<APIResponse<GenreDTO>>> GetGenreByIdAsync(int id)
+        [HttpGet("{id}")]
+        public async Task<ActionResult<APIResponse<GenreDTO>>> GetGenreByIdAsync([FromRoute] int id)
         {
             if (id == 0)
             {
@@ -120,9 +120,9 @@ namespace API.Controllers
             return Ok(APIResponse<GenreDTO>.Builder().WithResult(genre).WithStatusCode(HttpStatusCode.OK).Build());
         }
 
-        [HttpDelete("delete-genre")]
+        [HttpDelete("delete/{id}")]
         [Authorize(Roles = Constant.Role_Admin)]
-        public async Task<ActionResult<APIResponse<GenreDTO>>> DeleteGenreAsync(int id)
+        public async Task<ActionResult<APIResponse<GenreDTO>>> DeleteGenreAsync([FromRoute] int id)
         {
             if (id == 0)
             {

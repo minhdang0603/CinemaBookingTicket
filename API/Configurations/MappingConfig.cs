@@ -38,7 +38,9 @@ public class MappingConfig : Profile
             .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src =>
                 DateTime.Now))
             .ForMember(dest => dest.LastUpdatedAt, opt => opt.MapFrom(src =>
-                DateTime.Now)); CreateMap<MovieUpdateDTO, Movie>()
+                DateTime.Now))
+            .ForMember(dest => dest.IsActive, opt => opt.MapFrom(src => true));
+        CreateMap<MovieUpdateDTO, Movie>()
             .ForMember(dest => dest.MovieGenres, opt => opt.MapFrom((src, dest) =>
                 src.GenreIds != null ? src.GenreIds.Select(id => new MovieGenre { GenreId = id, MovieId = dest.Id }).ToList() : new List<MovieGenre>()))
             .ForMember(dest => dest.ShowTimes, opt => opt.Ignore())
@@ -51,7 +53,9 @@ public class MappingConfig : Profile
             .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src =>
                 DateTime.Now))
             .ForMember(dest => dest.LastUpdatedAt, opt => opt.MapFrom(src =>
-                DateTime.Now));
+                DateTime.Now))
+            .ForMember(dest => dest.IsActive, opt => opt.MapFrom(src =>
+                true));
         CreateMap<GenreUpdateDTO, Genre>()
             .ForMember(dest => dest.LastUpdatedAt, opt => opt.MapFrom(src =>
                 DateTime.Now));
@@ -141,7 +145,7 @@ public class MappingConfig : Profile
 
         // ===================== SEAT MAPPING =====================
         CreateMap<Seat, SeatDTO>()
-            .ForMember(dest => dest.SeatType, opt => opt.MapFrom(src => 
+            .ForMember(dest => dest.SeatType, opt => opt.MapFrom(src =>
                 src.SeatType));
 
         CreateMap<SeatUpdateDTO, Seat>()
