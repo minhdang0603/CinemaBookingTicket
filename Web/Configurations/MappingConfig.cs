@@ -20,6 +20,9 @@ namespace Web.Configurations
             // map to MovieDTO
             CreateMap<MovieDTO, MovieUpdateDTO>()
                 .ForMember(dest => dest.GenreIds, opt => opt.MapFrom(src => src.Genres.Select(g => g.Id).ToList()));
+            // Map from MovieDetailDTO to MovieUpdateDTO
+            CreateMap<MovieDetailDTO, MovieUpdateDTO>()
+                .ForMember(dest => dest.GenreIds, opt => opt.MapFrom(src => src.Genres.Select(g => g.Id).ToList()));
         }
     }
 }

@@ -14,9 +14,11 @@ public class MovieService : IMovieService
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
     private readonly ILogger<MovieService> _logger;
+    private readonly IShowTimeService _showTimeService;
 
-    public MovieService(IUnitOfWork unitOfWork, IMapper mapper, ILogger<MovieService> logger)
+    public MovieService(IUnitOfWork unitOfWork, IMapper mapper, ILogger<MovieService> logger, IShowTimeService showTimeService)
     {
+        _showTimeService = showTimeService;
         _unitOfWork = unitOfWork;
         _mapper = mapper;
         _logger = logger;
@@ -70,6 +72,13 @@ public class MovieService : IMovieService
             _logger.LogError($"Movie with ID {id} not found");
             throw new AppException(ErrorCodes.MovieNotFound(id));
         }
+        // Xóa bỏ các showtimes liên quan đến movie
+        var showTimes = await _unitOfWork.ShowTime.GetAllAsync(st => st.MovieId == id);
+        foreach (var showTime in showTimes)
+        {
+            await _showTimeService.DeleteShowTimeAsync(showTime.Id);
+        }
+
         movie.IsActive = false;
         movie.LastUpdatedAt = DateTime.Now;
         await _unitOfWork.Movie.UpdateAsync(movie);
