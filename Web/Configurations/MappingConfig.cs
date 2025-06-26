@@ -17,6 +17,9 @@ namespace Web.Configurations
             CreateMap<ShowTimeDTO, ShowTimeUpdateDTO>()
                 .ForMember(dest => dest.MovieId, opt => opt.MapFrom(src => src.Movie.Id))
                 .ForMember(dest => dest.ScreenId, opt => opt.MapFrom(src => src.Screen.Id));
+            CreateMap<ProvinceDetailDTO, ProvinceUpdateDTO>();
+            
+            CreateMap<SeatDTO, SeatUpdateDTO>();
         }
     }
 }

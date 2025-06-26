@@ -178,5 +178,11 @@ public class MappingConfig : Profile
         CreateMap<SeatType, SeatTypeDTO>()
             .ForMember(dest => dest.Color, opt => opt.MapFrom(src =>
                 src.Color));
+
+        // Province Mappings
+        CreateMap<Province, ProvinceDTO>();    
+        CreateMap<ProvinceCreateDTO, Province>();
+        CreateMap<ProvinceUpdateDTO, Province>();
+        CreateMap<Province, ProvinceDetailDTO>();
     }
 }
