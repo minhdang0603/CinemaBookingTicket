@@ -69,15 +69,6 @@ namespace Web.Areas.Admin.Controllers
 
             if (!ModelState.IsValid)
             {
-                // Log validation errors
-                foreach (var state in ModelState)
-                {
-                    foreach (var error in state.Value.Errors)
-                    {
-                        _logger.LogWarning("Validation error for {Key}: {Error}",
-                            state.Key, error.ErrorMessage);
-                    }
-                }
                 // Nếu ModelState không hợp lệ, trả về view với model và thông báo lỗi
                 ViewBag.Theaters = await LoadTheaterDropdown();
                 return View(model);

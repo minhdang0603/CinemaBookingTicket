@@ -2,8 +2,13 @@
     Layout = "_Layout"; // Kế thừa từ layout chung
 }
 
-<!-- Thêm CSS cho Admin Layout trong phần head của trang-->
-<link rel="stylesheet" href="~/css/admin.css" asp-append-version="true" />
+@section Styles {
+    <!-- Base CSS - luôn được load trước -->
+    <link rel="stylesheet" href="~/css/base.css" asp-append-version="true" />
+    
+    <!-- Render Styles section từ các view con -->
+    @await RenderSectionAsync("Styles", required: false)
+}
 <div class="admin-container">
     @RenderBody()
 </div>

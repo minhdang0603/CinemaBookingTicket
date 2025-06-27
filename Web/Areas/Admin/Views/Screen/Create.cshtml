@@ -1,5 +1,9 @@
 @model ScreenCreateDTO
 
+@section Styles {
+    <link rel="stylesheet" href="~/css/admin/screen/seat-configuration.css" asp-append-version="true" />
+}
+
 <div class="admin-header">
     <h1>
         <i class="fas fa-plus"></i> Create New Screen
@@ -42,8 +46,9 @@
                         </div>
 
                         <div class="mb-3">
-                            <div class="alert alert-info">
-                                <i class="fas fa-info-circle"></i> All seats will be created as standard seats by default.
+                            <div class="alert alert-info screen-info-alert">
+                                <i class="fas fa-info-circle"></i> All seats will be created as standard seats by
+                                default.
                                 You can modify seat types later in the Edit screen.
                             </div>
                         </div>
@@ -64,4 +69,30 @@
 
 @section AdminScripts {
     <partial name="_ValidationScriptsPartial" />
+    <script src="~/js/admin/screen/screen-management.js" asp-append-version="true"></script>
+    <script>
+        // Configuration specific to Create view
+        $(document).ready(function () {
+            // For create view, no existing screen ID
+            window.screenManager.setScreenId(null);
+
+            // Set the seat configuration URL (though not needed for create)
+            window.seatConfigurationUrl = '@Url.Action("GetSeatConfiguration", "Screen", new { area = "Admin" })';
+
+            // Add create progress indicator
+            $('#createScreenForm').on('submit', function () {
+                const submitBtn = $(this).find('button[type="submit"]');
+                const originalText = submitBtn.html();
+                submitBtn.html('<i class="fas fa-spinner fa-spin"></i> Creating...').prop('disabled', true);
+
+                // Re-enable if form validation fails
+                setTimeout(() => {
+                    if (!submitBtn.closest('form')[0].checkValidity()) {
+                        submitBtn.html(originalText).prop('disabled', false);
+                    }
+                }, 100);
+            });
+        });
+    </script>
 }
+  

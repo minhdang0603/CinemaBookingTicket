@@ -2,6 +2,10 @@
     ViewData["Title"] = "Home Page";
 }
 
+@section Styles {
+    <link rel="stylesheet" href="~/css/public/home.css" asp-append-version="true" />
+}
+
 
 
 <section class="promo-section">
@@ -11,7 +15,7 @@
 
     <!-- Movie Carousel -->
     <div class="movie-carousel">
-        <h3 style="margin-bottom: 20px;">Phim mới đang chiếu</h3>
+        <h3 class="movie-section-heading">Phim mới đang chiếu</h3>
         <div class="carousel-container" id="movieCarousel">
             @* Dữ liệu phim sẽ được load từ Controller *@
             @if (ViewBag.Movies != null)
@@ -44,7 +48,7 @@
             else
             {
                 <!-- Sample Movies for demo -->
-                <a asp-controller="Movie" asp-action="Index" >
+                <a asp-controller="Movie" asp-action="Index">
                     <div class="movie-card">
                         <div class="movie-poster">Disney Collection</div>
                         <div class="movie-info">
@@ -196,7 +200,7 @@
                         window.location.href = '@Url.Action("Login", "Account")';
                     </text>
             }
-                    }
+                        }
 
         function loadFeaturedMovies() {
             // AJAX call to load featured movies
@@ -225,22 +229,22 @@
             card.onclick = () => viewMovieDetail(movie.id);
 
             card.innerHTML = `
-                            <div class="movie-poster">
-                                ${movie.posterUrl ?
+                                <div class="movie-poster">
+                                    ${movie.posterUrl ?
                     `<img src="${movie.posterUrl}" alt="${movie.title}" />` :
                     `<span>${movie.title}</span>`
                 }
-                            </div>
-                            <div class="movie-info">
-                                <div class="movie-title">${movie.title}</div>
-                                <div class="movie-genre">${movie.genre}</div>
-                                <div class="movie-rating">
-                                    <span class="rating-stars">${generateStars(movie.rating)}</span>
-                                    <span>${movie.rating}/10</span>
                                 </div>
-                                <button class="book-btn" onclick="bookMovie(${movie.id}, event)">Đặt vé</button>
-                            </div>
-                        `;
+                                <div class="movie-info">
+                                    <div class="movie-title">${movie.title}</div>
+                                    <div class="movie-genre">${movie.genre}</div>
+                                    <div class="movie-rating">
+                                        <span class="rating-stars">${generateStars(movie.rating)}</span>
+                                        <span>${movie.rating}/10</span>
+                                    </div>
+                                    <button class="book-btn" onclick="bookMovie(${movie.id}, event)">Đặt vé</button>
+                                </div>
+                            `;
 
             return card;
         }

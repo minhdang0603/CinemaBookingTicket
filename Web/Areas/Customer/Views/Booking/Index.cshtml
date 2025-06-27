@@ -1,7 +1,10 @@
 ﻿@{
     ViewData["Title"] = "Book Ticket";
 }
-<link rel="stylesheet" href="~/css/public/movie-booking.css" />
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/public/movie-booking.css" asp-append-version="true" />
+}
 
 <!-- Step Indicator -->
 <div class="step-indicator">
@@ -80,7 +83,7 @@
 
             <!-- Total -->
             <div class="total-card fade-in">
-                <div style="color: rgba(255,255,255,0.8); font-size: 0.9rem; margin-bottom: 10px;">TỔNG ĐƠN HÀNG</div>
+                <div class="total-section-label">TỔNG ĐƠN HÀNG</div>
                 <div class="total-amount">
                     <span id="total-amount">0</span> ₫
                 </div>
@@ -98,15 +101,15 @@
                 <!-- Legend -->
                 <div class="legend">
                     <div class="legend-item">
-                        <div class="legend-seat" style="background: var(--seat-selected);"></div>
+                        <div class="legend-seat selected"></div>
                         <span>Ghế bạn chọn</span>
                     </div>
                     <div class="legend-item">
-                        <div class="legend-seat" style="background: var(--seat-taken);"></div>
+                        <div class="legend-seat taken"></div>
                         <span>Đã bán</span>
                     </div>
                     <div class="legend-item">
-                        <div class="legend-seat" style="background: #6b7280;"></div>
+                        <div class="legend-seat unavailable"></div>
                         <span>Không thể chọn</span>
                     </div>
                 </div>
@@ -119,15 +122,15 @@
                 <!-- Seat Types Legend -->
                 <div class="legend">
                     <div class="legend-item">
-                        <div class="legend-seat" style="background: var(--seat-standard);"></div>
+                        <div class="legend-seat standard"></div>
                         <span>Standard (70,000₫)</span>
                     </div>
                     <div class="legend-item">
-                        <div class="legend-seat" style="background: var(--seat-vip);"></div>
+                        <div class="legend-seat vip"></div>
                         <span>VIP (100,000₫)</span>
                     </div>
                     <div class="legend-item">
-                        <div class="legend-seat" style="background: var(--seat-couple);"></div>
+                        <div class="legend-seat couple"></div>
                         <span>Couple (150,000₫)</span>
                     </div>
                 </div>

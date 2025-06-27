@@ -1,0 +1,103 @@
+/* Seat Configuration Partial CSS - extends admin screen management */
+@import url('./screen-management.css');
+
+/* Additional styles specific to seat configuration partial */
+.seat-configuration {
+    width: 100%;
+}
+
+/* Override seat selection for better visibility */
+.seat-item.selected {
+    border: 2px solid #007bff !important;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5) !important;
+    animation: none; /* Override the red pulse animation */
+}
+
+/* Enhanced row selector */
+.row-selector {
+    color: #fff !important;
+    background-color: #444 !important;
+}
+
+/* Enhanced seat type options */
+.seat-type-option {
+    padding: 8px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    color: #fff;
+    font-weight: 500;
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.seat-type-option:hover {
+    border-color: #fff;
+    transform: translateY(-2px);
+}
+
+/* Ensure seat grid uses proper CSS Grid layout */
+.seat-row {
+    display: grid;
+    grid-template-columns: 32px repeat(var(--seats-per-row), 32px);
+    gap: var(--spacing-xs);
+    align-items: center;
+    justify-content: start;
+}
+
+/* Seat item specific to partial view */
+.seat-configuration .seat-item {
+    position: relative;
+    overflow: hidden;
+    width: 32px;
+    height: 32px;
+    background-color: #6c757d;
+    border-radius: 5px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 0.8rem;
+    box-sizing: border-box;
+}
+
+.seat-configuration .seat-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.1) 50%, transparent 70%);
+    opacity: 0;
+    transition: opacity var(--transition-fast);
+}
+
+.seat-configuration .seat-item:hover::before {
+    opacity: 1;
+}
+
+/* Enhanced seat actions for partial */
+.seat-actions .btn {
+    font-size: var(--font-size-sm);
+    padding: var(--spacing-xs) var(--spacing-sm);
+}
+
+/* Enhanced seat type selector */
+.seat-type-selector p {
+    color: var(--text-secondary);
+    font-weight: var(--font-weight-medium);
+}
+
+/* Improved responsive design for partial */
+@media (max-width: 576px) {
+    .seat-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .seat-actions .btn {
+        width: 100%;
+        margin-bottom: var(--spacing-xs);
+    }
+}

@@ -1,4 +1,5 @@
-/* Movie Detail Page CSS */
+/* Movie Detail Page CSS - extends base.css */
+@import url('../base.css');
 
 .movie-hero {
     position: relative;
@@ -30,17 +31,18 @@
 }
 
 .movie-info-card {
-    background: rgba(255,255,255,0.1);
+    background: var(--bg-card);
     backdrop-filter: blur(20px);
     border: 1px solid rgba(255,255,255,0.2);
-    border-radius: 20px;
-    padding: 40px;
-    margin-bottom: 30px;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
-    transition: all 0.3s ease;
+    border-radius: var(--radius-xl);
+    padding: var(--spacing-xxl);
+    margin-bottom: var(--spacing-xl);
+    box-shadow: var(--shadow-2xl);
+    transition: var(--transition-normal);
 }
 
 .movie-info-card:hover {
+    background: var(--bg-card-hover);
     transform: translateY(-5px);
     box-shadow: 0 30px 60px rgba(0,0,0,0.4);
 }
@@ -48,9 +50,9 @@
 .movie-poster {
     width: 100%;
     max-width: 300px;
-    border-radius: 15px;
-    box-shadow: 0 15px 30px rgba(0,0,0,0.5);
-    transition: transform 0.3s ease;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-2xl);
+    transition: var(--transition-normal);
 }
 
 .movie-poster:hover {
@@ -60,8 +62,10 @@
 .movie-title {
     font-size: 3rem;
     font-weight: 700;
+    background: linear-gradient(45deg, var(--accent-pink), var(--accent-teal));
     background-size: 300% 300%;
     -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
     animation: gradientShift 3s ease-in-out infinite;
     margin-bottom: 15px;
@@ -118,45 +122,45 @@
 }
 
 .btn-primary-custom {
-    background: linear-gradient(45deg, #ff6b6b, #ee5a6f);
+    background: linear-gradient(45deg, var(--accent-pink), var(--accent-pink-dark));
     border: none;
-    padding: 15px 30px;
-    border-radius: 50px;
-    color: white;
+    padding: var(--spacing-md) var(--spacing-xl);
+    border-radius: var(--radius-round);
+    color: var(--white);
     font-weight: 600;
     text-decoration: none;
     display: inline-flex;
     align-items: center;
-    gap: 10px;
-    transition: all 0.3s ease;
+    gap: var(--spacing-sm);
+    transition: var(--transition-normal);
     box-shadow: 0 10px 20px rgba(255,107,107,0.3);
 }
 
 .btn-primary-custom:hover {
     transform: translateY(-3px);
     box-shadow: 0 15px 30px rgba(255,107,107,0.4);
-    color: white;
+    color: var(--white);
 }
 
 .btn-secondary-custom {
-    background: rgba(255,255,255,0.1);
+    background: var(--bg-card);
     border: 2px solid rgba(255,255,255,0.3);
     padding: 13px 28px;
-    border-radius: 50px;
-    color: white;
+    border-radius: var(--radius-round);
+    color: var(--white);
     font-weight: 600;
     text-decoration: none;
     display: inline-flex;
     align-items: center;
-    gap: 10px;
-    transition: all 0.3s ease;
+    gap: var(--spacing-sm);
+    transition: var(--transition-normal);
 }
 
 .btn-secondary-custom:hover {
-    background: rgba(255,255,255,0.2);
+    background: var(--bg-card-hover);
     border-color: rgba(255,255,255,0.5);
     transform: translateY(-3px);
-    color: white;
+    color: var(--white);
 }
 
 .rating {
@@ -167,13 +171,14 @@
 }
 
 .rating-stars {
-    color: #ffd700;
+    color: var(--gold);
     font-size: 1.2rem;
 }
 
 .rating-score {
-    background: linear-gradient(45deg, #ffd700, #ffed4e);
+    background: linear-gradient(45deg, var(--gold), #ffed4e);
     -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
     font-weight: 700;
     font-size: 1.5rem;
@@ -372,4 +377,51 @@ select option {
 a {
     all: unset;
     cursor: pointer; 
+}
+
+/* Floating Elements */
+.floating-element {
+    position: absolute;
+    opacity: 0.1;
+    animation: float 6s ease-in-out infinite;
+    z-index: 1;
+}
+
+.floating-element:nth-child(1) {
+    top: 20%;
+    left: 10%;
+    font-size: 3rem !important;
+    animation-delay: 0s;
+}
+
+.floating-element:nth-child(2) {
+    top: 60%;
+    right: 15%;
+    font-size: 2rem !important;
+    animation-delay: 2s;
+}
+
+.floating-element:nth-child(3) {
+    bottom: 20%;
+    left: 20%;
+    font-size: 2.5rem !important;
+    animation-delay: 4s;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-20px); }
+}
+
+/* Custom Form Selects */
+.custom-form-select {
+    background: rgba(255,255,255,0.1) !important;
+    border: 1px solid rgba(255,255,255,0.3) !important;
+    color: white !important;
+    border-radius: 10px !important;
+}
+
+.custom-form-select option {
+    background: var(--bg-primary);
+    color: var(--text-primary);
 }

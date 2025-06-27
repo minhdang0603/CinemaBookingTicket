@@ -1,9 +1,11 @@
-/* Movie Booking Page CSS */
+/* Movie Booking Page CSS - extends base.css */
+@import url('../base.css');
+/* Movie Booking Specific Variables */
 :root {
     --primary-color: #1a1a2e;
     --secondary-color: #16213e;
     --accent-color: #e94560;
-    --gold-color: #ffd700;
+    --gold-color: var(--gold);
     --success-color: #0f4c75;
     --text-light: #8892b0;
     --text-white: #ccd6f6;
@@ -14,9 +16,9 @@
     --seat-couple: #8b5cf6;
     --seat-selected: #10b981;
     --seat-taken: #ef4444;
-    --border-radius: 12px;
-    --shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-    --shadow-hover: 0 20px 40px rgba(0, 0, 0, 0.3);
+    --border-radius: var(--radius-lg);
+    --shadow: var(--shadow-lg);
+    --shadow-hover: var(--shadow-xl);
 }
 
 body {
@@ -393,4 +395,36 @@ body {
     0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.6); }
     70% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
     100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+}
+
+/* Legend Seat Specific Colors */
+.legend-seat.selected {
+    background: var(--seat-selected) !important;
+}
+
+.legend-seat.taken {
+    background: var(--seat-taken) !important;
+}
+
+.legend-seat.unavailable {
+    background: #6b7280 !important;
+}
+
+.legend-seat.standard {
+    background: var(--seat-standard) !important;
+}
+
+.legend-seat.vip {
+    background: var(--seat-vip) !important;
+}
+
+.legend-seat.couple {
+    background: var(--seat-couple) !important;
+}
+
+/* Total Section */
+.total-section-label {
+    color: rgba(255,255,255,0.8);
+    font-size: 0.9rem;
+    margin-bottom: 10px;
 }

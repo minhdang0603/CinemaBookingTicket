@@ -1,19 +1,22 @@
 ﻿@{
     ViewData["Title"] = "Movie Detail";
 }
-<link rel="stylesheet" href="~/css/public/movie-detail.css" />
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/public/movie-detail.css" asp-append-version="true" />
+}
 <div class="movie-hero">
     <div class="floating-elements">
-        <i class="fas fa-film floating-element" style="font-size: 3rem;"></i>
-        <i class="fas fa-star floating-element" style="font-size: 2rem;"></i>
-        <i class="fas fa-video floating-element" style="font-size: 2.5rem;"></i>
+        <i class="fas fa-film floating-element"></i>
+        <i class="fas fa-star floating-element"></i>
+        <i class="fas fa-video floating-element"></i>
     </div>
 
     <div class="hero-content mt-3">
         <div class="row align-items-center">
             <div class="col-lg-4 col-md-6 mb-4">
                 <img src="https://images.unsplash.com/photo-1440404653325-ab127d49abc1?ixlib=rb-4.0.3"
-                     alt="Movie Poster" class="movie-poster">
+                    alt="Movie Poster" class="movie-poster">
             </div>
 
             <div class="col-lg-8 col-md-6">
@@ -87,16 +90,14 @@
             </h3>
             <div class="row mb-4">
                 <div class="col-md-4 mb-3">
-                    <select class="form-select"
-                            style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); color: white; border-radius: 10px;">
+                    <select class="form-select custom-form-select">
                         <option>Tp. Hồ Chí Minh</option>
                         <option>Hà Nội</option>
                         <option>Đà Nẵng</option>
                     </select>
                 </div>
                 <div class="col-md-4 mb-3">
-                    <select class="form-select"
-                            style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); color: white; border-radius: 10px;">
+                    <select class="form-select custom-form-select">
                         <option>Hôm nay</option>
                         <option>Ngày mai</option>
                         <option>Cuối tuần</option>
@@ -111,7 +112,7 @@
                     <div class="cinema-header" onclick="toggleCinemaGroup(this)">
                         <div class="d-flex align-items-center">
                             <img src="https://images.unsplash.com/photo-1489599003021-3d2ad2429a0a?ixlib=rb-4.0.3&w=50&h=50&fit=crop&crop=center"
-                                 class="cinema-logo me-3">
+                                class="cinema-logo me-3">
                             <div>
                                 <h5 class="cinema-name mb-0">CGV Cinemas</h5>
                                 <p class="cinema-count mb-0">21 rạp</p>
@@ -181,7 +182,7 @@
                     <div class="cinema-header" onclick="toggleCinemaGroup(this)">
                         <div class="d-flex align-items-center">
                             <img src="https://images.unsplash.com/photo-1489599003021-3d2ad2429a0a?ixlib=rb-4.0.3&w=50&h=50&fit=crop&crop=center"
-                                 class="cinema-logo me-3">
+                                class="cinema-logo me-3">
                             <div>
                                 <h5 class="cinema-name mb-0">Galaxy Cinema</h5>
                                 <p class="cinema-count mb-0">12 rạp</p>
@@ -220,7 +221,7 @@
                     <div class="cinema-header" onclick="toggleCinemaGroup(this)">
                         <div class="d-flex align-items-center">
                             <img src="https://images.unsplash.com/photo-1489599003021-3d2ad2429a0a?ixlib=rb-4.0.3&w=50&h=50&fit=crop&crop=center"
-                                 class="cinema-logo me-3">
+                                class="cinema-logo me-3">
                             <div>
                                 <h5 class="cinema-name mb-0">Lotte Cinema</h5>
                                 <p class="cinema-count mb-0">9 rạp</p>
@@ -262,7 +263,7 @@
                     <div class="cinema-header" onclick="toggleCinemaGroup(this)">
                         <div class="d-flex align-items-center">
                             <img src="https://images.unsplash.com/photo-1489599003021-3d2ad2429a0a?ixlib=rb-4.0.3&w=50&h=50&fit=crop&crop=center"
-                                 class="cinema-logo me-3">
+                                class="cinema-logo me-3">
                             <div>
                                 <h5 class="cinema-name mb-0">BHD Star Cineplex</h5>
                                 <p class="cinema-count mb-0">5 rạp</p>
