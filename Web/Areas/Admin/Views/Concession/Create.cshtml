@@ -11,7 +11,8 @@
         @Html.AntiForgeryToken()
         <div class="card">
             <div class="card-body">
-                <div class="row g-4"><!-- g-4: thêm khoảng cách giữa cột -->
+                <div class="row g-4">
+                    <!-- g-4: thêm khoảng cách giữa cột -->
                     <!-- Cột trái -->
                     <div class="col-md-6">
                         <div class="mb-3">
@@ -21,7 +22,7 @@
                         </div>
 
                         <div class="mb-3">
-                            <label asp-for="Price" class="form-label">Price</label>
+                            <label asp-for="Price" class="form-label">Price (VND)</label>
                             <div class="input-group">
                                 <input asp-for="Price" class="form-control" type="number" min="0" required>
                             </div>
@@ -40,14 +41,14 @@
                             <div class="mb-3">
                                 <label asp-for="Description" class="form-label">Description</label>
                                 <textarea asp-for="Description" class="form-control" rows="4"
-                                    placeholder="Enter concession description"></textarea>
+                                          placeholder="Enter concession description"></textarea>
                                 <span asp-validation-for="Description" class="text-danger"></span>
                             </div>
 
                             <div class="mb-3">
                                 <label asp-for="ImageUrl" class="form-label">Image URL</label>
                                 <input asp-for="ImageUrl" class="form-control" type="url"
-                                    placeholder="https://example.com/image.jpg">
+                                       placeholder="https://example.com/image.jpg">
                                 <span asp-validation-for="ImageUrl" class="text-danger"></span>
                             </div>
                         </div>
@@ -63,6 +64,7 @@
                     </div>
                 </div>
             </div>
+        </div>
     </form>
 </div>
 

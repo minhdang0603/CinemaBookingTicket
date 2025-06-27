@@ -20,17 +20,7 @@ public class MappingConfig : Profile
 
         CreateMap<Movie, MovieDetailDTO>()
             .ForMember(dest => dest.Genres, opt => opt.MapFrom(src =>
-                src.MovieGenres != null ? src.MovieGenres.Select(mg => mg.Genre) : null))
-            .ForMember(dest => dest.ShowTimes, opt => opt.MapFrom(src =>
-                src.ShowTimes != null ? src.ShowTimes.Select(st => new ShowTimeLiteDTO
-                {
-                    Id = st.Id,
-                    ShowDate = st.ShowDate,
-                    StartTime = st.StartTime,
-                    EndTime = st.EndTime,
-                    BasePrice = st.BasePrice,
-                    Screen = new ScreenDTO { Id = st.Screen.Id, Name = st.Screen.Name }
-                }) : null));
+                src.MovieGenres != null ? src.MovieGenres.Select(mg => mg.Genre) : null));
 
         CreateMap<MovieCreateDTO, Movie>()
             .ForMember(dest => dest.MovieGenres, opt => opt.Ignore())
@@ -101,14 +91,7 @@ public class MappingConfig : Profile
 
         // ===================== THEATER MAPPING =====================
         CreateMap<Theater, TheaterDTO>();
-        CreateMap<Theater, TheaterDetailDTO>().ForMember(dest => dest.Screens, opt => opt.MapFrom(src =>
-                src.Screens != null ? src.Screens.Select(s => new ScreenLiteDTO
-                {
-                    Id = s.Id,
-                    Name = s.Name,
-                    Rows = s.Rows,
-                    SeatsPerRow = s.SeatsPerRow
-                }) : null));
+        CreateMap<Theater, TheaterDetailDTO>();
         CreateMap<TheaterCreateDTO, Theater>()
             .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src =>
                 DateTime.Now))

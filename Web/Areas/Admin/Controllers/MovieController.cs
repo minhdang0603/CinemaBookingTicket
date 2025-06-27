@@ -122,6 +122,7 @@ namespace Web.Areas.Admin.Controllers
             TempData["success"] = "Movie created successfully.";
             return RedirectToAction(nameof(Index));
         }
+
         [HttpGet]
         public async Task<IActionResult> Edit(int id)
         {
@@ -145,6 +146,7 @@ namespace Web.Areas.Admin.Controllers
             var movieUpdateDTO = _map.Map<MovieUpdateDTO>(movie);
             return View(movieUpdateDTO);
         }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(MovieUpdateDTO model)
@@ -216,12 +218,6 @@ namespace Web.Areas.Admin.Controllers
                                      }).ToList();
 
             ViewBag.Genres = await LoadGenreDropdown();
-        }
-
-        [HttpGet]
-        public IActionResult Index123()
-        {
-            return View();
         }
     }
 }

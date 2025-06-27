@@ -20,7 +20,7 @@
             <div class="col-md-8">
                 <div class="form-floating">
                     <input type="text" class="form-control" name="searchTerm" placeholder="Search concession..."
-                        asp-area="Admin" asp-controller="Concession" asp-action="Index" value="@ViewBag.SearchTerm" />
+                           asp-area="Admin" asp-controller="Concession" asp-action="Index" value="@ViewBag.SearchTerm" />
                     <label>Search Concession</label>
                 </div>
             </div>
@@ -61,7 +61,8 @@
                             <div class="item-title">@item.Name</div>
                         </td>
                         <td>
-                            <span class="badge bg-success">$@item.Price.ToString("F2")</span>
+                            @* show vnd price *@
+                            <span class="badge bg-success">@item.Price.ToString("C", new System.Globalization.CultureInfo("vi-VN"))</span>
                         </td>
                         <td>
                             @if (item.Category != null)
@@ -76,7 +77,7 @@
                         <td>
                             <div class="action-buttons">
                                 <a class="btn btn-action btn-edit" asp-area="Admin" asp-controller="Concession"
-                                    asp-action="Edit" asp-route-id="@item.Id">
+                                   asp-action="Edit" asp-route-id="@item.Id">
                                     <i class="fas fa-edit"></i> Edit
                                 </a>
                                 <button class="btn btn-action btn-delete" onclick="deleteConcession(@item.Id, '@item.Name')">
@@ -86,17 +87,6 @@
                         </td>
                     </tr>
                 }
-            }
-            else
-            {
-                <tr>
-                    <td colspan="7" class="text-center">
-                        <div class="no-data">
-                            <i class="fas fa-cookie-bite fa-3x text-muted mb-3"></i>
-                            <p class="text-muted">No concessions found</p>
-                        </div>
-                    </td>
-                </tr>
             }
         </tbody>
     </table>
@@ -119,7 +109,7 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                     <a class="btn btn-danger"
-                        onclick="confirmDeleteConcession('@Url.Action("Delete", "Concession", new { area = "Admin", id = "__id__" })')">
+                       onclick="confirmDeleteConcession('@Url.Action("Delete", "Concession", new { area = "Admin", id = "__id__" })')">
                         <i class="fas fa-trash"></i> Delete
                     </a>
                 </div>
