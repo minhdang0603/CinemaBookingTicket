@@ -9,10 +9,6 @@ namespace Web.Areas.Public.Controllers
         {
             return View();
         }
-        public IActionResult MovieBooking()
-        {
-            return View();
-        }
     }
 
 }

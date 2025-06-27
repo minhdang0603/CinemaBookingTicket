@@ -1,0 +1,396 @@
+/* Movie Booking Page CSS */
+:root {
+    --primary-color: #1a1a2e;
+    --secondary-color: #16213e;
+    --accent-color: #e94560;
+    --gold-color: #ffd700;
+    --success-color: #0f4c75;
+    --text-light: #8892b0;
+    --text-white: #ccd6f6;
+    --bg-dark: #0a192f;
+    --bg-darker: #020c1b;
+    --seat-standard: #64748b;
+    --seat-vip: #f59e0b;
+    --seat-couple: #8b5cf6;
+    --seat-selected: #10b981;
+    --seat-taken: #ef4444;
+    --border-radius: 12px;
+    --shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    --shadow-hover: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background: linear-gradient(135deg, var(--bg-darker) 0%, var(--primary-color) 100%);
+    color: var(--text-white);
+    min-height: 100vh;
+    padding-bottom: 120px;  /*Space for fixed action buttons*/ 
+}
+
+.container-fluid {
+    padding: 0;
+}
+
+/* Step Indicator */
+.step-indicator {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    padding: 20px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.step-item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    position: relative;
+    padding: 10px;
+    transition: all 0.3s ease;
+}
+
+.step-item.active {
+    color: var(--accent-color);
+}
+
+.step-item .step-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    margin-bottom: 8px;
+    transition: all 0.3s ease;
+}
+
+.step-item.active .step-icon {
+    background: var(--accent-color);
+    color: white;
+    transform: scale(1.1);
+    box-shadow: 0 0 20px rgba(233, 69, 96, 0.5);
+}
+
+.step-item::after {
+    content: '';
+    position: absolute;
+    top: 25px;
+    right: -50%;
+    width: 100%;
+    height: 2px;
+    background: rgba(255, 255, 255, 0.2);
+    z-index: -1;
+}
+
+.step-item:last-child::after {
+    display: none;
+}
+
+/* Main Content */
+.booking-content {
+    padding: 40px 20px;
+}
+
+.movie-info-card {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--border-radius);
+    padding: 25px;
+    margin-bottom: 20px;
+    transition: all 0.3s ease;
+}
+
+.movie-info-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-hover);
+}
+
+.movie-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-white);
+    margin-bottom: 8px;
+}
+
+.cinema-name {
+    color: var(--gold-color);
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.showtime {
+    color: var(--text-light);
+    font-size: 0.9rem;
+}
+
+.total-card {
+    background: linear-gradient(135deg, var(--accent-color), #c73650);
+    border-radius: var(--border-radius);
+    padding: 25px;
+    text-align: center;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow);
+}
+
+.total-amount {
+    font-size: 2rem;
+    font-weight: 700;
+    color: white;
+}
+
+/* Cinema Hall */
+.cinema-hall {
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: var(--border-radius);
+    padding: 30px;
+    margin-bottom: 30px;
+}
+
+.screen {
+    background: linear-gradient(135deg, #ffffff, #e2e8f0);
+    color: var(--primary-color);
+    text-align: center;
+    padding: 15px;
+    border-radius: 50px;
+    margin-bottom: 40px;
+    font-weight: 600;
+    position: relative;
+    overflow: hidden;
+}
+
+.screen::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    animation: screenShine 3s infinite;
+}
+
+/* Seat Map */
+.seat-map {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    margin: 30px 0;
+}
+
+.seat-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.row-label {
+    width: 30px;
+    text-align: center;
+    font-weight: 600;
+    color: var(--text-light);
+}
+
+.seat {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    font-size: 11px;
+    font-weight: 500;
+}
+
+.seat:hover {
+    transform: scale(1.15);
+}
+
+.seat.standard {
+    background: var(--seat-standard);
+    color: white;
+}
+
+.seat.vip {
+    background: var(--seat-vip);
+    color: white;
+}
+
+.seat.couple {
+    background: var(--seat-couple);
+    color: white;
+    width: 68px;
+}
+
+.seat.selected {
+    background: var(--seat-selected) !important;
+    box-shadow: 0 0 15px rgba(16, 185, 129, 0.6);
+    animation: pulse 2s infinite;
+}
+
+.seat.taken {
+    background: var(--seat-taken);
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.seat.taken:hover {
+    transform: none;
+}
+
+/* Legend */
+.legend {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    margin: 30px 0;
+    flex-wrap: wrap;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+}
+
+.legend-seat {
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+}
+
+/* Action Buttons */
+.action-buttons {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 400px;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    border-radius: var(--border-radius);
+    padding: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    z-index: 1000;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.action-buttons .row {
+    align-items: stretch; /* Ensure both buttons have the same height */
+    margin: 0; /* Remove default Bootstrap margin */
+}
+
+.action-buttons .col-4,
+.action-buttons .col-8 {
+    padding: 0 5px; /* Adjust spacing between buttons */
+    display: flex; /* Make columns flex */
+    align-items: stretch; /* Stretch to full height */
+}
+
+.btn-custom {
+    padding: 14px 20px; /* Consistent padding for both buttons */
+    border-radius: 8px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    border: none;
+    text-decoration: none;
+    display: flex !important; /* Force flex display */
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    height: 50px; /* Fixed height */
+    font-size: 0.95rem;
+    min-height: 50px; /* Ensure min-height */
+}
+
+.btn-back {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-white);
+    height: 50px; /* Same height */
+    min-height: 50px;
+}
+
+.btn-back:hover {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    transform: translateY(-2px);
+}
+
+.btn-continue {
+    background: linear-gradient(135deg, var(--accent-color), #c73650);
+    color: white;
+    height: 50px; /* Same height */
+    min-height: 50px;
+}
+
+.btn-continue:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(233, 69, 96, 0.4);
+    color: white;
+}
+
+.btn-continue:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+    pointer-events: none;
+}
+
+.btn-continue.disabled {
+    opacity: 0.5 !important;
+    cursor: not-allowed !important;
+    transform: none !important;
+    box-shadow: none !important;
+    pointer-events: none !important;
+}
+
+.btn-custom i {
+    font-size: 1rem; /* Consistent icon size */
+    line-height: 1;
+}
+
+.btn-back i {
+    margin: 0; /* Remove any default margin */
+}
+
+.btn-continue span {
+    line-height: 1.2;
+}
+
+/* Ensure buttons are always clickable when enabled */
+.btn-custom:not(.disabled):not(:disabled) {
+    pointer-events: auto !important;
+    cursor: pointer !important;
+}
+
+/* Animations */
+.fade-in {
+    animation: fadeIn 0.6s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes screenShine {
+    0% { left: -100%; }
+    50% { left: 100%; }
+    100% { left: 100%; }
+}
+
+@keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.6); }
+    70% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+}
