@@ -1,0 +1,113 @@
+﻿@model MovieCreateDTO
+
+@{
+    ViewData["Title"] = "Create New Movie";
+    ViewData["Header"] = "Create New Movie";
+    ViewData["HeaderIcon"] = "fas fa-plus-circle";
+}
+
+<div class="admin-form-container">
+    <form id="createMovieForm" asp-area="Admin" asp-controller="Movie" asp-action="Create" method="post">
+        @Html.AntiForgeryToken()
+        <div class="card">
+            <div class="card-body">
+                <div class="row g-4"><!-- g-4: thêm khoảng cách giữa cột -->
+                    <!-- Cột trái -->
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label asp-for="Title" class="form-label">Movie Title</label>
+                            <input asp-for="Title" class="form-control" required>
+                            <span asp-validation-for="Title" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Director" class="form-label">Director</label>
+                            <input asp-for="Director" class="form-control" required>
+                            <span asp-validation-for="Director" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Cast" class="form-label">Cast</label>
+                            <input asp-for="Cast" class="form-control" required>
+                            <span asp-validation-for="Cast" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="ReleaseDate" class="form-label">Release Date</label>
+                            <input asp-for="ReleaseDate" class="form-control" type="date" required>
+                            <span asp-validation-for="ReleaseDate" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="AgeRating" class="form-label">Age Rating</label>
+                            <select asp-for="AgeRating" class="form-select" asp-items="ViewBag.AgeRatings">
+                                <option value="">-- Select Age Rating --</option>
+                            </select>
+                            <span asp-validation-for="AgeRating" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Duration" class="form-label">Duration (minutes)</label>
+                            <input asp-for="Duration" class="form-control" type="number" min="1" required>
+                            <span asp-validation-for="Duration" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <!-- Cột phải -->
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label asp-for="Description" class="form-label">Description</label>
+                            <textarea asp-for="Description" class="form-control" rows="4"></textarea>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="PosterUrl" class="form-label">Poster URL</label>
+                            <input asp-for="PosterUrl" class="form-control" type="url" required>
+                            <span asp-validation-for="PosterUrl" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="TrailerUrl" class="form-label">Trailer URL</label>
+                            <input asp-for="TrailerUrl" class="form-control" type="url">
+                            <span asp-validation-for="TrailerUrl" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="BackgroundUrl" class="form-label">Background URL</label>
+                            <input asp-for="BackgroundUrl" class="form-control" type="url">
+                            <span asp-validation-for="BackgroundUrl" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Genres</label>
+                            <div class="d-flex flex-wrap gap-2">
+                                @foreach (var genre in ViewBag.Genres)
+                                {
+                                    <div class="form-check me-3">
+                                        <input type="checkbox" name="GenreIds" value="@genre.Value" class="form-check-input"
+                                            id="genre_@genre.Value" />
+                                        <label class="form-check-label" for="genre_@genre.Value">&nbsp; @genre.Text</label>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div> <!-- end row -->
+
+                <div class="card-footer text-end mt-4">
+                    <a asp-action="Index" class="btn btn-secondary me-2">
+                        <i class="fas fa-arrow-left"></i> Back to List
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Create Movie
+                    </button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section AdminScripts {
+    <partial name="_ValidationScriptsPartial" />
+}

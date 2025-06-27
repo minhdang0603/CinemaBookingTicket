@@ -54,7 +54,7 @@ namespace API.Controllers
         }
 
 
-        [HttpPost("create-movie")]
+        [HttpPost("create")]
         [Authorize(Roles = Constant.Role_Admin)]
         public async Task<ActionResult<APIResponse<MovieDTO>>> CreateMovieAsync([FromBody] MovieCreateDTO movieCreateDTO)
         {
@@ -71,9 +71,9 @@ namespace API.Controllers
             return Ok(APIResponse<MovieDTO>.Builder().WithResult(movieDTO).WithStatusCode(HttpStatusCode.OK).Build());
         }
 
-        [HttpPut("update-movie")]
+        [HttpPut("update/{id}")]
         [Authorize(Roles = Constant.Role_Admin)]
-        public async Task<ActionResult<APIResponse<MovieDTO>>> UpdateMovieAsync(int id, [FromBody] MovieUpdateDTO movieUpdateDTO)
+        public async Task<ActionResult<APIResponse<MovieDTO>>> UpdateMovieAsync([FromRoute] int id, [FromBody] MovieUpdateDTO movieUpdateDTO)
         {
             if (id == 0 || movieUpdateDTO == null)
             {
@@ -97,8 +97,8 @@ namespace API.Controllers
             return Ok(APIResponse<MovieDTO>.Builder().WithResult(movieDTO).WithStatusCode(HttpStatusCode.OK).Build());
         }
 
-        [HttpGet("get-movie-by-id")]
-        public async Task<ActionResult<APIResponse<MovieDetailDTO>>> GetMovieByIdAsync(int id)
+        [HttpGet("{id}")]
+        public async Task<ActionResult<APIResponse<MovieDetailDTO>>> GetMovieByIdAsync([FromRoute] int id)
         {
             if (id == 0)
             {
@@ -122,9 +122,9 @@ namespace API.Controllers
             return Ok(APIResponse<MovieDetailDTO>.Builder().WithResult(movieDTO).WithStatusCode(HttpStatusCode.OK).Build());
         }
 
-        [HttpDelete("delete-movie")]
+        [HttpDelete("delete/{id}")]
         [Authorize(Roles = Constant.Role_Admin)]
-        public async Task<ActionResult<APIResponse<object>>> DeleteMovieAsync(int id)
+        public async Task<ActionResult<APIResponse<object>>> DeleteMovieAsync([FromRoute] int id)
         {
             if (id == 0)
             {

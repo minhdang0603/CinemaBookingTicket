@@ -23,6 +23,8 @@ namespace API.Configurations
             services.AddScoped<IBookingService, BookingService>();
             services.AddScoped<IPaymentService, PaymentService>();
             services.AddScoped<IShowTimeService, ShowTimeService>();
+            services.AddScoped<IConcessionCategoryService, ConcessionCategoryService>();
+            services.AddScoped<IConcessionService, ConcessionService>();
         }
     }
 }
