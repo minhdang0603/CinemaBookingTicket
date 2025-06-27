@@ -3,7 +3,7 @@
 }
 
 
-<!-- Promotional Banner -->
+
 <section class="promo-section">
     <div class="promo-banner">
         <h2>Collection</h2>
@@ -44,18 +44,20 @@
             else
             {
                 <!-- Sample Movies for demo -->
-                <div class="movie-card" onclick="viewMovieDetail(1)">
-                    <div class="movie-poster">Disney Collection</div>
-                    <div class="movie-info">
-                        <div class="movie-title">Lilo & Stitch</div>
-                        <div class="movie-genre">Gia đình • Hoạt hình</div>
-                        <div class="movie-rating">
-                            <span class="rating-stars">★★★★☆</span>
-                            <span>8.5/10</span>
+                <a asp-controller="Movie" asp-action="Index" >
+                    <div class="movie-card">
+                        <div class="movie-poster">Disney Collection</div>
+                        <div class="movie-info">
+                            <div class="movie-title">Lilo & Stitch</div>
+                            <div class="movie-genre">Gia đình • Hoạt hình</div>
+                            <div class="movie-rating">
+                                <span class="rating-stars">★★★★☆</span>
+                                <span>8.5/10</span>
+                            </div>
+                            <button class="book-btn" onclick="bookMovie(1, event)">Đặt vé</button>
                         </div>
-                        <button class="book-btn" onclick="bookMovie(1, event)">Đặt vé</button>
                     </div>
-                </div>
+                </a>
                 <div class="movie-card" onclick="viewMovieDetail(2)">
                     <div class="movie-poster">Marvel Series</div>
                     <div class="movie-info">
