@@ -96,18 +96,10 @@ public class MappingConfig : Profile
             .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src =>
                 DateTime.Now))
             .ForMember(dest => dest.LastUpdatedAt, opt => opt.MapFrom(src =>
-                DateTime.Now))
-            .ForMember(dest => dest.OpeningTime, opt => opt.MapFrom(src =>
-                TimeOnly.FromDateTime(src.OpeningTime!.Value)))
-            .ForMember(dest => dest.ClosingTime, opt => opt.MapFrom(src =>
-                TimeOnly.FromDateTime(src.ClosingTime!.Value)));
+                DateTime.Now));
         CreateMap<TheaterUpdateDTO, Theater>()
             .ForMember(dest => dest.LastUpdatedAt, opt => opt.MapFrom(src =>
-                DateTime.Now))
-            .ForMember(dest => dest.OpeningTime, opt => opt.MapFrom(src =>
-                TimeOnly.FromDateTime(src.OpeningTime!.Value)))
-            .ForMember(dest => dest.ClosingTime, opt => opt.MapFrom(src =>
-                TimeOnly.FromDateTime(src.ClosingTime!.Value)));
+                DateTime.Now));
 
 		// ===================== SCREEN MAPPING =====================
 
@@ -196,5 +188,11 @@ public class MappingConfig : Profile
             .ForMember(dest => dest.LastUpdatedAt, opt => opt.MapFrom(src => DateTime.Now))
             .ForMember(dest => dest.ConcessionOrderDetails, opt => opt.Ignore());
 
-    }
+		// ====================== Province MAPPING =====================
+		CreateMap<Province, ProvinceDTO>();
+		CreateMap<ProvinceCreateDTO, Province>()
+			.ForMember(dest => dest.IsActive, opt => opt.MapFrom(src => true));
+		CreateMap<ProvinceUpdateDTO, Province>();
+		CreateMap<Province, ProvinceDetailDTO>();
+	}
 }
