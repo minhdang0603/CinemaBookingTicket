@@ -1,0 +1,1546 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đặt Vé Xem Phim - Beta Cinema</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #1a1a2e;
+            --secondary-color: #16213e;
+            --accent-color: #e94560;
+            --gold-color: #ffd700;
+            --success-color: #0f4c75;
+            --text-light: #8892b0;
+            --text-white: #ccd6f6;
+            --bg-dark: #0a192f;
+            --bg-darker: #020c1b;
+            --seat-standard: #64748b;
+            --seat-vip: #f59e0b;
+            --seat-couple: #8b5cf6;
+            --seat-selected: #10b981;
+            --seat-taken: #ef4444;
+            --border-radius: 12px;
+            --shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            --shadow-hover: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, var(--bg-darker) 0%, var(--primary-color) 100%);
+            color: var(--text-white);
+            min-height: 100vh;
+            overflow-x: hidden;
+            padding-bottom: 120px;
+        }
+
+        .container-fluid {
+            padding: 0;
+        }
+
+        /* Step Indicator */
+        .step-indicator {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            padding: 20px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .step-item {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            position: relative;
+            padding: 10px;
+            transition: all 0.3s ease;
+        }
+
+            .step-item.active {
+                color: var(--accent-color);
+            }
+
+            .step-item .step-icon {
+                width: 50px;
+                height: 50px;
+                border-radius: 50%;
+                background: rgba(255, 255, 255, 0.1);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 20px;
+                margin-bottom: 8px;
+                transition: all 0.3s ease;
+            }
+
+            .step-item.active .step-icon {
+                background: var(--accent-color);
+                color: white;
+                transform: scale(1.1);
+                box-shadow: 0 0 20px rgba(233, 69, 96, 0.5);
+            }
+
+            .step-item::after {
+                content: '';
+                position: absolute;
+                top: 25px;
+                right: -50%;
+                width: 100%;
+                height: 2px;
+                background: rgba(255, 255, 255, 0.2);
+                z-index: -1;
+            }
+
+            .step-item:last-child::after {
+                display: none;
+            }
+
+        /* Main Content */
+        .main-content {
+            padding: 40px 20px;
+        }
+
+        .movie-info-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--border-radius);
+            padding: 25px;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+
+            .movie-info-card:hover {
+                transform: translateY(-5px);
+                box-shadow: var(--shadow-hover);
+            }
+
+        .movie-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-white);
+            margin-bottom: 8px;
+        }
+
+        .cinema-name {
+            color: var(--gold-color);
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .showtime {
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        .total-card {
+            background: linear-gradient(135deg, var(--accent-color), #c73650);
+            border-radius: var(--border-radius);
+            padding: 25px;
+            text-align: center;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+        }
+
+        .total-amount {
+            font-size: 1.5rem;
+            font-weight: 500;
+            color: white;
+        }
+
+        /* Cinema Hall */
+        .cinema-hall {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: var(--border-radius);
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+
+        .screen {
+            background: linear-gradient(135deg, #ffffff, #e2e8f0);
+            color: var(--primary-color);
+            text-align: center;
+            padding: 15px;
+            border-radius: 50px;
+            margin-bottom: 40px;
+            font-weight: 600;
+            position: relative;
+            overflow: hidden;
+        }
+
+            .screen::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: -100%;
+                width: 100%;
+                height: 100%;
+                background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+                animation: screenShine 3s infinite;
+            }
+
+
+        /* Seat Map */
+        .seat-map {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            margin: 30px 0;
+        }
+
+        .seat-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .row-label {
+            width: 30px;
+            text-align: center;
+            font-weight: 600;
+            color: var(--text-light);
+        }
+
+        .seat {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+            .seat:hover {
+                transform: scale(1.15);
+            }
+
+            .seat.standard {
+                background: var(--seat-standard);
+                color: white;
+            }
+
+            .seat.vip {
+                background: var(--seat-vip);
+                color: white;
+            }
+
+            .seat.couple {
+                background: var(--seat-couple);
+                color: white;
+                width: 68px;
+            }
+
+            .seat.selected {
+                background: var(--seat-selected) !important;
+                box-shadow: 0 0 15px rgba(16, 185, 129, 0.6);
+                animation: pulse 2s infinite;
+            }
+
+            .seat.taken {
+                background: var(--seat-taken);
+                cursor: not-allowed;
+                opacity: 0.6;
+            }
+
+                .seat.taken:hover {
+                    transform: none;
+                }
+
+
+        /* Legend */
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+        }
+
+        .legend-seat {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 400px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            z-index: 1000;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+            .action-buttons .row {
+                align-items: stretch;
+                margin: 0;
+            }
+
+            .action-buttons .col-4,
+            .action-buttons .col-8 {
+                padding: 0 5px;
+                display: flex;
+                align-items: stretch;
+            }
+
+        .btn-custom {
+            padding: 14px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: none;
+            text-decoration: none;
+            display: flex !important;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            height: 50px;
+            font-size: 0.95rem;
+            min-height: 50px;
+        }
+
+        .btn-back {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-white);
+            height: 30px;
+            min-height: 30px;
+        }
+
+            .btn-back:hover {
+                background: rgba(255, 255, 255, 0.2);
+                color: white;
+                transform: translateY(-2px);
+            }
+
+        .btn-continue {
+            background: linear-gradient(135deg, var(--accent-color), #c73650);
+            color: white;
+            height: 30px;
+            min-height: 30px;
+        }
+
+            .btn-continue:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 10px 20px rgba(233, 69, 96, 0.4);
+                color: white;
+            }
+
+            .btn-continue:disabled {
+                opacity: 0.5;
+                cursor: not-allowed;
+                transform: none;
+                box-shadow: none;
+                pointer-events: none;
+            }
+
+            .btn-continue.disabled {
+                opacity: 0.5 !important;
+                cursor: not-allowed !important;
+                transform: none !important;
+                box-shadow: none !important;
+                pointer-events: none !important;
+            }
+
+        .btn-custom i {
+            font-size: 1rem;
+            line-height: 1;
+        }
+
+        .btn-back i {
+            margin: 0;
+        }
+
+        .btn-continue span {
+            line-height: 1.2;
+        }
+
+        .btn-custom:not(.disabled):not(:disabled) {
+            pointer-events: auto !important;
+            cursor: pointer !important;
+        }
+
+
+
+        .step-content {
+            display: none;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+            .step-content.active {
+                display: block;
+            }
+
+        .section-title {
+            color: var(--text-white);
+            font-weight: 600;
+            margin-bottom: 30px;
+        }
+
+        /* Concession Styles */
+        .concession-section {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: var(--border-radius);
+            padding: 30px;
+        }
+
+        .combo-list {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .combo-item {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+            .combo-item:hover {
+                background: rgba(255, 255, 255, 0.08);
+                border-color: rgba(100, 255, 218, 0.3);
+            }
+
+        .combo-info {
+            flex: 1;
+        }
+
+        .combo-name {
+            color: var(--text-white);
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .combo-description {
+            color: var(--text-light);
+            margin: 0;
+            line-height: 1.5;
+        }
+
+        .highlight {
+            color: var(--accent-color);
+            font-weight: 600;
+        }
+
+        .combo-controls {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 15px;
+        }
+
+        .combo-price {
+            color: var(--gold-color);
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+
+        .quantity-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 5px;
+        }
+
+        .qty-btn {
+            width: 35px;
+            height: 35px;
+            border: none;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-white);
+            font-size: 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+            .qty-btn:hover {
+                background: var(--accent-color);
+                transform: scale(1.1);
+            }
+
+        .quantity {
+            color: var(--text-white);
+            font-weight: 600;
+            min-width: 30px;
+            text-align: center;
+            font-size: 1.1rem;
+        }
+
+        /* Payment Styles */
+        .payment-section {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: var(--border-radius);
+            padding: 30px;
+        }
+
+        .order-summary {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .summary-table {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .summary-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 20px;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+            .summary-row:first-child {
+                font-weight: 600;
+                color: var(--text-light);
+                font-size: 0.9rem;
+                text-transform: uppercase;
+            }
+
+            .summary-row.total-row {
+                border-bottom: none;
+                border-top: 2px solid rgba(100, 255, 218, 0.3);
+                margin-top: 10px;
+                padding-top: 15px;
+                font-weight: 700;
+                color: var(--gold-color);
+            }
+
+        .customer-info {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .form-label {
+            color: var(--text-white);
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+
+        .form-control {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 12px 16px;
+            color: var(--text-white);
+            transition: all 0.3s ease;
+        }
+
+            .form-control:focus {
+                background: rgba(255, 255, 255, 0.15);
+                border-color: var(--accent-color);
+                box-shadow: 0 0 0 0.2rem rgba(233, 69, 96, 0.25);
+                color: var(--text-white);
+            }
+
+        .error-message {
+            color: var(--accent-color);
+            font-size: 0.85rem;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .form-control.error {
+            border-color: var(--accent-color);
+        }
+
+            .form-control.error + .error-message {
+                display: block;
+            }
+
+        .payment-methods {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .payment-option {
+            display: flex;
+            align-items: center;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+            .payment-option:hover {
+                background: rgba(255, 255, 255, 0.08);
+                border-color: rgba(100, 255, 218, 0.3);
+            }
+
+            .payment-option.selected {
+                border-color: var(--accent-color);
+                background: rgba(233, 69, 96, 0.1);
+            }
+
+        .payment-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-size: 1.5rem;
+        }
+
+        .qr-icon {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .momo-icon {
+            background: linear-gradient(135deg, #e91e63, #ad1457);
+            color: white;
+        }
+
+        .card-icon {
+            background: linear-gradient(135deg, #2196f3, #0d47a1);
+            color: white;
+        }
+
+        .payment-info {
+            flex: 1;
+        }
+
+            .payment-info h6 {
+                color: var(--text-white);
+                font-weight: 600;
+                margin-bottom: 5px;
+            }
+
+            .payment-info p {
+                color: var(--text-light);
+                margin: 0;
+                font-size: 0.9rem;
+            }
+
+        .payment-check {
+            color: var(--accent-color);
+            font-size: 1.2rem;
+        }
+
+        .payment-option:not(.selected) .payment-check {
+            color: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Ticket Info Styles */
+        .ticket-info-section {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: var(--border-radius);
+            padding: 30px;
+        }
+
+        .confirmation-modal {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .modal-header {
+            background: rgba(255, 255, 255, 0.08);
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+            .modal-header h4 {
+                color: var(--text-white);
+                margin: 0;
+                font-weight: 600;
+            }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: var(--text-light);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-body {
+            padding: 30px;
+        }
+
+        .ticket-details {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .detail-row {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 20px;
+            padding: 15px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+            .detail-row:last-child {
+                border-bottom: none;
+            }
+
+            .detail-row.total-row {
+                border-top: 2px solid rgba(100, 255, 218, 0.3);
+                margin-top: 15px;
+                padding-top: 20px;
+                font-weight: 700;
+            }
+
+            .detail-row .label {
+                color: var(--text-light);
+                font-weight: 500;
+            }
+
+            .detail-row .value {
+                color: var(--text-white);
+                font-weight: 500;
+            }
+
+        .completion-message {
+            background: rgba(100, 255, 218, 0.1);
+            border: 1px solid rgba(100, 255, 218, 0.3);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+            .completion-message p {
+                color: var(--text-white);
+                margin: 0;
+                line-height: 1.6;
+            }
+
+        .btn-proceed-payment {
+            width: 100%;
+            background: linear-gradient(135deg, var(--accent-color), #c73650);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 15px 20px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+            .btn-proceed-payment:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 10px 20px rgba(233, 69, 96, 0.4);
+            }
+    </style>
+</head>
+<body>
+    <!-- Step Indicator -->
+    <div class="step-indicator">
+        <div class="container">
+            <div class="row">
+                <div class="col-3">
+                    <div class="step-item active">
+                        <div class="step-icon">
+                            <i class="fas fa-th"></i>
+                        </div>
+                        <span>Chọn ghế</span>
+                    </div>
+                </div>
+                <div class="col-3">
+                    <div class="step-item">
+                        <div class="step-icon">
+                            <i class="fas fa-shopping-bag"></i>
+                        </div>
+                        <span>Bắp nước</span>
+                    </div>
+                </div>
+                <div class="col-3">
+                    <div class="step-item">
+                        <div class="step-icon">
+                            <i class="fas fa-credit-card"></i>
+                        </div>
+                        <span>Thanh toán</span>
+                    </div>
+                </div>
+                <div class="col-3">
+                    <div class="step-item">
+                        <div class="step-icon">
+                            <i class="fas fa-inbox"></i>
+                        </div>
+                        <span>Thông tin vé</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Fixed Action Buttons -->
+    <div class="action-buttons fade-in">
+        <div class="row g-3">
+            <div class="col-4">
+                <button class="btn btn-custom btn-back w-100" id="back-btn" onclick="prevStep()">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+            </div>
+            <div class="col-8">
+                <button class="btn btn-custom btn-continue w-100" id="continue-btn" disabled>
+                    <span class="d-md-none">
+                        <span id="mobile-total">0</span>₫ |
+                    </span>
+                    <span id="continue-text">Tiếp tục</span>
+                    <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container main-content">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-lg-4 order-lg-2">
+                <!-- Movie Info -->
+                <div class="movie-info-card fade-in">
+                    <div class="movie-title">Doraemon Movie 44: Nobita Và Cuộc Phiêu Lưu Vào Thế Giới Trong Tranh</div>
+                    <div class="cinema-name">Beta Đan Phượng</div>
+                    <div class="showtime">
+                        <i class="fas fa-clock"></i> Suất <strong>11:00 27/06/2025</strong><br>
+                        <i class="fas fa-map-marker-alt"></i> Phòng chiếu <strong>P3</strong> - Ghế <span id="selected-seats">...</span>
+                    </div>
+                </div>
+
+                <!-- Total -->
+                <div class="total-card fade-in">
+                    <div style="color: rgba(255,255,255,0.8); font-size: 0.9rem; margin-bottom: 10px;">TỔNG ĐƠN HÀNG</div>
+                    <div class="total-amount">
+                        <span id="total-amount">0</span> ₫
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content Steps -->
+            <div class="col-lg-8 order-lg-1">
+                <!-- Step 1: Seat Selection -->
+                <div class="step-content active" id="step-seats">
+                    <div class="cinema-hall fade-in">
+                        <!-- Screen -->
+                        <div class="screen">
+                            <i class="fas fa-tv me-2"></i>MÀN HÌNH
+                        </div>
+
+                        <!-- Legend -->
+                        <div class="legend">
+                            <div class="legend-item">
+                                <div class="legend-seat" style="background: var(--seat-selected);"></div>
+                                <span>Ghế bạn chọn</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-seat" style="background: var(--seat-taken);"></div>
+                                <span>Đã bán</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-seat" style="background: #6b7280;"></div>
+                                <span>Không thể chọn</span>
+                            </div>
+                        </div>
+
+                        <!-- Seat Map -->
+                        <div class="seat-map" id="seat-map">
+                        </div>
+
+                        <!-- Seat Types Legend -->
+                        <div class="legend">
+                            <div class="legend-item">
+                                <div class="legend-seat" style="background: var(--seat-standard);"></div>
+                                <span>Standard (70,000₫)</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-seat" style="background: var(--seat-vip);"></div>
+                                <span>VIP (100,000₫)</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-seat" style="background: var(--seat-couple);"></div>
+                                <span>Couple (150,000₫)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 2: Concession -->
+                <div class="step-content" id="step-concession">
+                    <div class="concession-section fade-in">
+                        <h3 class="section-title mb-4">
+                            <i class="fas fa-shopping-bag me-2"></i>
+                            Combo bắp nước
+                        </h3>
+
+                        <div class="combo-list">
+                            <!-- Family Combo -->
+                            <div class="combo-item">
+                                <div class="combo-info">
+                                    <h5 class="combo-name">Family Combo 69oz</h5>
+                                    <p class="combo-description">
+                                        <span class="highlight">TIẾT KIỆM 95K!!!</span> Gồm: 2 Bắp (69oz) + 4 Nước có gaz (22oz) + 2 Snack Oishi (80g)
+                                    </p>
+                                </div>
+                                <div class="combo-controls">
+                                    <div class="combo-price">213.000 ₫</div>
+                                    <div class="quantity-controls">
+                                        <button class="qty-btn minus" onclick="updateComboQuantity('family', -1)">-</button>
+                                        <span class="quantity" id="family-qty">0</span>
+                                        <button class="qty-btn plus" onclick="updateComboQuantity('family', 1)">+</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Sweet Combo -->
+                            <div class="combo-item">
+                                <div class="combo-info">
+                                    <h5 class="combo-name">Sweet Combo 69oz</h5>
+                                    <p class="combo-description">
+                                        <span class="highlight">TIẾT KIỆM 46K!!!</span> Gồm: 1 Bắp (69oz) + 2 Nước có gaz (22oz)
+                                    </p>
+                                </div>
+                                <div class="combo-controls">
+                                    <div class="combo-price">88.000 ₫</div>
+                                    <div class="quantity-controls">
+                                        <button class="qty-btn minus" onclick="updateComboQuantity('sweet', -1)">-</button>
+                                        <span class="quantity" id="sweet-qty">0</span>
+                                        <button class="qty-btn plus" onclick="updateComboQuantity('sweet', 1)">+</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Beta Combo -->
+                            <div class="combo-item">
+                                <div class="combo-info">
+                                    <h5 class="combo-name">Beta Combo 69oz</h5>
+                                    <p class="combo-description">
+                                        <span class="highlight">TIẾT KIỆM 28K!!!</span> Gồm: 1 Bắp (69oz) + 1 Nước có gaz (22oz)
+                                    </p>
+                                </div>
+                                <div class="combo-controls">
+                                    <div class="combo-price">68.000 ₫</div>
+                                    <div class="quantity-controls">
+                                        <button class="qty-btn minus" onclick="updateComboQuantity('beta', -1)">-</button>
+                                        <span class="quantity" id="beta-qty">0</span>
+                                        <button class="qty-btn plus" onclick="updateComboQuantity('beta', 1)">+</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 3: Payment -->
+                <div class="step-content" id="step-payment">
+                    <div class="payment-section fade-in">
+                        <h3 class="section-title mb-4">
+                            <i class="fas fa-credit-card me-2"></i>
+                            Thông tin thanh toán
+                        </h3>
+
+                        <!-- Order Summary -->
+                        <div class="order-summary mb-4">
+                            <h5 class="mb-3">Tóm tắt đơn hàng</h5>
+                            <div class="summary-table">
+                                <div class="summary-row">
+                                    <span class="item-type">MÔ TẢ</span>
+                                    <span class="item-qty">SỐ LƯỢNG</span>
+                                    <span class="item-price">THÀNH TIỀN</span>
+                                </div>
+                                <div class="summary-row" id="seat-summary">
+                                    <span>VIP</span>
+                                    <span id="seat-count">0</span>
+                                    <span id="seat-total">0 ₫</span>
+                                </div>
+                                <div class="summary-row combo-summary" id="combo-summary" style="display: none;">
+                                    <span>Combo</span>
+                                    <span id="combo-count">0</span>
+                                    <span id="combo-total">0 ₫</span>
+                                </div>
+                                <div class="summary-row total-row">
+                                    <span>Tổng</span>
+                                    <span></span>
+                                    <span id="payment-total">0 ₫</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Customer Info -->
+                        <div class="customer-info mb-4">
+                            <h5 class="mb-3">Thông tin cá nhân</h5>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Họ và tên *</label>
+                                    <input type="text" class="form-control" id="customer-name" required>
+                                    <div class="error-message">Giá trị không được phép để trống</div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Số điện thoại *</label>
+                                    <input type="tel" class="form-control" id="customer-phone" required>
+                                    <div class="error-message">Giá trị không được phép để trống</div>
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label">Email</label>
+                                    <input type="email" class="form-control" id="customer-email">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Payment Methods -->
+                        <div class="payment-methods">
+                            <h5 class="mb-3">Hình thức thanh toán</h5>
+
+                            <div class="payment-option selected" data-method="qr">
+                                <div class="payment-icon qr-icon">
+                                    <i class="fas fa-qrcode"></i>
+                                </div>
+                                <div class="payment-info">
+                                    <h6>Chuyển khoản / Quét mã QR</h6>
+                                    <p>Tự động xuất mã vé trong 30s sau khi chuyển khoản</p>
+                                </div>
+                                <div class="payment-check">
+                                    <i class="fas fa-check-circle"></i>
+                                </div>
+                            </div>
+
+                            <div class="payment-option" data-method="momo">
+                                <div class="payment-icon momo-icon">
+                                    <i class="fab fa-cc-mastercard"></i>
+                                </div>
+                                <div class="payment-info">
+                                    <h6>Ví MoMo</h6>
+                                    <p>Thanh toán nhanh chóng với ví MoMo</p>
+                                </div>
+                                <div class="payment-check">
+                                    <i class="fas fa-circle"></i>
+                                </div>
+                            </div>
+
+                            <div class="payment-option" data-method="card">
+                                <div class="payment-icon card-icon">
+                                    <i class="fas fa-credit-card"></i>
+                                </div>
+                                <div class="payment-info">
+                                    <h6>Thẻ ATM / Thẻ quốc tế</h6>
+                                    <p>Thanh toán bằng thẻ ATM hoặc thẻ tín dụng</p>
+                                </div>
+                                <div class="payment-check">
+                                    <i class="fas fa-circle"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 4: Ticket Info -->
+                <div class="step-content" id="step-ticket">
+                    <div class="ticket-info-section fade-in">
+                        <div class="confirmation-modal">
+                            <div class="modal-header">
+                                <h4>Xác nhận đơn hàng</h4>
+                                <button class="close-btn" onclick="closeConfirmation()">×</button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="ticket-details">
+                                    <div class="detail-row">
+                                        <span class="label">Rạp</span>
+                                        <span class="value">Beta Đan Phượng</span>
+                                    </div>
+                                    <div class="detail-row">
+                                        <span class="label">Phim</span>
+                                        <span class="value">Doraemon Movie 44: Nobita Và Cuộc Phiêu Lưu Vào Thế Giới Trong Tranh</span>
+                                    </div>
+                                    <div class="detail-row">
+                                        <span class="label">Suất</span>
+                                        <span class="value"><strong>08:45 27/06/2025</strong></span>
+                                    </div>
+                                    <div class="detail-row">
+                                        <span class="label">Ghế</span>
+                                        <span class="value" id="final-seats">I5</span>
+                                    </div>
+                                    <div class="detail-row">
+                                        <span class="label">Thông tin<br>cá nhân</span>
+                                        <span class="value" id="final-customer-info">
+                                            Vũ Huy Anh<br>
+                                            0779906249<br>
+                                            vuhuyanhpew@gmail.com
+                                        </span>
+                                    </div>
+                                    <div class="detail-row">
+                                        <span class="label">Phương thức<br>thanh toán</span>
+                                        <span class="value">Ví MoMo</span>
+                                    </div>
+                                    <div class="detail-row total-row">
+                                        <span class="label">Giá trị<br>đơn hàng</span>
+                                        <span class="value"><strong id="final-total">52.500 ₫</strong></span>
+                                    </div>
+                                </div>
+
+                                <div class="completion-message">
+                                    <p>
+                                        Vé đã mua không thể đổi hoặc hoàn tiền.<br>
+                                        Mã vé sẽ được gửi <strong>01</strong> lần qua số điện thoại và email đã nhập.
+                                        Vui lòng kiểm tra lại thông tin trước khi tiếp tục.
+                                    </p>
+                                </div>
+
+                                <button class="btn-proceed-payment">Tiến hành thanh toán</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Global variables
+        const seatConfig = {
+            'A': { count: 11, type: 'standard', price: 70000 },
+            'B': { count: 11, type: 'standard', price: 70000 },
+            'C': { count: 9, type: 'standard', price: 70000 },
+            'D': { count: 9, type: 'vip', price: 100000 },
+            'E': { count: 9, type: 'vip', price: 100000 },
+            'F': { count: 9, type: 'vip', price: 100000 },
+            'G': { count: 9, type: 'vip', price: 100000 },
+            'H': { count: 9, type: 'vip', price: 100000 },
+            'I': { count: 10, type: 'vip', price: 100000 },
+            'J': { count: 8, type: 'couple', price: 150000 }
+        };
+
+        const combos = {
+            family: { name: 'Family Combo 69oz', price: 213000, quantity: 0 },
+            sweet: { name: 'Sweet Combo 69oz', price: 88000, quantity: 0 },
+            beta: { name: 'Beta Combo 69oz', price: 68000, quantity: 0 }
+        };
+
+        const takenSeats = ['A5', 'B3', 'D7', 'F2', 'H8', 'J4'];
+        let selectedSeats = [];
+        let currentStep = 1;
+
+        // Step Management
+        function showStep(stepNumber) {
+            // Hide all steps
+            document.querySelectorAll('.step-content').forEach(step => {
+                step.classList.remove('active');
+            });
+
+            // Show target step
+            document.getElementById(`step-${getStepName(stepNumber)}`).classList.add('active');
+
+            // Update step indicator
+            updateStepIndicator(stepNumber);
+            currentStep = stepNumber;
+
+            // Update button states
+            updateButtonStates();
+        }
+
+        function updateButtonStates() {
+            const backBtn = document.getElementById('back-btn');
+            const continueBtn = document.getElementById('continue-btn');
+            const continueText = document.getElementById('continue-text');
+
+            // Show/hide back button
+            if (currentStep === 1) {
+                backBtn.style.opacity = '0.5';
+                backBtn.disabled = true;
+            } else {
+                backBtn.style.opacity = '1';
+                backBtn.disabled = false;
+            }
+
+            // Update continue button text
+            switch (currentStep) {
+                case 1:
+                    continueText.textContent = 'Tiếp tục';
+                    break;
+                case 2:
+                    continueText.textContent = 'Tiếp tục';
+                    break;
+                case 3:
+                    continueText.textContent = 'Xác nhận';
+                    break;
+                case 4:
+                    continueBtn.style.display = 'none';
+                    break;
+            }
+
+            // Enable continue button for concession step (optional)
+            if (currentStep === 2) {
+                continueBtn.removeAttribute('disabled');
+                continueBtn.classList.remove('disabled');
+                continueBtn.style.pointerEvents = 'auto';
+                continueBtn.style.cursor = 'pointer';
+            }
+        }
+
+        function getStepName(stepNumber) {
+            const steps = ['seats', 'concession', 'payment', 'ticket'];
+            return steps[stepNumber - 1];
+        }
+
+        function updateStepIndicator(activeStep) {
+            document.querySelectorAll('.step-item').forEach((item, index) => {
+                item.classList.toggle('active', index + 1 === activeStep);
+            });
+        }
+
+        function nextStep() {
+            if (currentStep < 4) {
+                if (validateCurrentStep()) {
+                    showStep(currentStep + 1);
+                    updateSummary();
+                }
+            }
+        }
+
+        function prevStep() {
+            if (currentStep > 1) {
+                showStep(currentStep - 1);
+            }
+        }
+
+        function validateCurrentStep() {
+            switch (currentStep) {
+                case 1: // Seats
+                    if (selectedSeats.length === 0) {
+                        alert('Vui lòng chọn ít nhất 1 ghế');
+                        return false;
+                    }
+                    return true;
+                case 3: // Payment
+                    return validateCustomerInfo();
+                default:
+                    return true;
+            }
+        }
+
+        function validateCustomerInfo() {
+            const name = document.getElementById('customer-name');
+            const phone = document.getElementById('customer-phone');
+            let isValid = true;
+
+            // Reset errors
+            document.querySelectorAll('.form-control').forEach(input => {
+                input.classList.remove('error');
+            });
+
+            if (!name.value.trim()) {
+                name.classList.add('error');
+                isValid = false;
+            }
+
+            if (!phone.value.trim()) {
+                phone.classList.add('error');
+                isValid = false;
+            }
+
+            return isValid;
+        }
+
+        // Seat Management (existing functions)
+        function generateSeatMap() {
+            const seatMap = document.getElementById('seat-map');
+
+            Object.keys(seatConfig).forEach(row => {
+                const seatRow = document.createElement('div');
+                seatRow.className = 'seat-row';
+
+                const rowLabel = document.createElement('div');
+                rowLabel.className = 'row-label';
+                rowLabel.textContent = row;
+                seatRow.appendChild(rowLabel);
+
+                for (let i = seatConfig[row].count; i >= 1; i--) {
+                    const seatId = row + i;
+                    const seat = document.createElement('button');
+                    seat.className = `seat ${seatConfig[row].type}`;
+                    seat.textContent = seatId;
+                    seat.dataset.seatId = seatId;
+                    seat.dataset.price = seatConfig[row].price;
+
+                    if (takenSeats.includes(seatId)) {
+                        seat.classList.add('taken');
+                        seat.disabled = true;
+                    } else {
+                        seat.addEventListener('click', () => toggleSeat(seat));
+                    }
+
+                    seatRow.appendChild(seat);
+                }
+
+                seatMap.appendChild(seatRow);
+            });
+        }
+
+        function toggleSeat(seat) {
+            const seatId = seat.dataset.seatId;
+            const price = parseInt(seat.dataset.price);
+
+            if (seat.classList.contains('selected')) {
+                seat.classList.remove('selected');
+                selectedSeats = selectedSeats.filter(s => s.id !== seatId);
+            } else {
+                seat.classList.add('selected');
+                selectedSeats.push({ id: seatId, price: price });
+            }
+
+            updateUI();
+        }
+
+        // Combo Management
+        function updateComboQuantity(comboType, change) {
+            const currentQty = combos[comboType].quantity;
+            const newQty = Math.max(0, currentQty + change);
+
+            combos[comboType].quantity = newQty;
+            document.getElementById(`${comboType}-qty`).textContent = newQty;
+
+            updateUI();
+        }
+
+        // Payment Method Selection
+        function selectPaymentMethod(method) {
+            document.querySelectorAll('.payment-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+
+            document.querySelector(`[data-method="${method}"]`).classList.add('selected');
+        }
+
+        // UI Updates
+        function updateUI() {
+            const selectedSeatsText = selectedSeats.length > 0
+                ? selectedSeats.map(s => s.id).join(', ')
+                : '...';
+
+            const seatTotal = selectedSeats.reduce((sum, seat) => sum + seat.price, 0);
+            const comboTotal = Object.values(combos).reduce((sum, combo) => sum + (combo.price * combo.quantity), 0);
+            const totalAmount = seatTotal + comboTotal;
+
+            const formattedTotal = totalAmount.toLocaleString('vi-VN');
+
+            document.getElementById('selected-seats').textContent = selectedSeatsText;
+            document.getElementById('total-amount').textContent = formattedTotal;
+            document.getElementById('mobile-total').textContent = formattedTotal;
+
+            // Enable/disable continue button based on current step
+            const continueBtn = document.getElementById('continue-btn');
+
+            switch (currentStep) {
+                case 1: // Seat selection
+                    if (selectedSeats.length > 0) {
+                        continueBtn.removeAttribute('disabled');
+                        continueBtn.classList.remove('disabled');
+                        continueBtn.style.pointerEvents = 'auto';
+                        continueBtn.style.cursor = 'pointer';
+                    } else {
+                        continueBtn.setAttribute('disabled', 'true');
+                        continueBtn.classList.add('disabled');
+                        continueBtn.style.pointerEvents = 'none';
+                        continueBtn.style.cursor = 'not-allowed';
+                    }
+                    break;
+
+                case 2: // Concession (optional step)
+                    continueBtn.removeAttribute('disabled');
+                    continueBtn.classList.remove('disabled');
+                    continueBtn.style.pointerEvents = 'auto';
+                    continueBtn.style.cursor = 'pointer';
+                    break;
+
+                case 3: // Payment
+                    continueBtn.removeAttribute('disabled');
+                    continueBtn.classList.remove('disabled');
+                    continueBtn.style.pointerEvents = 'auto';
+                    continueBtn.style.cursor = 'pointer';
+                    break;
+
+                case 4: // Ticket info
+                    continueBtn.style.display = 'none';
+                    break;
+            }
+        }
+
+        function updateSummary() {
+            // Update seat summary
+            const seatCount = selectedSeats.length;
+            const seatTotal = selectedSeats.reduce((sum, seat) => sum + seat.price, 0);
+
+            document.getElementById('seat-count').textContent = seatCount;
+            document.getElementById('seat-total').textContent = seatTotal.toLocaleString('vi-VN') + ' ₫';
+
+            // Update combo summary
+            const totalComboQty = Object.values(combos).reduce((sum, combo) => sum + combo.quantity, 0);
+            const comboTotal = Object.values(combos).reduce((sum, combo) => sum + (combo.price * combo.quantity), 0);
+
+            const comboSummary = document.getElementById('combo-summary');
+            if (totalComboQty > 0) {
+                comboSummary.style.display = 'grid';
+                document.getElementById('combo-count').textContent = totalComboQty;
+                document.getElementById('combo-total').textContent = comboTotal.toLocaleString('vi-VN') + ' ₫';
+            } else {
+                comboSummary.style.display = 'none';
+            }
+
+            // Update total
+            const grandTotal = seatTotal + comboTotal;
+            document.getElementById('payment-total').textContent = grandTotal.toLocaleString('vi-VN') + ' ₫';
+            document.getElementById('total-amount').textContent = grandTotal.toLocaleString('vi-VN');
+        }
+
+        function updateFinalConfirmation() {
+            // Update seats
+            document.getElementById('final-seats').textContent = selectedSeats.map(s => s.id).join(', ');
+
+            // Update customer info
+            const name = document.getElementById('customer-name').value;
+            const phone = document.getElementById('customer-phone').value;
+            const email = document.getElementById('customer-email').value;
+
+            const customerInfo = `${name}<br>${phone}${email ? '<br>' + email : ''}`;
+            document.getElementById('final-customer-info').innerHTML = customerInfo;
+
+            // Update payment method
+            const selectedPayment = document.querySelector('.payment-option.selected');
+            const paymentMethod = selectedPayment ? selectedPayment.querySelector('h6').textContent : 'Chuyển khoản / Quét mã QR';
+            document.querySelector('.detail-row:nth-last-child(2) .value').textContent = paymentMethod;
+
+            // Update total
+            const seatTotal = selectedSeats.reduce((sum, seat) => sum + seat.price, 0);
+            const comboTotal = Object.values(combos).reduce((sum, combo) => sum + (combo.price * combo.quantity), 0);
+            const total = seatTotal + comboTotal;
+
+            document.getElementById('final-total').textContent = total.toLocaleString('vi-VN') + ' ₫';
+        }
+
+        function closeConfirmation() {
+            // Reset to step 1
+            showStep(1);
+
+            // Reset all data
+            selectedSeats = [];
+            Object.keys(combos).forEach(key => combos[key].quantity = 0);
+
+            // Reset UI
+            document.querySelectorAll('.seat.selected').forEach(seat => {
+                seat.classList.remove('selected');
+            });
+
+            document.querySelectorAll('.quantity').forEach(qty => {
+                qty.textContent = '0';
+            });
+
+            document.querySelectorAll('.form-control').forEach(input => {
+                input.value = '';
+                input.classList.remove('error');
+            });
+
+            updateUI();
+        }
+
+        // Event Listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            generateSeatMap();
+            updateUI();
+            updateButtonStates();
+
+            // Step navigation
+            document.getElementById('continue-btn').addEventListener('click', function(e) {
+                e.preventDefault();
+
+                if (currentStep === 3) {
+                    updateFinalConfirmation();
+                }
+
+                nextStep();
+            });
+
+            // Payment method selection
+            document.querySelectorAll('.payment-option').forEach(option => {
+                option.addEventListener('click', function() {
+                    selectPaymentMethod(this.dataset.method);
+                });
+            });
+
+            // Form validation
+            document.querySelectorAll('.form-control').forEach(input => {
+                input.addEventListener('input', function() {
+                    this.classList.remove('error');
+                });
+            });
+
+            // Proceed payment button
+            document.addEventListener('click', function(e) {
+                if (e.target.classList.contains('btn-proceed-payment')) {
+                    alert('Chuyển hướng đến cổng thanh toán...');
+                }
+            });
+
+            setTimeout(() => {
+                document.querySelectorAll('.fade-in').forEach(el => {
+                    el.style.opacity = '1';
+                });
+            }, 100);
+        });
+    </script>
+</body>
+</html>

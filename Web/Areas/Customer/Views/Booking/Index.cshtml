@@ -3,8 +3,10 @@
 }
 
 @section Styles {
-    <link rel="stylesheet" href="~/css/public/movie-booking.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/customer/booking/booking.css" asp-append-version="true" />
 }
+
+@Html.AntiForgeryToken()
 
 <!-- Step Indicator -->
 <div class="step-indicator">
@@ -50,12 +52,13 @@
 <div class="action-buttons fade-in">
     <div class="row g-3">
         <div class="col-4">
-            <a href="#" class="btn btn-custom btn-back w-100">
+            <a href="@Url.Action("Index", "Movie")" class="btn btn-custom btn-back w-100">
                 <i class="fas fa-arrow-left"></i>
             </a>
         </div>
         <div class="col-8">
-            <a href="#" class="btn btn-custom btn-continue w-100" id="continue-btn" disabled>
+            <a href="@Url.Action("Concession", "Booking")" class="btn btn-custom btn-continue w-100" id="continue-btn"
+                disabled>
                 <span class="d-md-none">
                     <span id="mobile-total">0</span>₫ |
                 </span>
@@ -77,7 +80,8 @@
                 <div class="cinema-name">Beta Đan Phượng</div>
                 <div class="showtime">
                     <i class="fas fa-clock"></i> Suất <strong>11:00 27/06/2025</strong><br>
-                    <i class="fas fa-map-marker-alt"></i> Phòng chiếu <strong>P3</strong> - Ghế <span id="selected-seats">...</span>
+                    <i class="fas fa-map-marker-alt"></i> Phòng chiếu <strong>P3</strong> - Ghế <span
+                        id="selected-seats">...</span>
                 </div>
             </div>
 
@@ -140,5 +144,52 @@
 </div>
 
 @section Scripts {
-    <script src="~/js/public/movie-booking.js"></script>
+    <script src="~/js/customer/booking/movie-booking.js" asp-append-version="true"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Initialize seats
+            if (typeof initializeSeats === 'function') {
+                initializeSeats();
+            }
+
+            // Handle continue button click
+            document.getElementById('continue-btn').addEventListener('click', function (e) {
+                e.preventDefault();
+
+                if (selectedSeats && selectedSeats.length > 0) {
+                    // Save seat selection data before navigating
+                    const seatData = {
+                        selectedSeats: selectedSeats.map(s => s.id).join(', '),
+                        totalAmount: calculateTotalAmount().toLocaleString('vi-VN'),
+                        seatCount: selectedSeats.length.toString(),
+                        seatTotal: selectedSeats.reduce((sum, seat) => sum + seat.price, 0).toLocaleString('vi-VN')
+                    };
+
+                    // Send data to server
+                    fetch('@Url.Action("SaveSeatSelection", "Booking")', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+                        },
+                        body: JSON.stringify(seatData)
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                // Navigate to concession page
+                                window.location.href = this.href;
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            // Navigate anyway
+                            window.location.href = this.href;
+                        });
+                } else {
+                    alert('Vui lòng chọn ít nhất một ghế');
+                }
+            });
+        });
+    </script>
 }

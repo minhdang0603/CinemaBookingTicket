@@ -1,0 +1,264 @@
+@{
+    ViewData["Title"] = "Payment - Book Ticket";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/customer/booking/payment.css" asp-append-version="true" />
+}
+
+<!-- Step Indicator -->
+<div class="step-indicator">
+    <div class="container">
+        <div class="row">
+            <div class="col-3">
+                <div class="step-item completed" data-step="1">
+                    <div class="step-icon">
+                        <i class="fas fa-th"></i>
+                    </div>
+                    <span>Chọn ghế</span>
+                </div>
+            </div>
+            <div class="col-3">
+                <div class="step-item completed" data-step="2">
+                    <div class="step-icon">
+                        <i class="fas fa-shopping-bag"></i>
+                    </div>
+                    <span>Bắp nước</span>
+                </div>
+            </div>
+            <div class="col-3">
+                <div class="step-item active" data-step="3">
+                    <div class="step-icon">
+                        <i class="fas fa-credit-card"></i>
+                    </div>
+                    <span>Thanh toán</span>
+                </div>
+            </div>
+            <div class="col-3">
+                <div class="step-item" data-step="4">
+                    <div class="step-icon">
+                        <i class="fas fa-inbox"></i>
+                    </div>
+                    <span>Thông tin vé</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Fixed Action Buttons -->
+<div class="action-buttons fade-in">
+    <div class="row g-3">
+        <div class="col-4">
+            <a href="@Url.Action("Concession", "Booking")" class="btn btn-custom btn-back w-100">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+        </div>
+        <div class="col-8">
+            <a href="@Url.Action("Confirmation", "Booking")" class="btn btn-custom btn-continue w-100" id="continue-btn">
+                <span class="d-md-none">
+                    <span id="mobile-total">0</span>₫ |
+                </span>
+                <span>Xác nhận</span>
+                <i class="fas fa-arrow-right"></i>
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Main Content -->
+<div class="container booking-content">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-lg-4 order-lg-2">
+            <!-- Movie Info -->
+            <div class="movie-info-card fade-in">
+                <div class="movie-title">Doraemon Movie 44: Nobita Và Cuộc Phiêu Lưu Vào Thế Giới Trong Tranh</div>
+                <div class="cinema-name">Beta Đan Phượng</div>
+                <div class="showtime">
+                    <i class="fas fa-clock"></i> Suất <strong>11:00 27/06/2025</strong><br>
+                    <i class="fas fa-map-marker-alt"></i> Phòng chiếu <strong>P3</strong> - Ghế <span id="selected-seats">@ViewBag.SelectedSeats</span>
+                </div>
+            </div>
+
+            <!-- Total -->
+            <div class="total-card fade-in">
+                <div class="total-section-label">TỔNG ĐƠN HÀNG</div>
+                <div class="total-amount">
+                    <span id="total-amount">@ViewBag.TotalAmount</span> ₫
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-lg-8 order-lg-1">
+            <div class="payment-section fade-in">
+                <h3 class="section-title mb-4">
+                    <i class="fas fa-credit-card me-2"></i>
+                    Thông tin thanh toán
+                </h3>
+
+                <!-- Order Summary -->
+                <div class="order-summary mb-4">
+                    <h5 class="mb-3">Tóm tắt đơn hàng</h5>
+                    <div class="summary-table">
+                        <div class="summary-row">
+                            <span class="item-type">MÔ TẢ</span>
+                            <span class="item-qty">SỐ LƯỢNG</span>
+                            <span class="item-price">THÀNH TIỀN</span>
+                        </div>
+                        <div class="summary-row" id="seat-summary">
+                            <span>Ghế đã chọn</span>
+                            <span id="seat-count">@ViewBag.SeatCount</span>
+                            <span id="seat-total">@ViewBag.SeatTotal ₫</span>
+                        </div>
+                        <div class="summary-row combo-summary" id="combo-summary" style="display: none;">
+                            <span>Combo</span>
+                            <span id="combo-count">0</span>
+                            <span id="combo-total">0 ₫</span>
+                        </div>
+                        <div class="summary-row total-row">
+                            <span>Tổng</span>
+                            <span></span>
+                            <span id="payment-total">@ViewBag.TotalAmount ₫</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Customer Info Form -->
+                <form id="payment-form" method="post" action="@Url.Action("ProcessPayment", "Booking")">
+                    <!-- Customer Info -->
+                    <div class="customer-info mb-4">
+                        <h5 class="mb-3">Thông tin cá nhân</h5>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Họ và tên *</label>
+                                <input type="text" class="form-control" id="customer-name" name="CustomerName" required>
+                                <div class="error-message">Giá trị không được phép để trống</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Số điện thoại *</label>
+                                <input type="tel" class="form-control" id="customer-phone" name="CustomerPhone" required>
+                                <div class="error-message">Giá trị không được phép để trống</div>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Email</label>
+                                <input type="email" class="form-control" id="customer-email" name="CustomerEmail">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Payment Methods -->
+                    <div class="payment-methods">
+                        <h5 class="mb-3">Hình thức thanh toán</h5>
+
+                        <div class="payment-option selected" data-method="qr">
+                            <div class="payment-icon qr-icon">
+                                <i class="fas fa-qrcode"></i>
+                            </div>
+                            <div class="payment-info">
+                                <h6>Chuyển khoản / Quét mã QR</h6>
+                                <p>Tự động xuất mã vé trong 30s sau khi chuyển khoản</p>
+                            </div>
+                            <div class="payment-check">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                            <input type="radio" name="PaymentMethod" value="qr" checked style="display: none;">
+                        </div>
+
+                        <div class="payment-option" data-method="momo">
+                            <div class="payment-icon momo-icon">
+                                <i class="fab fa-cc-mastercard"></i>
+                            </div>
+                            <div class="payment-info">
+                                <h6>Ví MoMo</h6>
+                                <p>Thanh toán nhanh chóng với ví MoMo</p>
+                            </div>
+                            <div class="payment-check">
+                                <i class="fas fa-circle"></i>
+                            </div>
+                            <input type="radio" name="PaymentMethod" value="momo" style="display: none;">
+                        </div>
+
+                        <div class="payment-option" data-method="card">
+                            <div class="payment-icon card-icon">
+                                <i class="fas fa-credit-card"></i>
+                            </div>
+                            <div class="payment-info">
+                                <h6>Thẻ ATM / Thẻ quốc tế</h6>
+                                <p>Thanh toán bằng thẻ ATM hoặc thẻ tín dụng</p>
+                            </div>
+                            <div class="payment-check">
+                                <i class="fas fa-circle"></i>
+                            </div>
+                            <input type="radio" name="PaymentMethod" value="card" style="display: none;">
+                        </div>
+                    </div>
+
+                    <!-- Hidden fields for booking data -->
+                    <input type="hidden" name="SelectedSeats" value="@ViewBag.SelectedSeats" />
+                    <input type="hidden" name="TotalAmount" value="@ViewBag.TotalAmount" />
+                    <input type="hidden" name="ComboData" id="combo-data" />
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/customer/booking/concession-payment.js" asp-append-version="true"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize payment functionality
+            if (typeof initializeConcessionPayment === 'function') {
+                initializeConcessionPayment();
+            }
+            
+            // Load booking data
+            loadBookingData();
+            
+            // Update summary
+            updateSummary();
+            
+            // Handle form submission
+            document.getElementById('continue-btn').addEventListener('click', function(e) {
+                e.preventDefault();
+                if (validatePaymentForm()) {
+                    // Update hidden combo data
+                    document.getElementById('combo-data').value = JSON.stringify(combos);
+                    
+                    // Submit form
+                    document.getElementById('payment-form').submit();
+                }
+            });
+        });
+        
+        function loadBookingData() {
+            const selectedSeatsText = '@ViewBag.SelectedSeats' || '...';
+            const totalAmount = '@ViewBag.TotalAmount' || '0';
+            
+            document.getElementById('selected-seats').textContent = selectedSeatsText;
+            document.getElementById('total-amount').textContent = totalAmount;
+            document.getElementById('mobile-total').textContent = totalAmount;
+        }
+        
+        function validatePaymentForm() {
+            const name = document.getElementById('customer-name').value.trim();
+            const phone = document.getElementById('customer-phone').value.trim();
+            
+            let isValid = true;
+            
+            if (!name) {
+                document.getElementById('customer-name').classList.add('error');
+                isValid = false;
+            }
+            
+            if (!phone) {
+                document.getElementById('customer-phone').classList.add('error');
+                isValid = false;
+            }
+            
+            return isValid;
+        }
+    </script>
+}

@@ -428,3 +428,147 @@ body {
     font-size: 0.9rem;
     margin-bottom: 10px;
 }
+
+/* Booking Steps */
+.booking-steps {
+    position: relative;
+    min-height: 500px;
+}
+
+.step-content {
+    display: none;
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+}
+
+.step-content.active {
+    display: block;
+    opacity: 1;
+}
+
+/* Section Titles */
+.section-title {
+    color: var(--text-white);
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+}
+
+.section-title i {
+    color: var(--accent-color);
+    margin-right: 10px;
+}
+
+/* Step Indicator Updates */
+.step-item.completed {
+    color: var(--success-color);
+}
+
+.step-item.completed .step-icon {
+    background: var(--success-color);
+    color: white;
+}
+
+/* Ticket Info Styles */
+.ticket-info-section {
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: var(--border-radius);
+    padding: 30px;
+}
+
+.confirmation-modal {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.modal-header {
+    background: rgba(255, 255, 255, 0.08);
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h4 {
+    color: var(--text-white);
+    margin: 0;
+    font-weight: 600;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    color: var(--text-light);
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-body {
+    padding: 30px;
+}
+
+.ticket-details {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.detail-row {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 20px;
+    padding: 15px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.detail-row:last-child {
+    border-bottom: none;
+}
+
+.detail-row.total-row {
+    border-top: 2px solid rgba(100, 255, 218, 0.3);
+    margin-top: 15px;
+    padding-top: 20px;
+    font-weight: 700;
+}
+
+.detail-row .label {
+    color: var(--text-light);
+    font-weight: 500;
+}
+
+.detail-row .value {
+    color: var(--text-white);
+    font-weight: 400;
+}
+
+.detail-row.total-row .value {
+    color: var(--gold-color);
+    font-size: 1.2rem;
+}
+
+.btn-proceed-payment {
+    background: linear-gradient(135deg, var(--accent-color), #c73650);
+    border: none;
+    padding: 15px 40px;
+    border-radius: 8px;
+    color: white;
+    font-weight: 600;
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+}
+
+.btn-proceed-payment:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-hover);
+}

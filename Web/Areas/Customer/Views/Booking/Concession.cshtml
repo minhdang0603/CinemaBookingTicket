@@ -1,0 +1,196 @@
+@{
+    ViewData["Title"] = "Concession - Book Ticket";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/customer/booking/concession.css" asp-append-version="true" />
+}
+
+<!-- Step Indicator -->
+<div class="step-indicator">
+    <div class="container">
+        <div class="row">
+            <div class="col-3">
+                <div class="step-item completed" data-step="1">
+                    <div class="step-icon">
+                        <i class="fas fa-th"></i>
+                    </div>
+                    <span>Chọn ghế</span>
+                </div>
+            </div>
+            <div class="col-3">
+                <div class="step-item active" data-step="2">
+                    <div class="step-icon">
+                        <i class="fas fa-shopping-bag"></i>
+                    </div>
+                    <span>Bắp nước</span>
+                </div>
+            </div>
+            <div class="col-3">
+                <div class="step-item" data-step="3">
+                    <div class="step-icon">
+                        <i class="fas fa-credit-card"></i>
+                    </div>
+                    <span>Thanh toán</span>
+                </div>
+            </div>
+            <div class="col-3">
+                <div class="step-item" data-step="4">
+                    <div class="step-icon">
+                        <i class="fas fa-inbox"></i>
+                    </div>
+                    <span>Thông tin vé</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Fixed Action Buttons -->
+<div class="action-buttons fade-in">
+    <div class="row g-3">
+        <div class="col-4">
+            <a href="@Url.Action("Index", "Booking")" class="btn btn-custom btn-back w-100">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+        </div>
+        <div class="col-8">
+            <a href="@Url.Action("Payment", "Booking")" class="btn btn-custom btn-continue w-100" id="continue-btn">
+                <span class="d-md-none">
+                    <span id="mobile-total">0</span>₫ |
+                </span>
+                <span>Tiếp tục</span>
+                <i class="fas fa-arrow-right"></i>
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Main Content -->
+<div class="container booking-content">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-lg-4 order-lg-2">
+            <!-- Movie Info -->
+            <div class="movie-info-card fade-in">
+                <div class="movie-title">Doraemon Movie 44: Nobita Và Cuộc Phiêu Lưu Vào Thế Giới Trong Tranh</div>
+                <div class="cinema-name">Beta Đan Phượng</div>
+                <div class="showtime">
+                    <i class="fas fa-clock"></i> Suất <strong>11:00 27/06/2025</strong><br>
+                    <i class="fas fa-map-marker-alt"></i> Phòng chiếu <strong>P3</strong> - Ghế <span id="selected-seats">@ViewBag.SelectedSeats</span>
+                </div>
+            </div>
+
+            <!-- Total -->
+            <div class="total-card fade-in">
+                <div class="total-section-label">TỔNG ĐƠN HÀNG</div>
+                <div class="total-amount">
+                    <span id="total-amount">@ViewBag.TotalAmount</span> ₫
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-lg-8 order-lg-1">
+            <div class="concession-section fade-in">
+                <h3 class="section-title mb-4">
+                    <i class="fas fa-shopping-bag me-2"></i>
+                    Combo bắp nước
+                </h3>
+
+                <div class="combo-list">
+                    <!-- Family Combo -->
+                    <div class="combo-item">
+                        <div class="combo-info">
+                            <h5 class="combo-name">Family Combo 69oz</h5>
+                            <p class="combo-description">
+                                <span class="highlight">TIẾT KIỆM 95K!!!</span> Gồm: 2 Bắp (69oz) + 4 Nước có gaz (22oz) + 2 Snack Oishi (80g)
+                            </p>
+                        </div>
+                        <div class="combo-controls">
+                            <div class="combo-price">213.000 ₫</div>
+                            <div class="quantity-controls">
+                                <button class="qty-btn minus" onclick="updateComboQuantity('family', -1)">-</button>
+                                <span class="quantity" id="family-qty">0</span>
+                                <button class="qty-btn plus" onclick="updateComboQuantity('family', 1)">+</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sweet Combo -->
+                    <div class="combo-item">
+                        <div class="combo-info">
+                            <h5 class="combo-name">Sweet Combo 69oz</h5>
+                            <p class="combo-description">
+                                <span class="highlight">TIẾT KIỆM 46K!!!</span> Gồm: 1 Bắp (69oz) + 2 Nước có gaz (22oz)
+                            </p>
+                        </div>
+                        <div class="combo-controls">
+                            <div class="combo-price">88.000 ₫</div>
+                            <div class="quantity-controls">
+                                <button class="qty-btn minus" onclick="updateComboQuantity('sweet', -1)">-</button>
+                                <span class="quantity" id="sweet-qty">0</span>
+                                <button class="qty-btn plus" onclick="updateComboQuantity('sweet', 1)">+</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Beta Combo -->
+                    <div class="combo-item">
+                        <div class="combo-info">
+                            <h5 class="combo-name">Beta Combo 69oz</h5>
+                            <p class="combo-description">
+                                <span class="highlight">TIẾT KIỆM 28K!!!</span> Gồm: 1 Bắp (69oz) + 1 Nước có gaz (22oz)
+                            </p>
+                        </div>
+                        <div class="combo-controls">
+                            <div class="combo-price">68.000 ₫</div>
+                            <div class="quantity-controls">
+                                <button class="qty-btn minus" onclick="updateComboQuantity('beta', -1)">-</button>
+                                <span class="quantity" id="beta-qty">0</span>
+                                <button class="qty-btn plus" onclick="updateComboQuantity('beta', 1)">+</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/customer/booking/concession-payment.js" asp-append-version="true"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize concession functionality
+            if (typeof initializeConcessionPayment === 'function') {
+                initializeConcessionPayment();
+            }
+            
+            // Load saved data from session/localStorage
+            loadBookingData();
+            
+            // Update UI
+            updateUI();
+        });
+        
+        function loadBookingData() {
+            // Load selected seats from ViewBag or session
+            const selectedSeatsText = '@ViewBag.SelectedSeats' || '...';
+            const totalAmount = '@ViewBag.TotalAmount' || '0';
+            
+            document.getElementById('selected-seats').textContent = selectedSeatsText;
+            document.getElementById('total-amount').textContent = totalAmount;
+            document.getElementById('mobile-total').textContent = totalAmount;
+        }
+        
+        function updateUI() {
+            // Calculate total including combos
+            if (typeof calculateTotalAmount === 'function') {
+                const total = calculateTotalAmount();
+                document.getElementById('total-amount').textContent = total.toLocaleString('vi-VN');
+                document.getElementById('mobile-total').textContent = total.toLocaleString('vi-VN');
+            }
+        }
+    </script>
+}
