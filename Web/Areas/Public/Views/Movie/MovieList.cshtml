@@ -1,0 +1,614 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phim Đang Chiếu</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #1a1a1a;
+            --secondary-color: #2d2d2d;
+            --accent-color: #3a3a3a;
+            --text-light: #ffffff;
+            --text-muted: #9ca3af;
+            --card-bg: #2d2d2d;
+            --hover-color: #dc2626;
+            --border-color: #404040;
+        }
+
+        body {
+            background-color: var(--primary-color);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: var(--text-light);
+        }
+
+        .hero-section {
+            background-color: var(--secondary-color);
+            padding: 3rem 0;
+            margin-bottom: 2rem;
+            position: relative;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .hero-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--text-light);
+        }
+
+        .text-red {
+            color: var(--hover-color) !important;
+        }
+
+        .filter-title {
+            color: var(--text-light);
+            font-weight: 600;
+            margin-bottom: 1rem;
+            font-size: 1rem;
+        }
+
+        .hero-subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            margin-bottom: 0;
+        }
+
+        .filter-sidebar {
+            background: var(--secondary-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            border: 1px solid var(--border-color);
+            position: sticky;
+            top: 20px;
+        }
+
+        .custom-dropdown {
+            background: var(--accent-color);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 0.75rem 1rem;
+            color: var(--text-light);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 1rem;
+            position: relative;
+        }
+
+        .custom-dropdown:hover {
+            background: var(--hover-color);
+            border-color: var(--hover-color);
+        }
+
+        .custom-dropdown::after {
+            content: '\f107';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .movie-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 2rem;
+            padding: 2rem 0;
+        }
+
+        .movie-card {
+            background: var(--secondary-color);
+            border-radius: 8px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            border: 1px solid var(--border-color);
+            position: relative;
+        }
+
+        .movie-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+            border-color: var(--hover-color);
+        }
+
+        .movie-poster {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .movie-poster img {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+            transition: transform 0.4s ease;
+        }
+
+        .movie-card:hover .movie-poster img {
+            transform: scale(1.1);
+        }
+
+        .movie-actions {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            display: flex;
+            gap: 0.5rem;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .movie-card:hover .movie-actions {
+            opacity: 1;
+        }
+
+        .action-btn {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.9);
+            border: none;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .action-btn:hover {
+            background: var(--hover-color);
+            color: white;
+            transform: scale(1.1);
+        }
+
+        .movie-info {
+            padding: 1.5rem;
+        }
+
+        .movie-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--text-light);
+            line-height: 1.3;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .movie-details {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .release-date {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .rating {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .rating.success {
+            color: #28a745;
+        }
+
+        .rating.warning {
+            color: #ffc107;
+        }
+
+        .rating.muted {
+            color: var(--text-muted);
+        }
+
+        .main-content {
+            background: var(--secondary-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            border: 1px solid var(--border-color);
+        }
+
+        .genre-badge {
+            background: #059669;
+            color: white;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 500;
+            margin: 0.2rem;
+            display: inline-block;
+        }
+
+        .action-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 4px;
+            background: rgba(0,0,0,0.7);
+            border: 1px solid var(--border-color);
+            color: var(--text-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .action-btn:hover {
+            background: var(--hover-color);
+            border-color: var(--hover-color);
+            color: white;
+        }
+
+
+        /* Pagination Styles */
+        .pagination-wrapper {
+            margin-top: 2rem;
+        }
+
+        .pagination .page-link {
+            background-color: var(--accent-color);
+            border: 1px solid var(--border-color);
+            color: var(--text-light);
+            padding: 0.5rem 0.75rem;
+            margin: 0 0.2rem;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+
+        .pagination .page-link:hover {
+            background-color: var(--hover-color);
+            border-color: var(--hover-color);
+            color: white;
+        }
+
+        .pagination .page-item.active .page-link {
+            background-color: var(--hover-color);
+            border-color: var(--hover-color);
+            color: white;
+        }
+
+        .pagination .page-item.disabled .page-link {
+            background-color: var(--secondary-color);
+            border-color: var(--border-color);
+            color: var(--text-muted);
+            cursor: not-allowed;
+        }
+
+        .pagination .page-item.disabled .page-link:hover {
+            background-color: var(--secondary-color);
+            border-color: var(--border-color);
+            color: var(--text-muted);
+        }
+    </style>
+</head>
+<body>
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="container">
+            <div class="hero-content text-center">
+                <h1 class="hero-title">
+                    <i class="fas fa-film me-3 text-red"></i>
+                    Phim Đang Chiếu
+                </h1>
+                <p class="hero-subtitle">
+                    Danh sách các phim hiện đang chiếu rạp trên toàn quốc 29/06/2025. 
+                    Xem lịch chiếu phim, giá vé tiện lợi, đặt vé nhanh chỉ với 1 bước!
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <div class="container">
+        <div class="row">
+            <!-- Sidebar Filters -->
+            <div class="col-lg-3 col-md-4">
+                <div class="filter-sidebar">
+                    <div class="mb-4">
+                        <h6 class="filter-title">
+                            <i class="fas fa-sort me-2"></i>
+                            Sắp xếp
+                        </h6>
+                        <div class="custom-dropdown">
+                            <span>Phổ biến</span>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <h6 class="filter-title">
+                            <i class="fas fa-tags me-2"></i>
+                            Thể loại
+                        </h6>
+                        <div class="custom-dropdown">
+                            <span>Tất cả</span>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <h6 class="filter-title">
+                            <i class="fas fa-language me-2"></i>
+                            Ngôn ngữ
+                        </h6>
+                        <div class="custom-dropdown">
+                            <span>Tất cả</span>
+                        </div>
+                    </div>
+
+                    <div class="mt-4">
+                        <h6 class="filter-title">Thể loại phổ biến</h6>
+                        <div class="d-flex flex-wrap">
+                            <span class="genre-badge">Hành động</span>
+                            <span class="genre-badge" style="background: #3b82f6;">Kinh dị</span>
+                            <span class="genre-badge" style="background: #8b5cf6;">Hài</span>
+                            <span class="genre-badge" style="background: #ec4899;">Tình cảm</span>
+                            <span class="genre-badge" style="background: #06b6d4;">Gia đình</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-lg-9 col-md-8">
+                <div class="main-content">
+                    <!-- Results Info -->
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div class="text-muted">
+                            <i class="fas fa-film me-2"></i>
+                            Hiển thị 1-6 trong tổng số 24 phim
+                        </div>
+                        <div class="text-muted">
+                            Trang 1 / 4
+                        </div>
+                    </div>
+
+                    <div class="movie-grid">
+                        <!-- Movie Card 1 -->
+                        <div class="movie-card">
+                            <div class="movie-poster">
+                                <img src="https://cdn.moveek.com/storage/media/cache/short/684701a026f4b224948393.jpg" alt="Út Lan: Oán Linh Giữ Của">
+                                <div class="movie-actions">
+                                    <button class="action-btn">
+                                        <i class="fas fa-heart"></i>
+                                    </button>
+                                    <button class="action-btn">
+                                        <i class="fas fa-star"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="movie-info">
+                                <h3 class="movie-title">Út Lan: Oán Linh Giữ Của</h3>
+                                <div class="movie-details">
+                                    <span class="release-date">20/06</span>
+                                    <div class="rating warning">
+                                        <i class="fas fa-thumbs-up"></i>
+                                        <span>67%</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Movie Card 2 -->
+                        <div class="movie-card">
+                            <div class="movie-poster">
+                                <img src="https://cdn.moveek.com/storage/media/cache/short/68183ba4c70b2014190582.jpg" alt="Bí Kíp Luyện Rồng live action">
+                                <div class="movie-actions">
+                                    <button class="action-btn">
+                                        <i class="fas fa-heart"></i>
+                                    </button>
+                                    <button class="action-btn">
+                                        <i class="fas fa-star"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="movie-info">
+                                <h3 class="movie-title">Bí Kíp Luyện Rồng live action</h3>
+                                <div class="movie-details">
+                                    <span class="release-date">13/06</span>
+                                    <div class="rating success">
+                                        <i class="fas fa-thumbs-up"></i>
+                                        <span>91%</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Movie Card 3 -->
+                        <div class="movie-card">
+                            <div class="movie-poster">
+                                <img src="https://cdn.moveek.com/storage/media/cache/short/6850df9493be9552985334.jpg" alt="Elio: Cậu Bé Đến Từ Trái Đất">
+                                <div class="movie-actions">
+                                    <button class="action-btn">
+                                        <i class="fas fa-heart"></i>
+                                    </button>
+                                    <button class="action-btn">
+                                        <i class="fas fa-star"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="movie-info">
+                                <h3 class="movie-title">Elio: Cậu Bé Đến Từ Trái Đất</h3>
+                                <div class="movie-details">
+                                    <span class="release-date">27/06</span>
+                                    <div class="rating muted">
+                                        <i class="fas fa-clock"></i>
+                                        <span>Sắp chiếu</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Movie Card 4 -->
+                        <div class="movie-card">
+                            <div class="movie-poster">
+                                <img src="https://cdn.moveek.com/storage/media/cache/short/685525219e1c4674575707.jpg" alt="MEGAN 2.0">
+                                <div class="movie-actions">
+                                    <button class="action-btn">
+                                        <i class="fas fa-heart"></i>
+                                    </button>
+                                    <button class="action-btn">
+                                        <i class="fas fa-star"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="movie-info">
+                                <h3 class="movie-title">MEGAN 2.0</h3>
+                                <div class="movie-details">
+                                    <span class="release-date">27/06</span>
+                                    <div class="rating muted">
+                                        <i class="fas fa-clock"></i>
+                                        <span>Sắp chiếu</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Movie Card 5 -->
+                        <div class="movie-card">
+                            <div class="movie-poster">
+                                <img src="https://cdn.moveek.com/storage/media/cache/short/683d2b09f1edd489878792.jpg" alt="Halabala: Rừng Ma Tế Xác">
+                                <div class="movie-actions">
+                                    <button class="action-btn">
+                                        <i class="fas fa-heart"></i>
+                                    </button>
+                                    <button class="action-btn">
+                                        <i class="fas fa-star"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="movie-info">
+                                <h3 class="movie-title">Halabala: Rừng Ma Tế Xác</h3>
+                                <div class="movie-details">
+                                    <span class="release-date">27/06</span>
+                                    <div class="rating muted">
+                                        <i class="fas fa-clock"></i>
+                                        <span>Sắp chiếu</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Movie Card 6 -->
+                        <div class="movie-card">
+                            <div class="movie-poster">
+                                <img src="https://cdn.moveek.com/storage/media/cache/short/68465d36113af867561247.jpg" alt="F1">
+                                <div class="movie-actions">
+                                    <button class="action-btn">
+                                        <i class="fas fa-heart"></i>
+                                    </button>
+                                    <button class="action-btn">
+                                        <i class="fas fa-star"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="movie-info">
+                                <h3 class="movie-title">F1</h3>
+                                <div class="movie-details">
+                                    <span class="release-date">27/06</span>
+                                    <div class="rating muted">
+                                        <i class="fas fa-clock"></i>
+                                        <span>Sắp chiếu</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Pagination -->
+                    <div class="pagination-wrapper mt-4">
+                        <nav aria-label="Page navigation">
+                            <ul class="pagination justify-content-center">
+                                <li class="page-item disabled">
+                                    <a class="page-link" href="#" tabindex="-1" aria-disabled="true">
+                                        <i class="fas fa-chevron-left"></i>
+                                        <span class="d-none d-sm-inline ms-1">Trước</span>
+                                    </a>
+                                </li>
+                                <li class="page-item active">
+                                    <a class="page-link" href="#">1</a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="#">2</a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="#">3</a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="#">4</a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="#">
+                                        <span class="d-none d-sm-inline me-1">Sau</span>
+                                        <i class="fas fa-chevron-right"></i>
+                                    </a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const movieCards = document.querySelectorAll('.movie-card');
+            
+            movieCards.forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-5px)';
+                });
+                
+                card.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0)';
+                });
+            });
+
+            const dropdowns = document.querySelectorAll('.custom-dropdown');
+            dropdowns.forEach(dropdown => {
+                dropdown.addEventListener('click', function() {
+                    console.log('Dropdown clicked:', this.textContent.trim());
+                });
+            });
+
+            const pageLinks = document.querySelectorAll('.pagination .page-link');
+            pageLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    document.querySelectorAll('.pagination .page-item').forEach(item => {
+                        item.classList.remove('active');
+                    });
+                    
+                    if (!this.parentElement.classList.contains('disabled')) {
+                        this.parentElement.classList.add('active');
+                        
+                        const pageNum = this.textContent.trim();
+                        if (!isNaN(pageNum)) {
+                            const startItem = (parseInt(pageNum) - 1) * 6 + 1;
+                            const endItem = Math.min(parseInt(pageNum) * 6, 24);
+                            document.querySelector('.text-muted').innerHTML = 
+                                `<i class="fas fa-film me-2"></i>Hiển thị ${startItem}-${endItem} trong tổng số 24 phim`;
+                            
+                            document.querySelectorAll('.text-muted')[1].textContent = `Trang ${pageNum} / 4`;
+                        }
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

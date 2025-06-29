@@ -8,7 +8,6 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/base.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/Web.styles.css" asp-append-version="true" />
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css">
     <!-- DataTables CDN -->
@@ -33,10 +32,19 @@
                     <li><a asp-area="public" asp-controller="Auth" asp-action="Login"><span class="icon">👤</span>Đăng
                             nhập</a></li>
                 }
-                <li><a asp-area="" asp-controller="Cinema" asp-action="Index"><span class="icon">🎭</span>Tìm rạp chiếu
-                        phim</a></li>
-                <li><a asp-area="" asp-controller="Movie" asp-action="Index"><span class="icon">🎬</span>Tìm bộ phim</a></li>
-                               <li class="dropdown">
+                <li class="dropdown">
+
+                    <a href="#" class="dropdown-toggle" onclick="toggleDropdown(event)">
+                        <span class="icon">🎬</span>Tìm bộ phim
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a asp-area="" asp-controller="Movie" asp-action="MovieList">Phim đang chiếu</a></li>
+                        <li><a asp-area="" asp-controller="Movie" asp-action="MovieList">Phim sắp chiếu</a></li>
+                        
+                    </ul>
+                </li>
+                <li class="dropdown">
+
                     <a href="#" class="dropdown-toggle" onclick="toggleDropdown(event)">
                         <span class="icon">🎫</span>Quản lí rạp
                     </a>
@@ -61,26 +69,7 @@
                     <button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
                     CINEMA
                 </div>
-                <div class="search-section">
-                    <form asp-area="" asp-controller="Movie" asp-action="Search" method="get">
-                        <div class="search-group">
-                            <label>Tìm phim</label>
-                            <input type="text" name="query" class="search-input" placeholder="Tên phim..." />
-                        </div>
-                        <div class="search-group">
-                            <label>Thể loại</label>
-                            <select name="genre" class="search-input">
-                                <option value="">Tất cả</option>
-                                <option value="action">Hành động</option>
-                                <option value="comedy">Hài</option>
-                                <option value="drama">Chính kịch</option>
-                                <option value="horror">Kinh dị</option>
-                                <option value="animation">Hoạt hình</option>
-                            </select>
-                        </div>
-                        <button type="submit" class="search-btn">Tìm kiếm</button>
-                    </form>
-                </div>
+                
                 <div class="user-section">
                     @if (User.Identity.IsAuthenticated)
                     {
@@ -112,9 +101,26 @@
     <script>
         function toggleDropdown(event) {
             event.preventDefault();
-            var parent = event.target.closest(".dropdown");
+
+            const allDropdowns = document.querySelectorAll('.sidebar .dropdown');
+            allDropdowns.forEach(dropdown => {
+                if (dropdown !== event.target.closest('.dropdown')) {
+                    dropdown.classList.remove('open');
+                }
+            });
+
+            const parent = event.target.closest(".dropdown");
             parent.classList.toggle("open");
         }
+
+        document.addEventListener('click', function (event) {
+            if (!event.target.closest('.sidebar .dropdown')) {
+                const allDropdowns = document.querySelectorAll('.sidebar .dropdown');
+                allDropdowns.forEach(dropdown => {
+                    dropdown.classList.remove('open');
+                });
+            }
+        });
     </script>
     <partial name="_Notification" />
     @await RenderSectionAsync("Scripts", required: false)
