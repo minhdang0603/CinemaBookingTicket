@@ -83,6 +83,24 @@
     --font-size-xl: 24px;
     --font-size-2xl: 32px;
     --font-size-3xl: 48px;
+    
+    /* Movie/Card Specific Colors */
+    --movie-card-bg: #2d2d2d;
+    --movie-card-hover: #3a3a3a;
+    --filter-bg: #2d2d2d;
+    --filter-border: #404040;
+    --hover-red: #dc2626;
+    
+    /* Genre Colors */
+    --genre-primary: #059669;
+    --genre-blue: #3b82f6;
+    --genre-purple: #8b5cf6;
+    --genre-pink: #ec4899;
+    --genre-cyan: #06b6d4;
+    
+    /* Secondary Color */
+    --secondary-color: #2d2d2d;
+    --accent-color: #3a3a3a;
 }
 
 /* Base Typography */
