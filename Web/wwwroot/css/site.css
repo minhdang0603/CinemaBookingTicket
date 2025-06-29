@@ -62,7 +62,7 @@ body {
     }
 
 .sidebar {
-    width: 200px;
+    width: 250px;
     background-color: var(--darker-gray);
     padding: var(--spacing-lg) 0;
     position: fixed;
@@ -115,9 +115,9 @@ body {
 
 /* Main Content */
 .main-content {
-    margin-left: 200px;
+    margin-left: 250px;
     min-height: 100vh;
-    width: calc(100% - 200px);
+    width: calc(100% - 250px);
 }
 
 /* Header */
@@ -729,71 +729,16 @@ body {
 
 /* Dropdown Toggle Button */
 .dropdown-toggle {
-    background-color: #333;
-    border: 1px solid #444;
     color: #e0e0e0;
 }
 
     .dropdown-toggle:hover {
         background-color: #444;
-        border-color: #555;
         color: #fff;
     }
 
     .dropdown-toggle:after {
         border-top-color: #e0e0e0;
-    }
-
-/* Custom styling for dropdown toggle buttons */
-.custom-dropdown-toggle {
-    background-color: #333;
-    color: #e0e0e0;
-    border: 1px solid #444;
-    border-radius: 8px;
-    padding: 12px 15px;
-    text-align: left;
-    position: relative;
-    width: 100%;
-}
-
-    .custom-dropdown-toggle::after {
-        position: absolute;
-        right: 15px;
-        top: 50%;
-        transform: translateY(-50%);
-    }
-
-    .custom-dropdown-toggle:hover,
-    .custom-dropdown-toggle:focus {
-        background-color: #3a3a3a;
-        border-color: #e50914;
-    }
-
-.custom-dropdown-menu {
-    background-color: #333;
-    border: 1px solid #444;
-    border-radius: 8px;
-    padding: 10px 0;
-    margin-top: 5px;
-    min-width: 100%;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-}
-
-.custom-dropdown-item {
-    color: #e0e0e0;
-    padding: 10px 15px;
-    transition: all 0.3s;
-    display: block;
-    width: 100%;
-    text-align: left;
-    border: none;
-    background-color: transparent;
-}
-
-    .custom-dropdown-item:hover,
-    .custom-dropdown-item:focus {
-        background-color: #e50914;
-        color: white;
     }
 
 /* Nav Menu - Cho cả user và admin */
@@ -839,6 +784,7 @@ body {
 /* Responsive Design */
 @media (max-width: 768px) {
     .sidebar {
+        width: 250px;
         transform: translateX(-100%);
     }
 
