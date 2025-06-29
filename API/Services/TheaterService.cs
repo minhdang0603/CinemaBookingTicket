@@ -64,13 +64,13 @@ namespace API.Services
 
         public async Task<List<TheaterDTO>> GetAllTheatersAsync(bool? isActive = true)
         {
-            var theaters = await _unitOfWork.Theater.GetAllAsync(t => t.IsActive == isActive);
+            var theaters = await _unitOfWork.Theater.GetAllAsync(t => t.IsActive == isActive, includeProperties: "Province");
             return _mapper.Map<List<TheaterDTO>>(theaters);
         }
 
         public async Task<TheaterDetailDTO> GetTheaterByIdAsync(int id, bool? isActive = true)
         {
-            var theater = await _unitOfWork.Theater.GetAsync(t => t.Id == id && t.IsActive == isActive);
+            var theater = await _unitOfWork.Theater.GetAsync(t => t.Id == id && t.IsActive == isActive, includeProperties: "Province,Screens");
 
             if (theater == null)
                 throw new AppException(ErrorCodes.TheaterNotFound(id));

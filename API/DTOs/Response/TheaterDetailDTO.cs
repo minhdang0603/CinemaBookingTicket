@@ -6,10 +6,12 @@ public class TheaterDetailDTO
     public string Name { get; set; } = null!;
     public string Address { get; set; } = null!;
 
-    public DateTime? OpeningTime { get; set; }
-    public DateTime? ClosingTime { get; set; }
+    public TimeOnly? OpeningTime { get; set; }
+    public TimeOnly? ClosingTime { get; set; }
 
     public string? Description { get; set; }
 
-    public List<ScreenLiteDTO> Screens { get; set; } = new List<ScreenLiteDTO>();
+    public ProvinceDTO Province { get; set; } = null!;
+
+	public List<ScreenLiteDTO> Screens { get; set; } = new List<ScreenLiteDTO>();
 }

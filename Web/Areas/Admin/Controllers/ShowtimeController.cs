@@ -13,7 +13,7 @@ using Web.Services.IServices;
 namespace Web.Areas.Admin.Controllers
 {
     [Area("Admin")]
-    //[Authorize(Roles = Constant.Role_Admin)]
+    [Authorize(Roles = Constant.Role_Admin)]
     public class ShowtimeController : Controller
     {
 

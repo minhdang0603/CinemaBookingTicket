@@ -6,12 +6,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - Cinema</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/base.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/Web.styles.css" asp-append-version="true" />
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css">
     <!-- DataTables CDN -->
     <link rel="stylesheet" href="https://cdn.datatables.net/2.3.2/css/dataTables.dataTables.css" />
+    
+    <!-- Render Styles section from views -->
+    @await RenderSectionAsync("Styles", required: false)
 </head>
 
 <body>
@@ -48,11 +52,11 @@
                     <ul class="dropdown-menu">
                         <li><a asp-area="Admin" asp-controller="Genre" asp-action="Index">Genre</a></li>
                         <li><a asp-area="Admin" asp-controller="Movie" asp-action="Index">Movie</a></li>
-                        <li><a asp-area="Admin" asp-controller="Session" asp-action="Index">Session</a></li>
-                        <li><a asp-area="Admin" asp-controller="Room" asp-action="Index">Room</a></li>
-                        <li><a asp-area="Admin" asp-controller="Booking" asp-action="Index">Booking</a></li>
                         <li><a asp-area="Admin" asp-controller="Showtime" asp-action="Index">Showtime</a></li>
                         <li><a asp-area="Admin" asp-controller="Screen" asp-action="Index">Screen</a></li>
+                        <li><a asp-area="Admin" asp-controller="Concession" asp-action="Index">Concession</a></li>
+                        <li><a asp-area="Admin" asp-controller="Theater" asp-action="Index">Theater</a></li>
+                        <li><a asp-area="Admin" asp-controller="Province" asp-action="Index">Province</a></li>
                     </ul>
                 </li>
             </ul>
@@ -90,7 +94,7 @@
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://kit.fontawesome.com/your-fontawesome-kit.js" crossorigin="anonymous"></script>
+    @* <script src="https://kit.fontawesome.com/your-fontawesome-kit.js" crossorigin="anonymous"></script> *@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
     <script src="https://cdn.datatables.net/2.3.2/js/dataTables.js"></script>
 

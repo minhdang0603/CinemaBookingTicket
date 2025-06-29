@@ -60,8 +60,7 @@ public class AuthService : IAuthService
         return new LoginResponseDTO
         {
             Token = token,
-            Expiration = expiration,
-            User = _mapper.Map<UserDTO>(user)
+            Expiration = expiration
         };
     }
 
@@ -98,8 +97,7 @@ public class AuthService : IAuthService
         return new LoginResponseDTO
         {
             Token = await GenerateJwtToken(user, DateTime.UtcNow.AddMinutes(tokenExpirationInMinutes)),
-            Expiration = DateTime.UtcNow.AddMinutes(tokenExpirationInMinutes),
-            User = _mapper.Map<UserDTO>(user)
+            Expiration = DateTime.UtcNow.AddMinutes(tokenExpirationInMinutes)
         };
     }
 

@@ -1,0 +1,105 @@
+﻿@model TheaterUpdateDTO
+
+@{
+    ViewData["Title"] = "Edit Theater";
+    ViewData["Header"] = "Edit Theater";
+    ViewData["HeaderIcon"] = "fas fa-edit";
+}
+
+<div class="admin-form-container">
+    <form id="editTheaterForm" asp-area="Admin" asp-controller="Theater" asp-action="Edit" method="post">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="Id" />
+
+        <div class="card">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label asp-for="Name" class="form-label">Theater Name</label>
+                            <input asp-for="Name" class="form-control" />
+                            <span asp-validation-for="Name" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Address" class="form-label">Address</label>
+                            <input asp-for="Address" class="form-control" />
+                            <span asp-validation-for="Address" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="ProvinceId" class="form-label">Province</label>
+                            <select asp-for="ProvinceId" class="form-control" asp-items="ViewBag.Provinces">
+                                <option value="">-- Select Province --</option>
+                            </select>
+                            <span asp-validation-for="ProvinceId" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label asp-for="OpeningTime" class="form-label">Opening Time</label>
+                            <input asp-for="OpeningTime" type="time" class="form-control" />
+                            <span asp-validation-for="OpeningTime" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="ClosingTime" class="form-label">Closing Time</label>
+                            <input asp-for="ClosingTime" type="time" class="form-control" />
+                            <span asp-validation-for="ClosingTime" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Description" class="form-label">Description</label>
+                            <textarea asp-for="Description" class="form-control" rows="4"></textarea>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer text-end">
+                <a asp-action="Index" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to List
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Save Changes
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section AdminScripts {
+    <style>
+        .admin-form-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background-color: #222;
+            border: 1px solid #333;
+        }
+
+        .card-footer {
+            background-color: #1a1a1a;
+            border-top: 1px solid #333;
+        }
+    </style>
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        $(document).ready(function() {
+            // Initialize form validation
+            $("#editTheaterForm").validate({
+                errorElement: 'span',
+                errorClass: 'text-danger',
+                highlight: function(element) {
+                    $(element).addClass('is-invalid');
+                },
+                unhighlight: function(element) {
+                    $(element).removeClass('is-invalid');
+                }
+            });
+        });
+    </script>
+}

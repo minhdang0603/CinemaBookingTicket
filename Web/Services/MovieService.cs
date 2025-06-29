@@ -9,40 +9,53 @@ namespace Web.Services
     {
         private readonly IHttpClientFactory _httpClientFactory;
         private string _baseUrl = string.Empty;
-
         public MovieService(IHttpClientFactory httpClientFactory, IConfiguration configuration) : base(httpClientFactory)
         {
             _httpClientFactory = httpClientFactory;
             _baseUrl = configuration.GetValue<string>("ServiceUrls:CinemaBookingTicketAPI") ?? string.Empty;
         }
-
-        public Task<T> CreateMovieAsync<T>(MovieCreateDTO movie, string token)
+        public Task<T> GetAllMoviesAsync<T>() => SendAsync<T>(new APIRequest()
         {
-            throw new NotImplementedException();
-        }
-
-        public Task<T> DeleteMovieAsync<T>(int movieId, string token)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<T> GetAllMoviesAsync<T>()
+            ApiType = Constant.ApiType.GET,
+            Url = _baseUrl + "/api/Movie/get-all-Movies"
+        });
+        public Task<T> GetMovieByIdAsync<T>(int id)
         {
             return SendAsync<T>(new APIRequest()
             {
                 ApiType = Constant.ApiType.GET,
-                Url = _baseUrl + "/api/Movie/get-all-movies"
+                Url = _baseUrl + $"/api/Movie/{id}"
+            });
+        }
+        public Task<T> CreateMovieAsync<T>(MovieCreateDTO Movie, string? token = null)
+        {
+            return SendAsync<T>(new APIRequest()
+            {
+                ApiType = Constant.ApiType.POST,
+                Data = Movie,
+                Token = token,
+                Url = _baseUrl + "/api/Movie/Create"
+            });
+        }
+        public Task<T> DeleteMovieAsync<T>(int id, string? token = null)
+        {
+            return SendAsync<T>(new APIRequest()
+            {
+                ApiType = Constant.ApiType.DELETE,
+                Url = _baseUrl + $"/api/Movie/Delete/{id}",
+                Token = token
             });
         }
 
-        public Task<T> GetMovieByIdAsync<T>(int movieId)
+        public Task<T> UpdateMovieAsync<T>(MovieUpdateDTO movie, string token)
         {
-            throw new NotImplementedException();
-        }
-
-        public Task<T> UpdateMovieAsync<T>(int movieId, MovieUpdateDTO movie, string token)
-        {
-            throw new NotImplementedException();
+            return SendAsync<T>(new APIRequest()
+            {
+                ApiType = Constant.ApiType.PUT,
+                Data = movie,
+                Token = token,
+                Url = _baseUrl + "/api/Movie/Update/" + movie.Id
+            });
         }
     }
 }

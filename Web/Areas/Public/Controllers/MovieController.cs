@@ -9,6 +9,7 @@ namespace Web.Areas.Public.Controllers
         {
             return View();
         }
+<<<<<<< HEAD
         public IActionResult MovieBooking()
         {
             return View();
@@ -17,6 +18,8 @@ namespace Web.Areas.Public.Controllers
         {
             return View();
         }
+=======
+>>>>>>> 5d3743d5d744ff013ef5b5b75f394a78f70f2f13
     }
 
 }

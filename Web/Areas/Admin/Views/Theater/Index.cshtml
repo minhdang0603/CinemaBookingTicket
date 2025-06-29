@@ -1,0 +1,114 @@
+﻿@model List<TheaterDTO>
+
+<!-- Header -->
+<div class="admin-header">
+    <a class="btn btn-create" asp-area="Admin" asp-controller="Theater" asp-action="Create">
+        <i class="fas fa-plus"></i> Create New
+    </a>
+    <h1>
+        <i class="fas fa-building"></i> Theaters
+    </h1>
+</div>
+
+<!-- Search Area -->
+<div class="search-area">
+    <form>
+        <div class="row">
+            <div class="col-md-8">
+                <div class="form-floating">
+                    <input type="text" class="form-control" name="searchTerm" placeholder="Search theaters..."
+                           asp-area="Admin" asp-controller="Theater" asp-action="Index" value="@ViewBag.SearchTerm" />
+                    <label>Search Theaters</label>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-floating">
+                    <select class="form-control" name="provinceId" asp-items="ViewBag.Provinces">
+                        <option value="">All Provinces</option>
+                    </select>
+                    <label>Filter by Province</label>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- Data Table -->
+<div class="data-table">
+    <table id="theaterTable" class="table mb-0">
+        <thead class="table-header">
+            <tr>
+                <th>Theater</th>
+                <th>Theater Details</th>
+                <th>Opening Time</th>
+                <th>Closing Time</th>
+                <th>Province</th>
+                <th class="text-center">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model != null && Model.Any())
+            {
+                foreach (var item in Model)
+                {
+                    <tr>
+                        <td>
+                            <div class="item-thumbnail bg-dark text-white d-flex align-items-center justify-content-center">
+                                <i class="fas fa-building fa-2x"></i>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="item-title fw-bold">@item.Name</div>
+                            <div class="item-meta">
+                                <small><i class="fas fa-map-marker-alt"></i> @item.Address</small><br />
+                                <small><i class="fas fa-hashtag"></i> ID: @item.Id</small>
+                            </div>
+                        </td>
+                        <td>@item.OpeningTime</td>
+                        <td>@item.ClosingTime</td>
+                        <td><span class="badge bg-info text-dark">@item.Province?.Name</span></td>
+                        <td>
+                            <div class="action-buttons">
+                                <a class="btn btn-action btn-edit" asp-area="Admin" asp-controller="Theater" asp-action="Edit" asp-route-id="@item.Id">
+                                    <i class="fas fa-edit"></i> Edit
+                                </a>
+                                <button class="btn btn-action btn-delete" onclick="deleteTheater(@item.Id, '@item.Name')">
+                                    <i class="fas fa-trash"></i> Delete
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>
+
+@section Modals {
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade" id="deleteModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">Confirm Delete</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to delete this theater?</p>
+                    <p><strong id="deleteTheaterTitle"></strong></p>
+                    <p class="text-muted">This action cannot be undone.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <a class="btn btn-danger" onclick="confirmDeleteTheater('@Url.Action("Delete", "Theater", new { area = "Admin", id = "__id__" })')">
+                        <i class="fas fa-trash"></i> Delete
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@section AdminScripts {
+    <script src="~/js/admin/theater/index.js"></script>
+}
