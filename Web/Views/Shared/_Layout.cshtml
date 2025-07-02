@@ -1,4 +1,5 @@
-﻿<!DOCTYPE html>
+﻿@using Utility
+<!DOCTYPE html>
 <html lang="vi">
 
 <head>
@@ -12,7 +13,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css">
     <!-- DataTables CDN -->
     <link rel="stylesheet" href="https://cdn.datatables.net/2.3.2/css/dataTables.dataTables.css" />
-    
+
     <!-- Render Styles section from views -->
     @await RenderSectionAsync("Styles", required: false)
 </head>
@@ -38,9 +39,13 @@
                         <span class="icon">🎬</span>Tìm bộ phim
                     </a>
                     <ul class="dropdown-menu">
-                        <li><a asp-area="" asp-controller="Movie" asp-action="MovieList">Phim đang chiếu</a></li>
-                        <li><a asp-area="" asp-controller="Movie" asp-action="MovieList">Phim sắp chiếu</a></li>
-                        
+                        <li>
+                            <a asp-area="" asp-controller="Movie" asp-action="MovieList">Phim đang chiếu</a>
+                        </li>
+                        <li>
+                            <a asp-area="" asp-controller="Movie" asp-action="ComingSoon">Phim sắp chiếu</a>
+                        </li>
+
                     </ul>
                 </li>
                 <li class="dropdown">
@@ -69,7 +74,7 @@
                     <button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
                     CINEMA
                 </div>
-                
+
                 <div class="user-section">
                     @if (User.Identity.IsAuthenticated)
                     {

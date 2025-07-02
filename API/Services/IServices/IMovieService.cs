@@ -7,7 +7,7 @@ public interface IMovieService
 {
     Task<List<MovieDTO>> GetAllMoviesAsync(bool? isActive = true);
     Task<List<MovieDTO>> GetMoviesByGenreAsync(int genreId, bool? isActive = true);
-    Task<List<MovieDTO>> GetAllMoviesWithPaginationAsync(int pageNumber, int pageSize, bool? isActive = true);
+    Task<List<MovieDTO>> GetAllMoviesWithPaginationAsync(int pageNumber, int pageSize, string status, bool? isActive = true);
     Task<List<MovieDTO>> SearchMoviesAsync(string searchTerm, bool? isActive = true);
     Task<MovieDetailDTO> GetMovieByIdAsync(int id, bool? isActive = true);
     Task<MovieDTO> CreateMovieAsync(MovieCreateDTO movieCreateDTO);

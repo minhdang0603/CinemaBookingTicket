@@ -100,13 +100,13 @@ public class MovieService : IMovieService
         return _mapper.Map<List<MovieDTO>>(movies);
     }
 
-    public async Task<List<MovieDTO>> GetAllMoviesWithPaginationAsync(int pageNumber, int pageSize, bool? isActive = true)
+    public async Task<List<MovieDTO>> GetAllMoviesWithPaginationAsync(int pageNumber, int pageSize, string status, bool? isActive = true)
     {
         var movies = await _unitOfWork.Movie.GetAllAsync(
-            m => m.IsActive == isActive,
+            m => m.IsActive == isActive && m.Status == status,
+            includeProperties: "MovieGenres.Genre,ShowTimes",
             pageSize: pageSize,
-            pageNumber: pageNumber,
-            includeProperties: "MovieGenres.Genre,ShowTimes");
+            pageNumber: pageNumber);
         return _mapper.Map<List<MovieDTO>>(movies);
     }
 

@@ -39,9 +39,9 @@ namespace API.Controllers
         }
 
         [HttpGet("get-all-movies-with-pagination")]
-        public async Task<ActionResult<APIResponse<List<MovieDTO>>>> GetAllMoviesWithPaginationAsync(int pageNumber, int pageSize, bool? isActive = true)
+        public async Task<ActionResult<APIResponse<List<MovieDTO>>>> GetAllMoviesWithPaginationAsync([FromQuery] int pageNumber, [FromQuery] int pageSize, [FromQuery] string status, bool? isActive = true)
         {
-            var movies = await _movieService.GetAllMoviesWithPaginationAsync(pageNumber, pageSize, isActive);
+            var movies = await _movieService.GetAllMoviesWithPaginationAsync(pageNumber, pageSize, status, isActive);
             if (movies.Count == 0)
             {
                 return NotFound(APIResponse<List<MovieDTO>>.Builder()
