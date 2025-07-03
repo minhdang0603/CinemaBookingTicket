@@ -1,0 +1,213 @@
+﻿@model Web.Models.DTOs.Response.MovieDetailDTO
+@{
+    ViewData["Title"] = Model?.Title ?? "Chi tiết phim";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/public/movie-detail.css" asp-append-version="true" />
+}
+
+<div class="movie-hero">
+    <div class="floating-elements">
+        <i class="fas fa-film floating-element"></i>
+        <i class="fas fa-star floating-element"></i>
+        <i class="fas fa-video floating-element"></i>
+    </div>
+
+    <div class="hero-content mt-3">
+        <div class="row align-items-center">
+            <div class="col-lg-4 col-md-6 mb-4">
+                @if (!string.IsNullOrEmpty(Model?.PosterUrl))
+                {
+                    <img src="@Model.PosterUrl" alt="@Model.Title" class="movie-poster"
+                         onerror="this.src='https://images.unsplash.com/photo-1440404653325-ab127d49abc1?ixlib=rb-4.0.3'" />
+                }
+                else
+                {
+                    <img src="https://images.unsplash.com/photo-1440404653325-ab127d49abc1?ixlib=rb-4.0.3"
+                         alt="Movie Poster" class="movie-poster" />
+                }
+            </div>
+
+            <div class="col-lg-8 col-md-6">
+                <div class="movie-info-card">
+                    <h1 class="movie-title">@(Model?.Title?.ToUpper() ?? "TÊN PHIM")</h1>
+
+                    @if (!string.IsNullOrEmpty(Model?.Director))
+                    {
+                        <h2 class="movie-subtitle">Đạo diễn: @Model.Director</h2>
+                    }
+
+                    <div class="rating">
+                        <div class="rating-stars" id="movieRatingStars">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star-half-alt"></i>
+                        </div>
+                        <span class="text-muted">/10</span>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(Model?.Description))
+                    {
+                        <p class="movie-description">
+                            @Model.Description
+                        </p>
+                    }
+                    else
+                    {
+                        <p class="movie-description">
+                            Mô tả phim sẽ được cập nhật sớm.
+                        </p>
+                    }
+
+                    <div class="movie-meta">
+                        @if (Model?.Duration > 0)
+                        {
+                            <div class="meta-item">
+                                <i class="fas fa-clock"></i>
+                                <span>@Model.Duration phút</span>
+                            </div>
+                        }
+
+                        @if (Model?.ReleaseDate != null)
+                        {
+                            <div class="meta-item">
+                                <i class="fas fa-calendar"></i>
+                                <span>@Model.ReleaseDate.Year</span>
+                            </div>
+                        }
+
+                        @if (Model?.Genres != null && Model.Genres.Any())
+                        {
+                            <div class="meta-item">
+                                <i class="fas fa-film"></i>
+                                <span>@string.Join(", ", Model.Genres.Select(g => g.Name))</span>
+                            </div>
+                        }
+
+                        @if (!string.IsNullOrEmpty(Model?.AgeRating))
+                        {
+                            <div class="meta-item">
+                                <i class="fas fa-users"></i>
+                                <span>@Model.AgeRating</span>
+                            </div>
+                        }
+
+                        @if (!string.IsNullOrEmpty(Model?.Director))
+                        {
+                            <div class="meta-item">
+                                <i class="fas fa-user-tie"></i>
+                                <span>@Model.Director</span>
+                            </div>
+                        }
+                    </div>
+
+                    <div class="action-buttons">
+                        <a href="#showtimes" class="btn-primary-custom">
+                            <i class="fas fa-ticket-alt"></i>
+                            Đặt vé ngay
+                        </a>
+                        @if (!string.IsNullOrEmpty(Model?.TrailerUrl))
+                        {
+                            <a href="@Model.TrailerUrl" target="_blank" class="btn-secondary-custom">
+                                <i class="fas fa-play"></i>
+                                Xem trailer
+                            </a>
+                        }
+                        <a href="#details" class="btn-secondary-custom">
+                            <i class="fas fa-info-circle"></i>
+                            Chi tiết
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cast Information -->
+        @if (!string.IsNullOrEmpty(Model?.Cast))
+        {
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="cast-info">
+                        <h4><i class="fas fa-users"></i> Diễn viên</h4>
+                        <p>@Model.Cast</p>
+                    </div>
+                </div>
+            </div>
+        }
+
+        <!-- Showtimes Section -->
+        <div class="showtimes-section" id="showtimes">
+            <h3 class="showtimes-title">
+                <i class="fas fa-map-marker-alt"></i>
+                Lịch chiếu tại rạp gần bạn
+            </h3>
+
+            <div class="row mb-4">
+                <div class="col-md-4 mb-3">
+                    <select class="form-select custom-form-select">
+                        <option>Tp. Hồ Chí Minh</option>
+                        <option>Hà Nội</option>
+                        <option>Đà Nẵng</option>
+                    </select>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <select class="form-select custom-form-select">
+                        <option>Hôm nay</option>
+                        <option>Ngày mai</option>
+                        <option>Cuối tuần</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Cinema List -->
+            <div class="cinema-list">
+                @if (ViewBag.Showtimes != null)
+                {
+                    @foreach (var cinema in (List<object>)ViewBag.Showtimes)
+                    {
+                        var cinemaData = cinema as dynamic;
+                        <div class="cinema-group mb-4">
+                            <div class="cinema-header" onclick="toggleCinemaGroup(this)">
+                                <div class="d-flex align-items-center">
+                                    <img src="https://images.unsplash.com/photo-1489599003021-3d2ad2429a0a?ixlib=rb-4.0.3&w=50&h=50&fit=crop&crop=center"
+                                         class="cinema-logo me-3">
+                                    <div>
+                                        <h5 class="cinema-name mb-0">@cinemaData.CinemaName</h5>
+                                        <p class="cinema-count mb-0">@cinemaData.Address</p>
+                                    </div>
+                                </div>
+                                <i class="fas fa-chevron-down cinema-toggle"></i>
+                            </div>
+                            <div class="cinema-locations">
+                                <div class="cinema-item">
+                                    <div class="showtimes-grid">
+                                        @foreach (var showtime in cinemaData.Showtimes)
+                                        {
+                                            <a asp-area="Public" asp-controller="Booking" asp-action="Index" asp-route-movieId="@Model.Id" asp-route-showtime="@showtime">
+                                                <div class="showtime-slot">@showtime</div>
+                                            </a>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="text-center">
+                        <p class="text-muted">Lịch chiếu sẽ được cập nhật sớm.</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/public/movie-detail.js"></script>
+    
+}
