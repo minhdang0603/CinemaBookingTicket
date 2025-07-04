@@ -93,7 +93,8 @@ public class PaymentService : IPaymentService
                 var payment = await _unitOfWork.Payment.GetAsync(p => p.Id == paymentId);
                 if (payment != null)
                 {
-                    var booking = await _unitOfWork.Booking.GetAsync(b => b.Id == payment.BookingId); if (booking == null || !payment.BookingId.HasValue)
+                    var booking = await _unitOfWork.Booking.GetAsync(b => b.Id == payment.BookingId);
+                    if (booking == null || !payment.BookingId.HasValue)
                     {
                         throw new AppException(ErrorCodes.BookingNotFound(payment.BookingId ?? 0));
                     }
@@ -154,10 +155,37 @@ public class PaymentService : IPaymentService
             string amount = queryParams["vnp_Amount"].ToString();
             string payDate = queryParams["vnp_PayDate"].ToString();
 
+            // Parse payment ID
+            if (!int.TryParse(vnp_TxnRef, out int paymentId))
+            {
+                throw new AppException(ErrorCodes.InternalServerError());
+            }
+
             if (vnp_ResponseCode == "00" && vnp_TransactionStatus == "00")
             {
+                // Update payment status to completed
+                await UpdatePaymentStatusAsync(paymentId, Constant.Payment_Status_Completed, vnpayTranId);
+                
+                // Get payment and related booking information
+                var payment = await _unitOfWork.Payment.GetAsync(p => p.Id == paymentId);
+                if (payment != null && payment.BookingId.HasValue)
+                {
+                    var booking = await _unitOfWork.Booking.GetAsync(
+                        b => b.Id == payment.BookingId && b.IsActive, 
+                        includeProperties: "ShowTime,ShowTime.Movie,ApplicationUser");
+                    
+                    if (booking != null)
+                    {
+                        // Update booking status
+                        booking.BookingStatus = Constant.Booking_Status_Confirmed;
+                        booking.LastUpdatedAt = DateTime.Now;
+                        await _unitOfWork.Booking.UpdateAsync(booking);
+                        await _unitOfWork.SaveAsync();
+                    }
+                }
+
                 // Get the frontend URL and success route from configuration
-                string successRoute = _configuration["Frontend:SuccessRoute"] ?? "/booking-success/{0}";
+                string successRoute = _configuration["Frontend:SuccessRoute"] ?? "/payment/success/{0}";
 
                 // Format the success route with the payment ID
                 string formattedSuccessRoute = string.Format(successRoute, vnp_TxnRef);
@@ -166,7 +194,7 @@ public class PaymentService : IPaymentService
                 return new VNPayResponseDTO
                 {
                     Success = true,
-                    OrderId = vnp_TxnRef,
+                    OrderId = payment.BookingId.ToString(),
                     TransactionId = vnpayTranId,
                     Amount = decimal.Parse(amount) / 100,
                     ResponseCode = vnp_ResponseCode,
@@ -179,7 +207,7 @@ public class PaymentService : IPaymentService
             else
             {
                 // Get the frontend URL and failure route from configuration
-                string failureRoute = _configuration["Frontend:FailureRoute"] ?? "/booking-failed/{0}";
+                string failureRoute = _configuration["Frontend:FailureRoute"] ?? "/payment/failed/{0}";
 
                 // Format the failure route with the payment ID
                 string formattedFailureRoute = string.Format(failureRoute, vnp_TxnRef);
@@ -254,7 +282,7 @@ public class PaymentService : IPaymentService
 
         if (booking == null)
         {
-            throw new AppException(ErrorCodes.InternalServerError());
+            throw new AppException(ErrorCodes.BookingNotFound(bookingId));
         }
 
         var payment = new Payment

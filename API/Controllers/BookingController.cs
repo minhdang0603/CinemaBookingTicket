@@ -3,8 +3,10 @@ using API.DTOs;
 using API.DTOs.Request;
 using API.DTOs.Response;
 using API.Services.IServices;
+using brevo_csharp.Client;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Net;
 using Utility;
 
 namespace API.Controllers;
@@ -22,22 +24,24 @@ public class BookingController : ControllerBase
 
     [HttpPost]
     [Authorize]
-    public async Task<ActionResult<APIResponse<string>>> CreateBookingAsync([FromBody] BookingCreateDTO bookingCreateDTO)
+    public async Task<ActionResult<APIResponse<BookingDTO>>> CreateBookingAsync([FromBody] BookingCreateDTO bookingCreateDTO)
     {
-        var paymentUrl = await _bookingService.CreateBookingWithPaymentAsync(bookingCreateDTO);
-        return Ok(APIResponse<string>.Builder()
-            .WithResult(paymentUrl)
+        var booking = await _bookingService.CreateBookingAsync(bookingCreateDTO);
+        return CreatedAtRoute("GetBookingByIdAsync", new { bookingId = booking.Id }, APIResponse<BookingDTO>.Builder()
+            .WithResult(booking)
+            .WithStatusCode(HttpStatusCode.Created)
             .WithSuccess(true)
             .Build());
     }
 
     [HttpDelete("{bookingId:int}")]
-    [Authorize(Roles = Constant.Role_Admin)]
+    [Authorize]
     public async Task<ActionResult<APIResponse<object>>> DeleteBookingAsync(int bookingId)
     {
         await _bookingService.DeleteBookingAsync(bookingId);
         return Ok(APIResponse<object>.Builder()
-            .WithSuccess(true)
+            .WithStatusCode(HttpStatusCode.NoContent)
+			.WithSuccess(true)
             .Build());
     }
 

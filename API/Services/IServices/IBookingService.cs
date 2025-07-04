@@ -1,3 +1,4 @@
+using API.Data.Models;
 using API.DTOs.Request;
 using API.DTOs.Response;
 
@@ -10,5 +11,5 @@ public interface IBookingService
     Task<List<BookingDTO>> GetMyBookingsAsync();
     Task DeleteBookingAsync(int bookingId);
     Task CancelBookingAsync(int bookingId);
-    Task<string> CreateBookingWithPaymentAsync(BookingCreateDTO bookingCreateDTO);
+	Task<BookingDTO> CreateBookingAsync(BookingCreateDTO bookingCreateDTO);
 }
