@@ -60,4 +60,12 @@ public class GenreService : BaseService, IGenreService
             Token = token
         });
     }
+    public Task<T> GetFiveTopGenresAsync<T>()
+    {
+        return SendAsync<T>(new APIRequest()
+        {
+            ApiType = Constant.ApiType.GET,
+            Url = _baseUrl + "/api/Genre/get-five-top-genres"
+        });
+    }
 }

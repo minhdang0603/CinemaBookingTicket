@@ -64,10 +64,12 @@
         <div class="col-lg-3 col-md-4">
             <div class="filter-sidebar">
                 <!-- Filter Form -->
-                <form method="get" action="@(isComingSoon ? Url.Action("ComingSoon", "Movie") : Url.Action("MovieList", "Movie"))" id="filterForm">
+                <form method="get"
+                    action="@(isComingSoon? Url.Action("ComingSoon", "Movie") : Url.Action("MovieList", "Movie"))"
+                    id="filterForm">
                     <input type="hidden" name="pageNumber" value="1" />
                     <input type="hidden" name="pageSize" value="@pageSize" />
-                    
+
                     <div class="mb-4">
                         <h6 class="filter-title">
                             <i class="fas fa-sort me-2"></i>
@@ -79,7 +81,8 @@
                             {
                                 @foreach (var genre in ViewBag.Genres)
                                 {
-                                    <option value="@genre.Value" selected="@(currentGenreId?.ToString() == genre.Value ? "selected" : null)">
+                                    <option value="@genre.Value"
+                                        selected="@(currentGenreId?.ToString() == genre.Value ? "selected" : null)">
                                         @genre.Text
                                     </option>
                                 }
@@ -98,7 +101,8 @@
                             {
                                 @foreach (var year in ViewBag.Years)
                                 {
-                                    <option value="@year.Value" selected="@(currentYear?.ToString() == year.Value ? "selected" : null)">
+                                    <option value="@year.Value"
+                                        selected="@(currentYear?.ToString() == year.Value ? "selected" : null)">
                                         @year.Text
                                     </option>
                                 }
@@ -110,15 +114,31 @@
                 <div class="mt-4">
                     <h6 class="filter-title">Thể loại phổ biến</h6>
                     <div class="genre-badges">
-                        @if (ViewBag.Genres != null)
+                        @if (ViewBag.TopGenres != null)
                         {
-                            var genres = ViewBag.Genres as IEnumerable<SelectListItem>;
-                            if (genres != null)
+                            var topGenres = ViewBag.TopGenres as IEnumerable<SelectListItem>;
+                            if (topGenres != null)
                             {
-                                foreach (var genre in genres.Take(5))
+                                foreach (var genre in topGenres)
                                 {
-                                    <span class="genre-badge @(currentGenreId?.ToString() == genre.Value ? "active" : "")" 
-                                          onclick="selectGenre('@genre.Value')">@genre.Text</span>
+                                    <span class="genre-badge @(currentGenreId?.ToString() == genre.Value ? "active" : "")"
+                                        onclick="selectGenre('@genre.Value')">@genre.Text</span>
+                                }
+                            }
+                        }
+                        else
+                        {
+                            @* Fallback nếu không load được top genres *@
+                            @if (ViewBag.Genres != null)
+                            {
+                                var genres = ViewBag.Genres as IEnumerable<SelectListItem>;
+                                if (genres != null)
+                                {
+                                    foreach (var genre in genres.Take(5))
+                                    {
+                                        <span class="genre-badge @(currentGenreId?.ToString() == genre.Value ? "active" : "")"
+                                            onclick="selectGenre('@genre.Value')">@genre.Text</span>
+                                    }
                                 }
                             }
                         }
@@ -127,8 +147,8 @@
 
                 <!-- Reset Filters Button -->
                 <div class="mt-4">
-                    <a href="@(isComingSoon ? Url.Action("ComingSoon", "Movie") : Url.Action("MovieList", "Movie"))" 
-                       class="btn btn-outline-light btn-sm w-100">
+                    <a href="@(isComingSoon? Url.Action("ComingSoon", "Movie") : Url.Action("MovieList", "Movie"))"
+                        class="btn btn-outline-light btn-sm w-100">
                         <i class="fas fa-undo me-2"></i>
                         Đặt lại bộ lọc
                     </a>
@@ -177,16 +197,24 @@
                                             <i class="fas fa-star"></i>
                                         </button>
                                     </div>
+                                    @* Đảm bảo badge luôn có position absolute để không ảnh hưởng đến layout *@
                                     @if (isComingSoon)
                                     {
                                         <div class="coming-soon-badge">
                                             <span>Sắp chiếu</span>
                                         </div>
                                     }
+                                    else
+                                    {
+                                        @* Thêm div trống với cùng class để giữ consistency *@
+                                        <div class="coming-soon-badge" style="display: none;">
+                                            <span></span>
+                                        </div>
+                                    }
                                 </div>
                                 <div class="movie-info">
                                     <h3 class="movie-title">
-                                        <a href="@Url.Action("Details", "Movie", new { id = movie.Id })"
+                                        <a href="@Url.Action("Index", "Movie", new { id = movie.Id })"
                                             class="text-decoration-none">
                                             @movie.Title
                                         </a>
@@ -216,14 +244,15 @@
                                     <div class="movie-actions-bottom mt-2">
                                         @if (isComingSoon)
                                         {
-                                            <button class="btn btn-outline-primary btn-sm w-100" disabled>
+                                            <a href="@Url.Action("Index", "Movie", new { id = movie.Id })"
+                                                class="btn btn-outline-primary btn-sm w-100">
                                                 <i class="fas fa-clock me-1"></i>
                                                 Sắp chiếu
-                                            </button>
+                                            </a>
                                         }
                                         else
                                         {
-                                            <a href="@Url.Action("MovieBooking", "Movie", new { id = movie.Id })"
+                                            <a href="@Url.Action("Index", "Movie", new { id = movie.Id })"
                                                 class="btn btn-primary btn-sm w-100">
                                                 <i class="fas fa-ticket-alt me-1"></i>
                                                 Đặt vé
@@ -264,8 +293,21 @@
                                 <li class="page-item @(currentPage <= 1 ? "disabled" : "")">
                                     @{
                                         var prevUrl = isComingSoon ?
-                                        Url.Action("ComingSoon", new { pageNumber = currentPage - 1, pageSize = pageSize, genreId = currentGenreId, year = currentYear }) :
-                                        Url.Action("MovieList", new { pageNumber = currentPage - 1, pageSize = pageSize, genreId = currentGenreId, year = currentYear });
+                                        Url.Action("ComingSoon", new
+                                        {
+                                            pageNumber = currentPage - 1,
+                                            pageSize = pageSize,
+                                            genreId = currentGenreId,
+                                            year = currentYear
+                                        }) :
+                                        Url.Action("MovieList", new
+                                        {
+                                            pageNumber = currentPage - 1,
+                                            pageSize = pageSize,
+                                            genreId
+                                        = currentGenreId,
+                                            year = currentYear
+                                        });
                                     }
                                     <a class="page-link" href="@(currentPage > 1 ? prevUrl : "#")"
                                         tabindex="@(currentPage <= 1 ? "-1" : "")"
@@ -296,8 +338,21 @@
                                 @if (startPage > 1)
                                 {
                                     var firstPageUrl = isComingSoon ?
-                                    Url.Action("ComingSoon", new { pageNumber = 1, pageSize = pageSize, genreId = currentGenreId, year = currentYear }) :
-                                    Url.Action("MovieList", new { pageNumber = 1, pageSize = pageSize, genreId = currentGenreId, year = currentYear });
+                                    Url.Action("ComingSoon", new
+                                    {
+                                        pageNumber = 1,
+                                        pageSize = pageSize,
+                                        genreId =
+                                    currentGenreId,
+                                        year = currentYear
+                                    }) :
+                                    Url.Action("MovieList", new
+                                    {
+                                        pageNumber = 1,
+                                        pageSize = pageSize,
+                                        genreId = currentGenreId,
+                                        year = currentYear
+                                    });
                                     <li class="page-item">
                                         <a class="page-link" href="@firstPageUrl">1</a>
                                     </li>
@@ -312,8 +367,21 @@
                                 @for (int i = startPage; i <= endPage; i++)
                                 {
                                     var pageUrl = isComingSoon ?
-                                    Url.Action("ComingSoon", new { pageNumber = i, pageSize = pageSize, genreId = currentGenreId, year = currentYear }) :
-                                    Url.Action("MovieList", new { pageNumber = i, pageSize = pageSize, genreId = currentGenreId, year = currentYear });
+                                    Url.Action("ComingSoon", new
+                                    {
+                                        pageNumber = i,
+                                        pageSize = pageSize,
+                                        genreId =
+                                    currentGenreId,
+                                        year = currentYear
+                                    }) :
+                                    Url.Action("MovieList", new
+                                    {
+                                        pageNumber = i,
+                                        pageSize = pageSize,
+                                        genreId = currentGenreId,
+                                        year = currentYear
+                                    });
                                     <li class="page-item @(i == currentPage ? "active" : "")">
                                         <a class="page-link" href="@pageUrl">@i</a>
                                     </li>
@@ -328,8 +396,22 @@
                                         </li>
                                     }
                                     var lastPageUrl = isComingSoon ?
-                                    Url.Action("ComingSoon", new { pageNumber = totalPages, pageSize = pageSize, genreId = currentGenreId, year = currentYear }) :
-                                    Url.Action("MovieList", new { pageNumber = totalPages, pageSize = pageSize, genreId = currentGenreId, year = currentYear });
+                                    Url.Action("ComingSoon", new
+                                    {
+                                        pageNumber = totalPages,
+                                        pageSize = pageSize,
+                                        genreId =
+                                    currentGenreId,
+                                        year = currentYear
+                                    }) :
+                                    Url.Action("MovieList", new
+                                    {
+                                        pageNumber = totalPages,
+                                        pageSize = pageSize,
+                                        genreId =
+                                    currentGenreId,
+                                        year = currentYear
+                                    });
                                     <li class="page-item">
                                         <a class="page-link" href="@lastPageUrl">@totalPages</a>
                                     </li>
@@ -339,10 +421,23 @@
                                 <li class="page-item @(currentPage >= totalPages ? "disabled" : "")">
                                     @{
                                         var nextUrl = isComingSoon ?
-                                        Url.Action("ComingSoon", new { pageNumber = currentPage + 1, pageSize = pageSize, genreId = currentGenreId, year = currentYear }) :
-                                        Url.Action("MovieList", new { pageNumber = currentPage + 1, pageSize = pageSize, genreId = currentGenreId, year = currentYear });
+                                        Url.Action("ComingSoon", new
+                                        {
+                                            pageNumber = currentPage + 1,
+                                            pageSize = pageSize,
+                                            genreId = currentGenreId,
+                                            year = currentYear
+                                        }) :
+                                        Url.Action("MovieList", new
+                                        {
+                                            pageNumber = currentPage + 1,
+                                            pageSize = pageSize,
+                                            genreId
+                                        = currentGenreId,
+                                            year = currentYear
+                                        });
                                     }
-                                    <a class="page-link" href="@(currentPage < totalPages ? nextUrl : "#")">
+                                    <a class="page-link" href="@(currentPage<totalPages? nextUrl : "#")">
                                         <span class="d-none d-sm-inline me-1">Sau</span>
                                         <i class="fas fa-chevron-right"></i>
                                     </a>

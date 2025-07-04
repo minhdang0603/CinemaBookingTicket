@@ -202,26 +202,32 @@
 /* Movie Grid */
 .movie-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
     gap: 1.5rem;
     padding: 1rem 0;
     width: 100%;
 }
 
-/* Responsive breakpoints */
-@media (max-width: 1200px) {
+/* Responsive breakpoints - sửa lại cho nhất quán */
+@media (min-width: 1200px) {
+    .movie-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+@media (min-width: 992px) and (max-width: 1199px) {
     .movie-grid {
         grid-template-columns: repeat(3, 1fr);
     }
 }
 
-@media (max-width: 992px) {
+@media (min-width: 768px) and (max-width: 991px) {
     .movie-grid {
         grid-template-columns: repeat(2, 1fr);
     }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 767px) {
     .movie-grid {
         grid-template-columns: repeat(2, 1fr);
         gap: 1rem;
@@ -241,7 +247,8 @@
     width: 100% !important;
     flex: unset !important;
     position: relative !important;
-    display: block !important;
+    display: flex !important;
+    flex-direction: column !important;
     background: var(--movie-card-bg);
     border-radius: var(--radius-md);
     overflow: hidden;
@@ -251,14 +258,16 @@
     cursor: pointer;
     box-sizing: border-box !important;
     max-width: 100%;
+    height: 100%; /* Đảm bảo chiều cao đồng nhất */
 }
 
-/* Movie poster aspect ratio */
+/* Movie poster aspect ratio - sửa lại để đồng nhất */
 .movie-grid .movie-poster {
     position: relative;
     overflow: hidden;
     aspect-ratio: 2/3;
     width: 100%;
+    flex-shrink: 0; /* Không cho phép co lại */
 }
 
 .movie-grid .movie-poster img {
@@ -268,9 +277,13 @@
     transition: transform 0.4s ease;
 }
 
-/* Movie info styling */
+/* Movie info styling - sửa lại để đồng nhất */
 .movie-grid .movie-info {
     padding: 1rem;
+    flex-grow: 1; /* Cho phép mở rộng để lấp đầy không gian */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 }
 
 .movie-grid .movie-title {
@@ -285,23 +298,46 @@
     -webkit-box-orient: vertical;
     overflow: hidden;
     transition: var(--transition-normal);
-    min-height: 2.6rem; /* Ensure consistent height */
+    min-height: 2.6rem; /* Đảm bảo chiều cao đồng nhất */
 }
 
 .movie-grid .movie-details {
     margin-bottom: 0.5rem;
+    flex-grow: 1; /* Để đẩy nút xuống dưới */
 }
 
 .movie-grid .movie-duration {
     margin-bottom: 0.75rem;
 }
 
-/* Button styling */
+/* Coming Soon Badge - sửa lại positioning */
+.coming-soon-badge {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: var(--hover-red);
+    color: var(--white);
+    padding: 0.3rem 0.8rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.75rem;
+    font-weight: 600;
+    z-index: 2;
+    box-shadow: var(--shadow-md);
+    transform: none !important; /* Đảm bảo không bị transform */
+}
+
+/* Button styling - đảm bảo nút luôn ở cuối */
+.movie-grid .movie-actions-bottom {
+    margin-top: auto; /* Đẩy nút xuống cuối */
+}
+
 .movie-grid .movie-actions-bottom .btn {
     font-size: 0.875rem;
     padding: 0.5rem;
+    width: 100%;
 }
 
+/* Movie Card Hover Effects */
 .movie-grid .movie-card:hover {
     transform: translateY(-5px);
     box-shadow: var(--shadow-2xl);

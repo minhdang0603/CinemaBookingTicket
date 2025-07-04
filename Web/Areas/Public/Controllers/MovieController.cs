@@ -25,8 +25,10 @@ namespace Web.Areas.Public.Controllers
             _genreService = genreService;
         }
 
-        public IActionResult Index()
+        public IActionResult Index(int? id)
         {
+            // Tạm thời chỉ truyền id qua ViewBag để sử dụng sau này
+            ViewBag.MovieId = id;
             return View();
         }
 
@@ -55,6 +57,9 @@ namespace Web.Areas.Public.Controllers
                 // Load genres for dropdowns
                 ViewBag.Genres = await LoadGenreDropdown();
                 ViewBag.Years = GetYears();
+
+                // Load top 5 genres for popular section
+                ViewBag.TopGenres = await LoadTopGenresAsync();
 
                 // Set page title and status
                 ViewBag.PageTitle = pageTitle;
@@ -147,6 +152,32 @@ namespace Web.Areas.Public.Controllers
                 Text = year.ToString(),
                 Value = year.ToString()
             }).ToList();
+        }
+
+        // Thêm method mới để load top genres
+        private async Task<IEnumerable<SelectListItem>> LoadTopGenresAsync()
+        {
+            try
+            {
+                var topGenresResponse = await _genreService.GetFiveTopGenresAsync<APIResponse>();
+                if (topGenresResponse == null || !topGenresResponse.IsSuccess)
+                {
+                    _logger.LogError("Failed to load top genres from API");
+                    return new List<SelectListItem>();
+                }
+
+                var topGenres = JsonConvert.DeserializeObject<List<GenreDTO>>(Convert.ToString(topGenresResponse.Result));
+                return topGenres.Select(g => new SelectListItem
+                {
+                    Text = g.Name,
+                    Value = g.Id.ToString()
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while loading top genres.");
+                return new List<SelectListItem>();
+            }
         }
     }
 }
