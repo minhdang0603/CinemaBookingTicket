@@ -1,6 +1,7 @@
-﻿@model Web.Models.DTOs.Response.MovieDetailDTO
+﻿@model Web.Models.ViewModels.MovieDetailViewModel
+@using Web.Models.DTOs.Response
 @{
-    ViewData["Title"] = Model?.Title ?? "Chi tiết phim";
+    ViewData["Title"] = Model?.Movie?.Title ?? "Chi tiết phim";
 }
 
 @section Styles {
@@ -17,9 +18,9 @@
     <div class="hero-content mt-3">
         <div class="row align-items-center">
             <div class="col-lg-4 col-md-6 mb-4">
-                @if (!string.IsNullOrEmpty(Model?.PosterUrl))
+                @if (!string.IsNullOrEmpty(Model?.Movie?.PosterUrl))
                 {
-                    <img src="@Model.PosterUrl" alt="@Model.Title" class="movie-poster"
+                    <img src="@Model.Movie.PosterUrl" alt="@Model.Movie.Title" class="movie-detail-poster"
                          onerror="this.src='https://images.unsplash.com/photo-1440404653325-ab127d49abc1?ixlib=rb-4.0.3'" />
                 }
                 else
@@ -31,11 +32,11 @@
 
             <div class="col-lg-8 col-md-6">
                 <div class="movie-info-card">
-                    <h1 class="movie-title">@(Model?.Title?.ToUpper() ?? "TÊN PHIM")</h1>
+                    <h1 class="movie-title">@(Model?.Movie?.Title?.ToUpper() ?? "TÊN PHIM")</h1>
 
-                    @if (!string.IsNullOrEmpty(Model?.Director))
+                    @if (!string.IsNullOrEmpty(Model?.Movie?.Director))
                     {
-                        <h2 class="movie-subtitle">Đạo diễn: @Model.Director</h2>
+                        <h2 class="movie-subtitle">Đạo diễn: @Model.Movie.Director</h2>
                     }
 
                     <div class="rating">
@@ -49,10 +50,10 @@
                         <span class="text-muted">/10</span>
                     </div>
 
-                    @if (!string.IsNullOrEmpty(Model?.Description))
+                    @if (!string.IsNullOrEmpty(Model?.Movie?.Description))
                     {
                         <p class="movie-description">
-                            @Model.Description
+                            @Model.Movie.Description
                         </p>
                     }
                     else
@@ -63,43 +64,43 @@
                     }
 
                     <div class="movie-meta">
-                        @if (Model?.Duration > 0)
+                        @if (Model?.Movie?.Duration > 0)
                         {
                             <div class="meta-item">
                                 <i class="fas fa-clock"></i>
-                                <span>@Model.Duration phút</span>
+                                <span>@Model.Movie.Duration phút</span>
                             </div>
                         }
 
-                        @if (Model?.ReleaseDate != null)
+                        @if (Model?.Movie?.ReleaseDate != null)
                         {
                             <div class="meta-item">
                                 <i class="fas fa-calendar"></i>
-                                <span>@Model.ReleaseDate.Year</span>
+                                <span>@Model.Movie.ReleaseDate.Year</span>
                             </div>
                         }
 
-                        @if (Model?.Genres != null && Model.Genres.Any())
+                        @if (Model?.Movie?.Genres != null && Model.Movie.Genres.Any())
                         {
                             <div class="meta-item">
                                 <i class="fas fa-film"></i>
-                                <span>@string.Join(", ", Model.Genres.Select(g => g.Name))</span>
+                                <span>@string.Join(", ", Model.Movie.Genres.Select(g => g.Name))</span>
                             </div>
                         }
 
-                        @if (!string.IsNullOrEmpty(Model?.AgeRating))
+                        @if (!string.IsNullOrEmpty(Model?.Movie?.AgeRating))
                         {
                             <div class="meta-item">
                                 <i class="fas fa-users"></i>
-                                <span>@Model.AgeRating</span>
+                                <span>@Model.Movie.AgeRating</span>
                             </div>
                         }
 
-                        @if (!string.IsNullOrEmpty(Model?.Director))
+                        @if (!string.IsNullOrEmpty(Model?.Movie?.Director))
                         {
                             <div class="meta-item">
                                 <i class="fas fa-user-tie"></i>
-                                <span>@Model.Director</span>
+                                <span>@Model.Movie.Director</span>
                             </div>
                         }
                     </div>
@@ -109,9 +110,9 @@
                             <i class="fas fa-ticket-alt"></i>
                             Đặt vé ngay
                         </a>
-                        @if (!string.IsNullOrEmpty(Model?.TrailerUrl))
+                        @if (!string.IsNullOrEmpty(Model?.Movie?.TrailerUrl))
                         {
-                            <a href="@Model.TrailerUrl" target="_blank" class="btn-secondary-custom">
+                            <a href="@Model.Movie.TrailerUrl" target="_blank" class="btn-secondary-custom">
                                 <i class="fas fa-play"></i>
                                 Xem trailer
                             </a>
@@ -126,13 +127,13 @@
         </div>
 
         <!-- Cast Information -->
-        @if (!string.IsNullOrEmpty(Model?.Cast))
+        @if (!string.IsNullOrEmpty(Model?.Movie?.Cast))
         {
             <div class="row mt-4">
                 <div class="col-12">
                     <div class="cast-info">
                         <h4><i class="fas fa-users"></i> Diễn viên</h4>
-                        <p>@Model.Cast</p>
+                        <p>@Model.Movie.Cast</p>
                     </div>
                 </div>
             </div>
@@ -164,19 +165,21 @@
 
             <!-- Cinema List -->
             <div class="cinema-list">
-                @if (ViewBag.Showtimes != null)
+                @if (Model?.HasShowtimes == true)
                 {
-                    @foreach (var cinema in (List<object>)ViewBag.Showtimes)
+                    @foreach (var theaterGroup in Model.ShowtimesByTheater ?? Enumerable.Empty<IGrouping<TheaterDTO, ShowTimeLiteDTO>>())
                     {
-                        var cinemaData = cinema as dynamic;
+                        var theater = theaterGroup.Key;
+                        var showtimes = theaterGroup.OrderBy(st => st.ShowDate).ThenBy(st => st.StartTime).ToList();
+                        
                         <div class="cinema-group mb-4">
                             <div class="cinema-header" onclick="toggleCinemaGroup(this)">
                                 <div class="d-flex align-items-center">
                                     <img src="https://images.unsplash.com/photo-1489599003021-3d2ad2429a0a?ixlib=rb-4.0.3&w=50&h=50&fit=crop&crop=center"
                                          class="cinema-logo me-3">
                                     <div>
-                                        <h5 class="cinema-name mb-0">@cinemaData.CinemaName</h5>
-                                        <p class="cinema-count mb-0">@cinemaData.Address</p>
+                                        <h5 class="cinema-name mb-0">@theater.Name</h5>
+                                        <p class="cinema-count mb-0">@theater.Address</p>
                                     </div>
                                 </div>
                                 <i class="fas fa-chevron-down cinema-toggle"></i>
@@ -184,10 +187,16 @@
                             <div class="cinema-locations">
                                 <div class="cinema-item">
                                     <div class="showtimes-grid">
-                                        @foreach (var showtime in cinemaData.Showtimes)
+                                        @foreach (var showtime in showtimes)
                                         {
-                                            <a asp-area="Public" asp-controller="Booking" asp-action="Index" asp-route-movieId="@Model.Id" asp-route-showtime="@showtime">
-                                                <div class="showtime-slot">@showtime</div>
+                                            <a asp-area="Public" asp-controller="Booking" asp-action="Index" 
+                                               asp-route-movieId="@Model.Movie.Id" 
+                                               asp-route-showtimeId="@showtime.Id"
+                                               title="@showtime.ShowDate.ToString("dd/MM/yyyy") - @showtime.Screen?.Name - @showtime.BasePrice.ToString("C")">
+                                                <div class="showtime-slot">
+                                                    <span class="time">@showtime.StartTime.ToString("HH:mm")</span>
+                                                    <small class="screen-info">@showtime.Screen?.Name</small>
+                                                </div>
                                             </a>
                                         }
                                     </div>

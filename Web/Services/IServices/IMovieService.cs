@@ -9,5 +9,6 @@ namespace Web.Services.IServices
         Task<T> CreateMovieAsync<T>(MovieCreateDTO movie, string token);
         Task<T> UpdateMovieAsync<T>(MovieUpdateDTO movie, string token);
         Task<T> DeleteMovieAsync<T>(int movieId, string token);
+        Task<T> GetMoviesForHomeAsync<T>();
     }
 }

@@ -47,7 +47,7 @@
     box-shadow: 0 30px 60px rgba(0,0,0,0.4);
 }
 
-.movie-poster {
+.movie-detail-poster {
     width: 100%;
     max-width: 300px;
     border-radius: var(--radius-md);
@@ -55,7 +55,7 @@
     transition: var(--transition-normal);
 }
 
-.movie-poster:hover {
+.movie-detail-poster:hover {
     transform: scale(1.05);
 }
 
@@ -359,13 +359,30 @@ select option {
 .showtime-slot {
     background: linear-gradient(45deg, #4ecdc4, #44a08d);
     color: white;
-    padding: 8px 15px;
+    padding: 10px 15px;
     border-radius: 20px;
     font-size: 0.9rem;
     font-weight: 500;
     cursor: pointer;
     transition: all 0.3s ease;
     border: 2px solid transparent;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    min-width: 80px;
+}
+
+.showtime-slot .time {
+    font-weight: 600;
+    font-size: 1rem;
+    margin-bottom: 2px;
+}
+
+.showtime-slot .screen-info {
+    font-size: 0.7rem;
+    opacity: 0.9;
+    font-weight: 400;
 }
 
 .showtime-slot:hover {

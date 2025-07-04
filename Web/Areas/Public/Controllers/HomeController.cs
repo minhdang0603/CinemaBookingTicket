@@ -4,6 +4,8 @@ using Web.Models;
 using Web.Models.DTOs.Response;
 using Web.Services.IServices;
 using Web.Models.DTOs.Request;
+using Web.Models.ViewModels;
+using Utility;
 
 namespace Web.Areas.Public.Controllers
 {
@@ -23,18 +25,21 @@ namespace Web.Areas.Public.Controllers
         {
             try
             {
-                // Load featured movies for carousel
+                // Load featured movies for the home page
                 var featuredMovies = await GetFeaturedMoviesAsync();
-                ViewBag.Movies = featuredMovies;
+                var model = new HomeIndexViewModel
+                {
+                    FeaturedMovies = featuredMovies
+                };
 
-                return View();
+                return View(model);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error loading home page data");
-                // Return empty list if error occurs
-                ViewBag.Movies = new List<MovieDTO>();
-                return View();
+                // Return empty model if error occurs
+                var model = new HomeIndexViewModel();
+                return View(model);
             }
         }
 
@@ -58,39 +63,40 @@ namespace Web.Areas.Public.Controllers
         {
             try
             {
-                // Gọi API để lấy danh sách phim
-                var movieResponse = await _movieService.GetAllMoviesAsync<APIResponse>();
+                // Gọi API endpoint mới để lấy phim cho trang chủ
+                var movieResponse = await _movieService.GetMoviesForHomeAsync<APIResponse>();
 
                 if (movieResponse == null || !movieResponse.IsSuccess)
                 {
-                    _logger.LogError("Failed to load movies from API: {Error}",
+                    _logger.LogError("Failed to load movies for home from API: {Error}",
                         movieResponse?.ErrorMessages?.FirstOrDefault());
                     return new List<MovieDTO>();
                 }
 
-                // Deserialize response thành list MovieDTO
-                var allMovies = JsonConvert.DeserializeObject<List<MovieDTO>>(
-                    Convert.ToString(movieResponse.Result));
-
-                if (allMovies == null || !allMovies.Any())
+                // Deserialize response thành home movies model
+                var responseData = Convert.ToString(movieResponse.Result);
+                if (string.IsNullOrEmpty(responseData))
                 {
-                    _logger.LogWarning("No movies found from API");
+                    _logger.LogWarning("Empty response data from GetMoviesForHome API");
                     return new List<MovieDTO>();
                 }
 
-                // Lọc những phim đang chiếu và lấy top 12 phim mới nhất
-                var featuredMovies = allMovies
-                    .Where(m => m.Status == "NowShowing") // Chỉ lấy phim đang chiếu
-                    .OrderByDescending(m => m.ReleaseDate) // Sắp xếp theo ngày phát hành mới nhất
-                    .Take(12) // Lấy 12 phim cho carousel (phù hợp với số dots)
-                    .ToList();
+                var homeMoviesData = JsonConvert.DeserializeObject<HomeMoviesDTO>(responseData);
+                if (homeMoviesData == null)
+                {
+                    _logger.LogWarning("Failed to deserialize home movies data");
+                    return new List<MovieDTO>();
+                }
 
-                _logger.LogInformation("Successfully loaded {Count} featured movies", featuredMovies.Count);
-                return featuredMovies;
+                // Lấy danh sách phim đang chiếu từ response
+                var nowShowingMovies = homeMoviesData.NowShowing ?? new List<MovieDTO>();
+
+                _logger.LogInformation("Successfully loaded {Count} featured movies for home", nowShowingMovies.Count);
+                return nowShowingMovies;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Exception occurred while getting featured movies");
+                _logger.LogError(ex, "Exception occurred while getting featured movies for home");
                 return new List<MovieDTO>();
             }
         }
@@ -109,11 +115,11 @@ namespace Web.Areas.Public.Controllers
                 }
 
                 var allMovies = JsonConvert.DeserializeObject<List<MovieDTO>>(
-                    Convert.ToString(movieResponse.Result));
+                    Convert.ToString(movieResponse.Result) ?? "[]");
 
                 var moviesByGenre = allMovies?
                     .Where(m => m.Genres != null && m.Genres.Any(g => g.Id == genreId))
-                    .Where(m => m.Status == "NowShowing")
+                    .Where(m => m.Status == Constant.Movie_Status_NowShowing)
                     .OrderByDescending(m => m.ReleaseDate)
                     .Take(12)
                     .ToList() ?? new List<MovieDTO>();

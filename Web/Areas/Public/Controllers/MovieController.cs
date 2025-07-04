@@ -2,6 +2,7 @@
 using Newtonsoft.Json;
 using Web.Models;
 using Web.Models.DTOs.Response;
+using Web.Models.ViewModels;
 using Web.Services.IServices;
 
 namespace Web.Areas.Public.Controllers
@@ -46,7 +47,7 @@ namespace Web.Areas.Public.Controllers
                 }
 
                 var movie = JsonConvert.DeserializeObject<MovieDetailDTO>(
-                    Convert.ToString(movieResponse.Result));
+                    Convert.ToString(movieResponse.Result) ?? string.Empty);
 
                 if (movie == null)
                 {
@@ -55,11 +56,13 @@ namespace Web.Areas.Public.Controllers
                     return RedirectToAction("Index", "Home");
                 }
 
-                ViewBag.Movie = movie;
+                // Create view model with movie data from API
+                var viewModel = new MovieDetailViewModel
+                {
+                    Movie = movie
+                };
 
-                await LoadShowtimesForMovie(id);
-
-                return View(movie);
+                return View(viewModel);
             }
             catch (Exception ex)
             {
@@ -67,41 +70,6 @@ namespace Web.Areas.Public.Controllers
                 TempData["error"] = "Đã xảy ra lỗi khi tải thông tin phim.";
                 return RedirectToAction("Index", "Home");
             }
-        }
-
-        private async Task LoadShowtimesForMovie(int movieId)
-        {
-            try
-            {
-                ViewBag.Showtimes = GetSampleShowtimes();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Failed to load showtimes for movie {MovieId}", movieId);
-                ViewBag.Showtimes = new List<object>();
-            }
-        }
-
-        private List<object> GetSampleShowtimes()
-        {
-            return new List<object>
-            {
-                new {
-                    CinemaName = "CGV Vincom Đồng Khởi",
-                    Address = "Tầng 3, TTTM Vincom Center Đồng Khởi, 72 Lê Thánh Tôn & 45A Lý Tự Trọng, Quận 1",
-                    Showtimes = new[] { "10:30", "13:15", "16:00", "18:45", "21:30" }
-                },
-                new {
-                    CinemaName = "CGV Liberty Citypoint",
-                    Address = "Tầng M - 1, Liberty Center Saigon Citypoint, 59 - 61 Pasteur, Q.1",
-                    Showtimes = new[] { "11:00", "14:15", "17:30", "20:15" }
-                },
-                new {
-                    CinemaName = "Galaxy Nguyễn Du",
-                    Address = "116 Nguyễn Du, Q.1, Tp. Hồ Chí Minh",
-                    Showtimes = new[] { "10:15", "13:00", "15:45", "18:30", "21:15" }
-                }
-            };
         }
 
         public IActionResult MovieBooking()
@@ -127,7 +95,7 @@ namespace Web.Areas.Public.Controllers
                 }
 
                 var movie = JsonConvert.DeserializeObject<MovieDetailDTO>(
-                    Convert.ToString(movieResponse.Result));
+                    Convert.ToString(movieResponse.Result) ?? string.Empty);
 
                 return Json(new { success = true, data = movie });
             }

@@ -57,5 +57,14 @@ namespace Web.Services
                 Url = _baseUrl + "/api/Movie/Update/" + movie.Id
             });
         }
+
+        public Task<T> GetMoviesForHomeAsync<T>()
+        {
+            return SendAsync<T>(new APIRequest()
+            {
+                ApiType = Constant.ApiType.GET,
+                Url = _baseUrl + "/api/Movie/get-movies-for-home"
+            });
+        }
     }
 }

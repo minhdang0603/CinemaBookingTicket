@@ -5,6 +5,7 @@ using API.Exceptions;
 using API.Repositories.IRepositories;
 using API.Services.IServices;
 using AutoMapper;
+using Utility;
 
 namespace API.Services;
 
@@ -114,7 +115,7 @@ public class MovieService : IMovieService
     {
         var movie = await _unitOfWork.Movie.GetAsync(
             m => m.Id == id && m.IsActive == isActive,
-            includeProperties: "MovieGenres.Genre,ShowTimes");
+            includeProperties: "MovieGenres.Genre,ShowTimes.Screen.Theater.Province");
         if (movie == null)
         {
             _logger.LogError($"Movie with ID {id} not found");
@@ -188,5 +189,50 @@ public class MovieService : IMovieService
 
         _logger.LogInformation($"Movie {movie.Title} updated successfully with ID {movie.Id}");
         return _mapper.Map<MovieDTO>(updatedMovie);
+    }
+
+    public async Task<List<MovieDTO>> GetMoviesByStatusAsync(string status, int? limit = null, bool? isActive = true)
+    {
+        var movies = await _unitOfWork.Movie.GetAllAsync(
+            m => m.Status == status && m.IsActive == isActive,
+            includeProperties: "MovieGenres.Genre,ShowTimes");
+
+        var result = _mapper.Map<List<MovieDTO>>(movies);
+
+        // Áp dụng limit nếu được chỉ định
+        if (limit.HasValue && limit.Value > 0)
+        {
+            result = result.Take(limit.Value).ToList();
+        }
+
+        return result;
+    }
+
+    public async Task<HomeMoviesDTO> GetMoviesForHomeAsync(int? nowShowingLimit = 12, int? comingSoonLimit = 6)
+    {
+        try
+        {
+            // Lấy phim đang chiếu
+            var nowShowingMovies = await GetMoviesByStatusAsync(Constant.Movie_Status_NowShowing, nowShowingLimit);
+
+            // Lấy phim sắp chiếu
+            var comingSoonMovies = await GetMoviesByStatusAsync(Constant.Movie_Status_ComingSoon, comingSoonLimit);
+
+            var result = new HomeMoviesDTO
+            {
+                NowShowing = nowShowingMovies,
+                ComingSoon = comingSoonMovies
+            };
+
+            _logger.LogInformation("Successfully retrieved movies for home: {NowShowing} now showing, {ComingSoon} coming soon",
+                nowShowingMovies.Count, comingSoonMovies.Count);
+
+            return result;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error occurred while getting movies for home");
+            throw;
+        }
     }
 }

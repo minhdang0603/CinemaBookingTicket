@@ -1,4 +1,5 @@
-﻿@{
+﻿@model Web.Models.ViewModels.HomeIndexViewModel
+@{
     ViewData["Title"] = "Trang chủ";
 }
 
@@ -20,16 +21,16 @@
                 </div>
             </div>
 
-            @if (ViewBag.Movies != null && ((List<Web.Models.DTOs.Response.MovieDTO>)ViewBag.Movies).Any())
+            @if (Model.HasMovies)
             {
-                @foreach (var movie in (List<Web.Models.DTOs.Response.MovieDTO>)ViewBag.Movies)
+                @foreach (var movie in Model.FeaturedMovies)
                 {
                     <div class="movie-card" onclick="viewMovieDetail(@movie.Id)">
                         <div class="movie-poster">
                             @if (!string.IsNullOrEmpty(movie.PosterUrl))
                             {
                                 <img src="@movie.PosterUrl" alt="@movie.Title"
-                                     onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" />
+                                    onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" />
                                 <div class="poster-fallback" style="display:none;">
                                     <i class="fas fa-film"></i>
                                     <span>@movie.Title</span>
@@ -110,7 +111,7 @@
 @section Scripts {
     <script>
         $(document).ready(function () {
-            const hasMoviesFromServer = @Json.Serialize(ViewBag.Movies != null && ((List<Web.Models.DTOs.Response.MovieDTO>)ViewBag.Movies).Any());
+            const hasMoviesFromServer = @Json.Serialize(Model.HasMovies);
 
             if (!hasMoviesFromServer) {
                 loadFeaturedMovies();
@@ -161,35 +162,35 @@
 
             const posterHtml = movie.posterUrl
                 ? `<img src="${movie.posterUrl}" alt="${movie.title}"
-                               onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" />
-                           <div class="poster-fallback" style="display:none;">
-                               <i class="fas fa-film"></i>
-                               <span>${movie.title}</span>
-                           </div>`
+                                   onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" />
+                               <div class="poster-fallback" style="display:none;">
+                                   <i class="fas fa-film"></i>
+                                   <span>${movie.title}</span>
+                               </div>`
                 : `<div class="poster-fallback">
-                               <i class="fas fa-film"></i>
-                               <span>${movie.title}</span>
-                           </div>`;
+                                   <i class="fas fa-film"></i>
+                                   <span>${movie.title}</span>
+                               </div>`;
 
             return $(`
-                        <div class="movie-card" onclick="viewMovieDetail(${movie.id})">
-                            <div class="movie-poster">
-                                ${posterHtml}
-                            </div>
-                            <div class="movie-info">
-                                <div class="movie-title">${movie.title}</div>
-                                <div class="movie-genre">${genresText}</div>
-                                <div class="movie-rating">
-                                    <span class="rating-stars" data-rating="${movie.rating}">★★★★☆</span>
-                                    <span>${movie.rating}/10</span>
+                            <div class="movie-card" onclick="viewMovieDetail(${movie.id})">
+                                <div class="movie-poster">
+                                    ${posterHtml}
                                 </div>
-                                <div class="movie-duration">
-                                    <i class="fas fa-clock"></i> ${movie.duration} phút
+                                <div class="movie-info">
+                                    <div class="movie-title">${movie.title}</div>
+                                    <div class="movie-genre">${genresText}</div>
+                                    <div class="movie-rating">
+                                        <span class="rating-stars" data-rating="${movie.rating}">★★★★☆</span>
+                                        <span>${movie.rating}/10</span>
+                                    </div>
+                                    <div class="movie-duration">
+                                        <i class="fas fa-clock"></i> ${movie.duration} phút
+                                    </div>
+                                    <button class="book-btn" onclick="bookMovie(${movie.id}, event)">Đặt vé</button>
                                 </div>
-                                <button class="book-btn" onclick="bookMovie(${movie.id}, event)">Đặt vé</button>
                             </div>
-                        </div>
-                    `);
+                        `);
         }
 
         function updateStarRatings() {
@@ -258,24 +259,5 @@
         function viewMovieDetail(movieId) {
             window.location.href = '@Url.Action("Details", "Movie", new { area = "Public" })/' + movieId;
         }
-
-        function bookMovie(movieId, event) {
-            event.stopPropagation();
-
-        @if (User.Identity.IsAuthenticated)
-        {
-            <text>
-                    window.location.href = '@Url.Action("Book", "Booking", new { area = "Public" })/' + movieId;
-            </text>
-        }
-        else
-        {
-            <text>
-                                if (confirm('Bạn cần đăng nhập để đặt vé. Chuyển đến trang đăng nhập?')) {
-                    window.location.href = '@Url.Action("Login", "Account", new { area = "Public" })';
-                }
-            </text>
-        }
-                }
     </script>
 }
