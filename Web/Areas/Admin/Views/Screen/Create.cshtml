@@ -73,11 +73,6 @@
     <script>
         // Configuration specific to Create view
         $(document).ready(function () {
-            // For create view, no existing screen ID
-            window.screenManager.setScreenId(null);
-
-            // Set the seat configuration URL (though not needed for create)
-            window.seatConfigurationUrl = '@Url.Action("GetSeatConfiguration", "Screen", new { area = "Admin" })';
 
             // Add create progress indicator
             $('#createScreenForm').on('submit', function () {
