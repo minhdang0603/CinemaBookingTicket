@@ -19,11 +19,6 @@ namespace Web.Areas.Public.Controllers
             _logger = logger;
         }
 
-        public IActionResult Index()
-        {
-            return View();
-        }
-
         [HttpGet]
         public async Task<IActionResult> Details(int id)
         {
@@ -80,40 +75,6 @@ namespace Web.Areas.Public.Controllers
                 _logger.LogError(ex, "Exception occurred while loading movie details for ID: {Id}", id);
                 TempData["error"] = "Đã xảy ra lỗi khi tải thông tin phim.";
                 return RedirectToAction("Index", "Home");
-            }
-        }
-
-        public IActionResult MovieBooking()
-        {
-            return View();
-        }
-
-        public IActionResult MovieList()
-        {
-            return View();
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> GetMovieDetails(int id)
-        {
-            try
-            {
-                var movieResponse = await _movieService.GetMovieByIdAsync<APIResponse>(id);
-
-                if (movieResponse == null || !movieResponse.IsSuccess)
-                {
-                    return Json(new { success = false, message = "Không thể tải thông tin phim" });
-                }
-
-                var movie = JsonConvert.DeserializeObject<MovieDTO>(
-                    Convert.ToString(movieResponse.Result) ?? string.Empty);
-
-                return Json(new { success = true, data = movie });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error getting movie details for ID: {Id}", id);
-                return Json(new { success = false, message = "Đã xảy ra lỗi" });
             }
         }
     }
