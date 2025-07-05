@@ -46,7 +46,7 @@ namespace Web.Areas.Public.Controllers
                     return RedirectToAction("Index", "Home");
                 }
 
-                var movie = JsonConvert.DeserializeObject<MovieDetailDTO>(
+                var movie = JsonConvert.DeserializeObject<MovieDTO>(
                     Convert.ToString(movieResponse.Result) ?? string.Empty);
 
                 if (movie == null)
@@ -56,15 +56,26 @@ namespace Web.Areas.Public.Controllers
                     return RedirectToAction("Index", "Home");
                 }
 
+                // Lấy showtimes từ API mới
+                var showtimeResponse = await _movieService.GetShowtimesByMovieIdAsync<APIResponse>(id);
+                var showtimes = new List<ShowTimeLiteDTO>();
+                if (showtimeResponse != null && showtimeResponse.IsSuccess)
+                {
+                    showtimes = JsonConvert.DeserializeObject<List<ShowTimeLiteDTO>>(
+                        Convert.ToString(showtimeResponse.Result) ?? string.Empty) ?? new List<ShowTimeLiteDTO>();
+                }
+
                 // Create view model with movie data from API
                 var viewModel = new MovieDetailViewModel
                 {
-                    Movie = movie
+                    Movie = movie,
+                    ShowTimes = showtimes
                 };
 
                 return View(viewModel);
             }
-            catch (Exception ex)
+
+			catch (Exception ex)
             {
                 _logger.LogError(ex, "Exception occurred while loading movie details for ID: {Id}", id);
                 TempData["error"] = "Đã xảy ra lỗi khi tải thông tin phim.";
@@ -94,7 +105,7 @@ namespace Web.Areas.Public.Controllers
                     return Json(new { success = false, message = "Không thể tải thông tin phim" });
                 }
 
-                var movie = JsonConvert.DeserializeObject<MovieDetailDTO>(
+                var movie = JsonConvert.DeserializeObject<MovieDTO>(
                     Convert.ToString(movieResponse.Result) ?? string.Empty);
 
                 return Json(new { success = true, data = movie });

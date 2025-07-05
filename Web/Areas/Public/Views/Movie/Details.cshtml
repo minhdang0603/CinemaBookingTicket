@@ -21,12 +21,12 @@
                 @if (!string.IsNullOrEmpty(Model?.Movie?.PosterUrl))
                 {
                     <img src="@Model.Movie.PosterUrl" alt="@Model.Movie.Title" class="movie-detail-poster"
-                         onerror="this.src='https://images.unsplash.com/photo-1440404653325-ab127d49abc1?ixlib=rb-4.0.3'" />
+                        onerror="this.src='https://images.unsplash.com/photo-1440404653325-ab127d49abc1?ixlib=rb-4.0.3'" />
                 }
                 else
                 {
                     <img src="https://images.unsplash.com/photo-1440404653325-ab127d49abc1?ixlib=rb-4.0.3"
-                         alt="Movie Poster" class="movie-poster" />
+                        alt="Movie Poster" class="movie-poster" />
                 }
             </div>
 
@@ -99,8 +99,8 @@
                         @if (!string.IsNullOrEmpty(Model?.Movie?.Director))
                         {
                             <div class="meta-item">
-                                <i class="fas fa-user-tie"></i>
-                                <span>@Model.Movie.Director</span>
+                                <i class="fas fa-users"></i>
+                                <span>@Model.Movie.Cast</span>
                             </div>
                         }
                     </div>
@@ -125,19 +125,6 @@
                 </div>
             </div>
         </div>
-
-        <!-- Cast Information -->
-        @if (!string.IsNullOrEmpty(Model?.Movie?.Cast))
-        {
-            <div class="row mt-4">
-                <div class="col-12">
-                    <div class="cast-info">
-                        <h4><i class="fas fa-users"></i> Diễn viên</h4>
-                        <p>@Model.Movie.Cast</p>
-                    </div>
-                </div>
-            </div>
-        }
 
         <!-- Showtimes Section -->
         <div class="showtimes-section" id="showtimes">
@@ -167,16 +154,14 @@
             <div class="cinema-list">
                 @if (Model?.HasShowtimes == true)
                 {
-                    @foreach (var theaterGroup in Model.ShowtimesByTheater ?? Enumerable.Empty<IGrouping<TheaterDTO, ShowTimeLiteDTO>>())
+                    foreach (var theaterGroup in Model.ShowtimesByTheater)
                     {
-                        var theater = theaterGroup.Key;
-                        var showtimes = theaterGroup.OrderBy(st => st.ShowDate).ThenBy(st => st.StartTime).ToList();
-                        
-                        <div class="cinema-group mb-4">
+                        var theater = theaterGroup.Theater;
+                        var screens = theaterGroup.Screens;
+                        string groupId = $"theater-{theater.Id}";
+                        <div class="cinema-group mb-4" id="@groupId">
                             <div class="cinema-header" onclick="toggleCinemaGroup(this)">
                                 <div class="d-flex align-items-center">
-                                    <img src="https://images.unsplash.com/photo-1489599003021-3d2ad2429a0a?ixlib=rb-4.0.3&w=50&h=50&fit=crop&crop=center"
-                                         class="cinema-logo me-3">
                                     <div>
                                         <h5 class="cinema-name mb-0">@theater.Name</h5>
                                         <p class="cinema-count mb-0">@theater.Address</p>
@@ -185,22 +170,27 @@
                                 <i class="fas fa-chevron-down cinema-toggle"></i>
                             </div>
                             <div class="cinema-locations">
-                                <div class="cinema-item">
-                                    <div class="showtimes-grid">
-                                        @foreach (var showtime in showtimes)
-                                        {
-                                            <a asp-area="Public" asp-controller="Booking" asp-action="Index" 
-                                               asp-route-movieId="@Model.Movie.Id" 
-                                               asp-route-showtimeId="@showtime.Id"
-                                               title="@showtime.ShowDate.ToString("dd/MM/yyyy") - @showtime.Screen?.Name - @showtime.BasePrice.ToString("C")">
-                                                <div class="showtime-slot">
-                                                    <span class="time">@showtime.StartTime.ToString("HH:mm")</span>
-                                                    <small class="screen-info">@showtime.Screen?.Name</small>
-                                                </div>
-                                            </a>
-                                        }
+                                @foreach (var screenGroup in screens)
+                                {
+                                    var screen = screenGroup.Screen;
+                                    var showtimes = screenGroup.Showtimes;
+                                    <div class="cinema-item">
+                                        <h6 class="mb-2 ms-2">@screen.Name</h6>
+                                        <div class="showtimes-grid">
+                                            @foreach (var showtime in showtimes)
+                                            {
+                                                <a asp-area="Public" asp-controller="Booking" asp-action="Index"
+                                                    asp-route-movieId="@Model.Movie.Id" asp-route-showtimeId="@showtime.Id"
+                                                    class="mt-2"
+                                                    title="@showtime.ShowDate.ToString("dd/MM/yyyy") - @showtime.Screen?.Name - @showtime.BasePrice.ToString("C")">
+                                                    <div class="showtime-slot">
+                                                        <span class="time">@showtime.StartTime.ToString("HH:mm")</span>
+                                                    </div>
+                                                </a>
+                                            }
+                                        </div>
                                     </div>
-                                </div>
+                                }
                             </div>
                         </div>
                     }
@@ -218,5 +208,5 @@
 
 @section Scripts {
     <script src="~/js/public/movie-detail.js"></script>
-    
+
 }

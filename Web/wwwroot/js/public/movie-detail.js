@@ -40,20 +40,20 @@ document.addEventListener('DOMContentLoaded', function() {
     window.toggleCinemaGroup = function(header) {
         const cinemaGroup = header.parentElement;
         const isActive = cinemaGroup.classList.contains('active');
-
+        const cinemaItems = cinemaGroup.querySelectorAll('.cinema-item');
         document.querySelectorAll('.cinema-group').forEach(group => {
             group.classList.remove('active');
         });
 
         if (!isActive) {
             cinemaGroup.classList.add('active');
+            cinemaItems.forEach(item => item.classList.add('active'));
         }
     };
 
     // Showtimes toggling
     window.toggleShowtimes = function(cinemaItem) {
         const isActive = cinemaItem.classList.contains('active');
-
         const cinemaGroup = cinemaItem.closest('.cinema-group');
         cinemaGroup.querySelectorAll('.cinema-item').forEach(item => {
             item.classList.remove('active');

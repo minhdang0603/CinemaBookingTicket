@@ -359,7 +359,7 @@ select option {
 .showtime-slot {
     background: linear-gradient(45deg, #4ecdc4, #44a08d);
     color: white;
-    padding: 10px 15px;
+    padding: 4px 10px;
     border-radius: 20px;
     font-size: 0.9rem;
     font-weight: 500;

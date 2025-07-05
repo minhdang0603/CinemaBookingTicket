@@ -18,40 +18,36 @@ public class MappingConfig : Profile
 		// Add MovieLiteDTO mapping for use in ShowTimeDTO
 		CreateMap<Movie, MovieLiteDTO>();
 
-        CreateMap<Movie, MovieDetailDTO>()
-            .ForMember(dest => dest.Genres, opt => opt.MapFrom(src =>
-                src.MovieGenres != null ? src.MovieGenres.Select(mg => mg.Genre) : null));
+		CreateMap<MovieCreateDTO, Movie>()
+			.ForMember(dest => dest.MovieGenres, opt => opt.Ignore())
+			.ForMember(dest => dest.ShowTimes, opt => opt.Ignore())
+			.ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src =>
+				DateTime.Now))
+			.ForMember(dest => dest.LastUpdatedAt, opt => opt.MapFrom(src =>
+				DateTime.Now))
+			.ForMember(dest => dest.IsActive, opt => opt.MapFrom(src => true));
+		CreateMap<MovieUpdateDTO, Movie>()
+			.ForMember(dest => dest.MovieGenres, opt => opt.MapFrom((src, dest) =>
+				src.GenreIds != null ? src.GenreIds.Select(id => new MovieGenre { GenreId = id, MovieId = dest.Id }).ToList() : new List<MovieGenre>()))
+			.ForMember(dest => dest.ShowTimes, opt => opt.Ignore())
+			.ForMember(dest => dest.LastUpdatedAt, opt => opt.MapFrom(src =>
+				DateTime.Now));
 
-        CreateMap<MovieCreateDTO, Movie>()
-            .ForMember(dest => dest.MovieGenres, opt => opt.Ignore())
-            .ForMember(dest => dest.ShowTimes, opt => opt.Ignore())
-            .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src =>
-                DateTime.Now))
-            .ForMember(dest => dest.LastUpdatedAt, opt => opt.MapFrom(src =>
-                DateTime.Now))
-            .ForMember(dest => dest.IsActive, opt => opt.MapFrom(src => true));
-        CreateMap<MovieUpdateDTO, Movie>()
-            .ForMember(dest => dest.MovieGenres, opt => opt.MapFrom((src, dest) =>
-                src.GenreIds != null ? src.GenreIds.Select(id => new MovieGenre { GenreId = id, MovieId = dest.Id }).ToList() : new List<MovieGenre>()))
-            .ForMember(dest => dest.ShowTimes, opt => opt.Ignore())
-            .ForMember(dest => dest.LastUpdatedAt, opt => opt.MapFrom(src =>
-                DateTime.Now));
-
-        // ===================== GENRE MAPPING =====================
-        CreateMap<Genre, GenreDTO>();
-        CreateMap<GenreCreateDTO, Genre>()
-            .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src =>
-                DateTime.Now))
-            .ForMember(dest => dest.LastUpdatedAt, opt => opt.MapFrom(src =>
-                DateTime.Now))
-            .ForMember(dest => dest.IsActive, opt => opt.MapFrom(src =>
-                true));
-        CreateMap<GenreUpdateDTO, Genre>()
-            .ForMember(dest => dest.LastUpdatedAt, opt => opt.MapFrom(src =>
-                DateTime.Now));
-        // ===================== USER MAPPING =====================
-        CreateMap<ApplicationUser, UserDTO>();
-        CreateMap<UserUpdateDTO, ApplicationUser>();
+		// ===================== GENRE MAPPING =====================
+		CreateMap<Genre, GenreDTO>();
+		CreateMap<GenreCreateDTO, Genre>()
+			.ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src =>
+				DateTime.Now))
+			.ForMember(dest => dest.LastUpdatedAt, opt => opt.MapFrom(src =>
+				DateTime.Now))
+			.ForMember(dest => dest.IsActive, opt => opt.MapFrom(src =>
+				true));
+		CreateMap<GenreUpdateDTO, Genre>()
+			.ForMember(dest => dest.LastUpdatedAt, opt => opt.MapFrom(src =>
+				DateTime.Now));
+		// ===================== USER MAPPING =====================
+		CreateMap<ApplicationUser, UserDTO>();
+		CreateMap<UserUpdateDTO, ApplicationUser>();
 
 		// ===================== BOOKING MAPPING =====================
 		CreateMap<Booking, BookingDTO>()
@@ -89,17 +85,17 @@ public class MappingConfig : Profile
 			.ForMember(dest => dest.SeatPrice, opt => opt.MapFrom(src =>
 				src.SeatPrice));
 
-        // ===================== THEATER MAPPING =====================
-        CreateMap<Theater, TheaterDTO>();
-        CreateMap<Theater, TheaterDetailDTO>();
-        CreateMap<TheaterCreateDTO, Theater>()
-            .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src =>
-                DateTime.Now))
-            .ForMember(dest => dest.LastUpdatedAt, opt => opt.MapFrom(src =>
-                DateTime.Now));
-        CreateMap<TheaterUpdateDTO, Theater>()
-            .ForMember(dest => dest.LastUpdatedAt, opt => opt.MapFrom(src =>
-                DateTime.Now));
+		// ===================== THEATER MAPPING =====================
+		CreateMap<Theater, TheaterDTO>();
+		CreateMap<Theater, TheaterDetailDTO>();
+		CreateMap<TheaterCreateDTO, Theater>()
+			.ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src =>
+				DateTime.Now))
+			.ForMember(dest => dest.LastUpdatedAt, opt => opt.MapFrom(src =>
+				DateTime.Now));
+		CreateMap<TheaterUpdateDTO, Theater>()
+			.ForMember(dest => dest.LastUpdatedAt, opt => opt.MapFrom(src =>
+				DateTime.Now));
 
 		// ===================== SCREEN MAPPING =====================
 
@@ -118,10 +114,10 @@ public class MappingConfig : Profile
 			.ForMember(dest => dest.LastUpdatedAt, opt => opt.MapFrom(src =>
 				DateTime.Now));
 
-        // ===================== SEAT MAPPING =====================
-        CreateMap<Seat, SeatDTO>()
-            .ForMember(dest => dest.SeatType, opt => opt.MapFrom(src =>
-                src.SeatType));
+		// ===================== SEAT MAPPING =====================
+		CreateMap<Seat, SeatDTO>()
+			.ForMember(dest => dest.SeatType, opt => opt.MapFrom(src =>
+				src.SeatType));
 
 		CreateMap<SeatUpdateDTO, Seat>()
 			.ForMember(dest => dest.LastUpdatedAt, opt => opt.MapFrom(src =>
@@ -153,40 +149,40 @@ public class MappingConfig : Profile
 				.ForMember(dest => dest.LastUpdatedAt, opt => opt.MapFrom(src =>
 					DateTime.Now));
 
-        // ===================== SEAT TYPE MAPPING =====================
-        CreateMap<SeatType, SeatTypeDTO>()
-            .ForMember(dest => dest.Color, opt => opt.MapFrom(src =>
-                src.Color));
+		// ===================== SEAT TYPE MAPPING =====================
+		CreateMap<SeatType, SeatTypeDTO>()
+			.ForMember(dest => dest.Color, opt => opt.MapFrom(src =>
+				src.Color));
 
-        // ====================== CONCESSION CATEGORY MAPPING =====================
-        CreateMap<ConcessionCategory, ConcessionCategoryDTO>();
-        CreateMap<ConcessionCategoryCreateDTO, ConcessionCategory>()
-            .ForMember(dest => dest.IsActive, opt => opt.MapFrom(src =>
-                true));
-        CreateMap<ConcessionCategoryUpdateDTO, ConcessionCategory>();
+		// ====================== CONCESSION CATEGORY MAPPING =====================
+		CreateMap<ConcessionCategory, ConcessionCategoryDTO>();
+		CreateMap<ConcessionCategoryCreateDTO, ConcessionCategory>()
+			.ForMember(dest => dest.IsActive, opt => opt.MapFrom(src =>
+				true));
+		CreateMap<ConcessionCategoryUpdateDTO, ConcessionCategory>();
 
-        // ====================== CONCESSION Order DETAIL MAPPING =====================
-        CreateMap<ConcessionOrderDetail, ConcessionOrderDetailDTO>()
-            .ForMember(dest => dest.Name, opt => opt.MapFrom(src =>
-                src.Concession != null ? src.Concession.Name : string.Empty))
-            .ForMember(dest => dest.Description, opt => opt.MapFrom(src =>
-                src.Concession != null ? src.Concession.Description : string.Empty))
-            .ForMember(dest => dest.UnitPrice, opt => opt.MapFrom(src =>
-                src.Concession != null ? src.Concession.Price : 0))
-            .ForMember(dest => dest.ImageUrl, opt => opt.MapFrom(src =>
-                src.Concession != null ? src.Concession.ImageUrl : string.Empty));
-        // ====================== CONCESSION MAPPING =====================
-        CreateMap<Concession, ConcessionDTO>()
-            .ForMember(dest => dest.Category, opt => opt.MapFrom(src =>
-                src.Category));
-        CreateMap<ConcessionCreateDTO, Concession>()
-            .ForMember(dest => dest.IsActive, opt => opt.MapFrom(src => true))
-            .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => DateTime.Now))
-            .ForMember(dest => dest.LastUpdatedAt, opt => opt.MapFrom(src => DateTime.Now))
-            .ForMember(dest => dest.ConcessionOrderDetails, opt => opt.Ignore());
-        CreateMap<ConcessionUpdateDTO, Concession>()
-            .ForMember(dest => dest.LastUpdatedAt, opt => opt.MapFrom(src => DateTime.Now))
-            .ForMember(dest => dest.ConcessionOrderDetails, opt => opt.Ignore());
+		// ====================== CONCESSION Order DETAIL MAPPING =====================
+		CreateMap<ConcessionOrderDetail, ConcessionOrderDetailDTO>()
+			.ForMember(dest => dest.Name, opt => opt.MapFrom(src =>
+				src.Concession != null ? src.Concession.Name : string.Empty))
+			.ForMember(dest => dest.Description, opt => opt.MapFrom(src =>
+				src.Concession != null ? src.Concession.Description : string.Empty))
+			.ForMember(dest => dest.UnitPrice, opt => opt.MapFrom(src =>
+				src.Concession != null ? src.Concession.Price : 0))
+			.ForMember(dest => dest.ImageUrl, opt => opt.MapFrom(src =>
+				src.Concession != null ? src.Concession.ImageUrl : string.Empty));
+		// ====================== CONCESSION MAPPING =====================
+		CreateMap<Concession, ConcessionDTO>()
+			.ForMember(dest => dest.Category, opt => opt.MapFrom(src =>
+				src.Category));
+		CreateMap<ConcessionCreateDTO, Concession>()
+			.ForMember(dest => dest.IsActive, opt => opt.MapFrom(src => true))
+			.ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => DateTime.Now))
+			.ForMember(dest => dest.LastUpdatedAt, opt => opt.MapFrom(src => DateTime.Now))
+			.ForMember(dest => dest.ConcessionOrderDetails, opt => opt.Ignore());
+		CreateMap<ConcessionUpdateDTO, Concession>()
+			.ForMember(dest => dest.LastUpdatedAt, opt => opt.MapFrom(src => DateTime.Now))
+			.ForMember(dest => dest.ConcessionOrderDetails, opt => opt.Ignore());
 
 		// ====================== Province MAPPING =====================
 		CreateMap<Province, ProvinceDTO>();

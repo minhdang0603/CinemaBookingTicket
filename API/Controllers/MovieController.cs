@@ -98,11 +98,11 @@ namespace API.Controllers
 		}
 
 		[HttpGet("{id}")]
-		public async Task<ActionResult<APIResponse<MovieDetailDTO>>> GetMovieByIdAsync([FromRoute] int id)
+		public async Task<ActionResult<APIResponse<MovieDTO>>> GetMovieByIdAsync([FromRoute] int id)
 		{
 			if (id == 0)
 			{
-				return BadRequest(APIResponse<MovieDetailDTO>.Builder()
+				return BadRequest(APIResponse<MovieDTO>.Builder()
 					.WithErrorMessages(new List<string> { "Movie Id is null" })
 					.WithStatusCode(HttpStatusCode.BadRequest)
 					.WithSuccess(false)
@@ -112,14 +112,14 @@ namespace API.Controllers
 			var movieDTO = await _movieService.GetMovieByIdAsync(id);
 			if (movieDTO == null)
 			{
-				return NotFound(APIResponse<MovieDetailDTO>.Builder()
+				return NotFound(APIResponse<MovieDTO>.Builder()
 					.WithErrorMessages(new List<string> { $"Movie with ID {id} not found" })
 					.WithStatusCode(HttpStatusCode.NotFound)
 					.WithSuccess(false)
 					.Build());
 			}
 
-			return Ok(APIResponse<MovieDetailDTO>.Builder().WithResult(movieDTO).WithStatusCode(HttpStatusCode.OK).Build());
+			return Ok(APIResponse<MovieDTO>.Builder().WithResult(movieDTO).WithStatusCode(HttpStatusCode.OK).Build());
 		}
 
 		[HttpDelete("delete/{id}")]
@@ -171,6 +171,16 @@ namespace API.Controllers
 			var moviesData = await _movieService.GetMoviesForHomeAsync(nowShowingLimit, comingSoonLimit);
 			return Ok(APIResponse<HomeMoviesDTO>.Builder()
 				.WithResult(moviesData)
+				.WithStatusCode(HttpStatusCode.OK)
+				.Build());
+		}
+
+		[HttpGet("{id}/showtimes")]
+		public async Task<ActionResult<APIResponse<List<ShowTimeLiteDTO>>>> GetShowtimesByMovieId(int id)
+		{
+			var showtimes = await _movieService.GetShowTimesByMovieIdAsync(id);
+			return Ok(APIResponse<List<ShowTimeLiteDTO>>.Builder()
+				.WithResult(showtimes)
 				.WithStatusCode(HttpStatusCode.OK)
 				.Build());
 		}

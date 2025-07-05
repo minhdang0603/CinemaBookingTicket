@@ -111,7 +111,7 @@ public class MovieService : IMovieService
         return _mapper.Map<List<MovieDTO>>(movies);
     }
 
-    public async Task<MovieDetailDTO> GetMovieByIdAsync(int id, bool? isActive = true)
+    public async Task<MovieDTO> GetMovieByIdAsync(int id, bool? isActive = true)
     {
         var movie = await _unitOfWork.Movie.GetAsync(
             m => m.Id == id && m.IsActive == isActive,
@@ -121,7 +121,7 @@ public class MovieService : IMovieService
             _logger.LogError($"Movie with ID {id} not found");
             throw new AppException(ErrorCodes.MovieNotFound(id));
         }
-        return _mapper.Map<MovieDetailDTO>(movie);
+        return _mapper.Map<MovieDTO>(movie);
     }
 
     public async Task<List<MovieDTO>> GetMoviesByGenreAsync(int genreId, bool? isActive = true)
@@ -234,5 +234,24 @@ public class MovieService : IMovieService
             _logger.LogError(ex, "Error occurred while getting movies for home");
             throw;
         }
+    }
+
+    public async Task<List<ShowTimeLiteDTO>> GetShowTimesByMovieIdAsync(int movieId, DateTime? fromTime = null)
+    {
+        var from = fromTime ?? DateTime.Now.AddMinutes(30);
+        var fromDate = DateOnly.FromDateTime(from);
+        var fromTimeOnly = TimeOnly.FromDateTime(from);
+        //var showTimes = await _unitOfWork.ShowTime.GetAllAsync(
+        //    st => st.MovieId == movieId && st.IsActive == true &&
+        //        (st.ShowDate > fromDate || (st.ShowDate == fromDate && st.StartTime > fromTimeOnly)),
+        //    includeProperties: "Screen.Theater.Province"
+        //);
+
+		var showTimes = await _unitOfWork.ShowTime.GetAllAsync(
+			st => st.MovieId == movieId && st.IsActive == true,
+			includeProperties: "Screen.Theater.Province"
+		);
+
+		return _mapper.Map<List<ShowTimeLiteDTO>>(showTimes);
     }
 }
