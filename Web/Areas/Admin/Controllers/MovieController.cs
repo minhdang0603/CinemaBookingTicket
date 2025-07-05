@@ -133,8 +133,8 @@ namespace Web.Areas.Admin.Controllers
                 TempData["error"] = response?.ErrorMessages?.FirstOrDefault() ?? "Unable to load movie details.";
                 return RedirectToAction(nameof(Index));
             }
-            // Deserialize the response data into a MovieDtailDTO
-            var movie = JsonConvert.DeserializeObject<MovieDetailDTO>(Convert.ToString(response.Result));
+            // Deserialize the response data into a MovieDTO
+            var movie = JsonConvert.DeserializeObject<MovieDTO>(Convert.ToString(response.Result));
             if (movie == null)
             {
                 _logger.LogError("Movie not found for ID: {Id}", id);

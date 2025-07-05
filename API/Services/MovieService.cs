@@ -5,6 +5,7 @@ using API.Exceptions;
 using API.Repositories.IRepositories;
 using API.Services.IServices;
 using AutoMapper;
+using Utility;
 
 namespace API.Services;
 
@@ -110,17 +111,17 @@ public class MovieService : IMovieService
         return _mapper.Map<List<MovieDTO>>(movies);
     }
 
-    public async Task<MovieDetailDTO> GetMovieByIdAsync(int id, bool? isActive = true)
+    public async Task<MovieDTO> GetMovieByIdAsync(int id, bool? isActive = true)
     {
         var movie = await _unitOfWork.Movie.GetAsync(
             m => m.Id == id && m.IsActive == isActive,
-            includeProperties: "MovieGenres.Genre,ShowTimes");
+            includeProperties: "MovieGenres.Genre,ShowTimes.Screen.Theater.Province");
         if (movie == null)
         {
             _logger.LogError($"Movie with ID {id} not found");
             throw new AppException(ErrorCodes.MovieNotFound(id));
         }
-        return _mapper.Map<MovieDetailDTO>(movie);
+        return _mapper.Map<MovieDTO>(movie);
     }
 
     public async Task<List<MovieDTO>> GetMoviesByGenreAsync(int genreId, bool? isActive = true)
@@ -188,5 +189,69 @@ public class MovieService : IMovieService
 
         _logger.LogInformation($"Movie {movie.Title} updated successfully with ID {movie.Id}");
         return _mapper.Map<MovieDTO>(updatedMovie);
+    }
+
+    public async Task<List<MovieDTO>> GetMoviesByStatusAsync(string status, int? limit = null, bool? isActive = true)
+    {
+        var movies = await _unitOfWork.Movie.GetAllAsync(
+            m => m.Status == status && m.IsActive == isActive,
+            includeProperties: "MovieGenres.Genre,ShowTimes");
+
+        var result = _mapper.Map<List<MovieDTO>>(movies);
+
+        // Áp dụng limit nếu được chỉ định
+        if (limit.HasValue && limit.Value > 0)
+        {
+            result = result.Take(limit.Value).ToList();
+        }
+
+        return result;
+    }
+
+    public async Task<HomeMoviesDTO> GetMoviesForHomeAsync(int? nowShowingLimit = 12, int? comingSoonLimit = 6)
+    {
+        try
+        {
+            // Lấy phim đang chiếu
+            var nowShowingMovies = await GetMoviesByStatusAsync(Constant.Movie_Status_NowShowing, nowShowingLimit);
+
+            // Lấy phim sắp chiếu
+            var comingSoonMovies = await GetMoviesByStatusAsync(Constant.Movie_Status_ComingSoon, comingSoonLimit);
+
+            var result = new HomeMoviesDTO
+            {
+                NowShowing = nowShowingMovies,
+                ComingSoon = comingSoonMovies
+            };
+
+            _logger.LogInformation("Successfully retrieved movies for home: {NowShowing} now showing, {ComingSoon} coming soon",
+                nowShowingMovies.Count, comingSoonMovies.Count);
+
+            return result;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error occurred while getting movies for home");
+            throw;
+        }
+    }
+
+    public async Task<List<ShowTimeLiteDTO>> GetShowTimesByMovieIdAsync(int movieId, DateTime? fromTime = null)
+    {
+        var from = fromTime ?? DateTime.Now.AddMinutes(30);
+        var fromDate = DateOnly.FromDateTime(from);
+        var fromTimeOnly = TimeOnly.FromDateTime(from);
+        //var showTimes = await _unitOfWork.ShowTime.GetAllAsync(
+        //    st => st.MovieId == movieId && st.IsActive == true &&
+        //        (st.ShowDate > fromDate || (st.ShowDate == fromDate && st.StartTime > fromTimeOnly)),
+        //    includeProperties: "Screen.Theater.Province"
+        //);
+
+		var showTimes = await _unitOfWork.ShowTime.GetAllAsync(
+			st => st.MovieId == movieId && st.IsActive == true,
+			includeProperties: "Screen.Theater.Province"
+		);
+
+		return _mapper.Map<List<ShowTimeLiteDTO>>(showTimes);
     }
 }

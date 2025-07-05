@@ -1,128 +1,87 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@model Web.Models.ViewModels.HomeIndexViewModel
+@{
+    ViewData["Title"] = "Trang chủ";
 }
 
 @section Styles {
     <link rel="stylesheet" href="~/css/public/home.css" asp-append-version="true" />
 }
 
-
-
-
 <section class="promo-section">
-    
     <!-- Movie Carousel -->
     <div class="movie-carousel">
         <h3 class="movie-section-heading">Phim mới đang chiếu</h3>
         <div class="carousel-container" id="movieCarousel">
-            @* Dữ liệu phim sẽ được load từ Controller *@
-            @if (ViewBag.Movies != null)
+            <div class="loading-state" id="loadingState">
+                <div class="text-center">
+                    <div class="spinner-border" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p>Đang tải phim...</p>
+                </div>
+            </div>
+
+            @if (Model.HasMovies)
             {
-                @foreach (var movie in ViewBag.Movies)
+                @foreach (var movie in Model.FeaturedMovies)
                 {
                     <div class="movie-card" onclick="viewMovieDetail(@movie.Id)">
                         <div class="movie-poster">
                             @if (!string.IsNullOrEmpty(movie.PosterUrl))
                             {
-                                <img src="@movie.PosterUrl" alt="@movie.Title" />
+                                <img src="@movie.PosterUrl" alt="@movie.Title"
+                                    onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" />
+                                <div class="poster-fallback" style="display:none;">
+                                    <i class="fas fa-film"></i>
+                                    <span>@movie.Title</span>
+                                </div>
                             }
                             else
                             {
-                                <span>@movie.Title</span>
+                                <div class="poster-fallback">
+                                    <i class="fas fa-film"></i>
+                                    <span>@movie.Title</span>
+                                </div>
                             }
                         </div>
                         <div class="movie-info">
                             <div class="movie-title">@movie.Title</div>
-                            <div class="movie-genre">@movie.Genre</div>
-                            <div class="movie-rating">
-                                <span class="rating-stars">★★★★☆</span>
-                                <span>@movie.Rating/10</span>
+                            <div class="movie-genre">
+                                @if (movie.Genres != null && movie.Genres.Any())
+                                {
+                                    @string.Join(" • ", movie.Genres.Select(g => g.Name))
+                                }
+                                else
+                                {
+                                    <span class="text-muted">Chưa phân loại</span>
+                                }
+                            </div>
+                            <div class="movie-duration">
+                                <i class="fas fa-clock"></i> @movie.Duration phút
                             </div>
                             <button class="book-btn" onclick="bookMovie(@movie.Id, event)">Đặt vé</button>
                         </div>
                     </div>
                 }
+
+                <script>
+                    // Hide loading state sau khi load xong
+                    document.getElementById('loadingState').style.display = 'none';
+                </script>
             }
             else
             {
-                <!-- Sample Movies for demo -->
-                <a asp-controller="Movie" asp-action="Index">
-                    <div class="movie-card">
-                        <div class="movie-poster">Disney Collection</div>
-                        <div class="movie-info">
-                            <div class="movie-title">Lilo & Stitch</div>
-                            <div class="movie-genre">Gia đình • Hoạt hình</div>
-                            <div class="movie-rating">
-                                <span class="rating-stars">★★★★☆</span>
-                                <span>8.5/10</span>
-                            </div>
-                            <button class="book-btn" onclick="bookMovie(1, event)">Đặt vé</button>
-                        </div>
-                    </div>
-                </a>
-                <div class="movie-card" onclick="viewMovieDetail(2)">
-                    <div class="movie-poster">Marvel Series</div>
-                    <div class="movie-info">
-                        <div class="movie-title">Avengers Collection</div>
-                        <div class="movie-genre">Hành động • Siêu anh hùng</div>
-                        <div class="movie-rating">
-                            <span class="rating-stars">★★★★★</span>
-                            <span>9.2/10</span>
-                        </div>
-                        <button class="book-btn" onclick="bookMovie(2, event)">Đặt vé</button>
-                    </div>
-                </div>
-                <div class="movie-card" onclick="viewMovieDetail(3)">
-                    <div class="movie-poster">Moana</div>
-                    <div class="movie-info">
-                        <div class="movie-title">Moana</div>
-                        <div class="movie-genre">Phiêu lưu • Hoạt hình</div>
-                        <div class="movie-rating">
-                            <span class="rating-stars">★★★★☆</span>
-                            <span>8.8/10</span>
-                        </div>
-                        <button class="book-btn" onclick="bookMovie(3, event)">Đặt vé</button>
-                    </div>
-                </div>
-                <div class="movie-card" onclick="viewMovieDetail(4)">
-                    <div class="movie-poster">Action Collection</div>
-                    <div class="movie-info">
-                        <div class="movie-title">Fast & Furious</div>
-                        <div class="movie-genre">Hành động • Tốc độ</div>
-                        <div class="movie-rating">
-                            <span class="rating-stars">★★★★☆</span>
-                            <span>8.0/10</span>
-                        </div>
-                        <button class="book-btn" onclick="bookMovie(4, event)">Đặt vé</button>
-                    </div>
-                </div>
-                <div class="movie-card" onclick="viewMovieDetail(5)">
-                    <div class="movie-poster">Horror Night</div>
-                    <div class="movie-info">
-                        <div class="movie-title">The Conjuring</div>
-                        <div class="movie-genre">Kinh dị • Tâm lý</div>
-                        <div class="movie-rating">
-                            <span class="rating-stars">★★★★☆</span>
-                            <span>8.7/10</span>
-                        </div>
-                        <button class="book-btn" onclick="bookMovie(5, event)">Đặt vé</button>
+                <div class="no-movies-message" id="noMoviesMessage" style="display:none;">
+                    <div class="text-center p-4">
+                        <i class="fas fa-film fa-3x text-muted mb-3"></i>
+                        <h4>Không có phim đang chiếu</h4>
+                        <p class="text-muted">Hãy quay lại sau để xem những bộ phim mới nhất!</p>
                     </div>
                 </div>
             }
         </div>
+
         <div class="carousel-dots" id="carouselDots">
-            <span class="dot active" onclick="currentSlide(1)"></span>
-            <span class="dot" onclick="currentSlide(2)"></span>
-            <span class="dot" onclick="currentSlide(3)"></span>
-            <span class="dot" onclick="currentSlide(4)"></span>
-            <span class="dot" onclick="currentSlide(5)"></span>
-            <span class="dot" onclick="currentSlide(6)"></span>
-            <span class="dot" onclick="currentSlide(7)"></span>
-            <span class="dot" onclick="currentSlide(8)"></span>
-            <span class="dot" onclick="currentSlide(9)"></span>
-            <span class="dot" onclick="currentSlide(10)"></span>
-            <span class="dot" onclick="currentSlide(11)"></span>
-            <span class="dot" onclick="currentSlide(12)"></span>
         </div>
     </div>
 </section>
@@ -130,121 +89,116 @@
 <!-- Footer Promotions -->
 <section class="footer-promos">
     <div class="promo-card">
-        <h3>2 DAYS SPECIAL</h3>
+        <h3>ƯU ĐÃI ĐỘC QUYỀN</h3>
         <div class="price">₫50,000</div>
-        <p>Giá đặc biệt 2 ngày</p>
-        <small>2024.10.01~2025.09.30</small>
+        <p>Giá đặc biệt cuối tuần</p>
+        <small>Áp dụng từ thứ 6 đến chủ nhật</small>
     </div>
     <div class="promo-card">
-        <h3>CINEMA MILEAGE</h3>
-        <p>Sinh ra thay đổi</p>
-        <p>Tích lũy điểm thưởng</p>
+        <h3>TÍCH ĐIỂM THÀNH VIÊN</h3>
+        <p>Mỗi vé xem = 10 điểm</p>
+        <p>Đổi quà hấp dẫn</p>
         <button class="btn btn-secondary mt-10">Đăng ký ngay</button>
     </div>
     <div class="promo-card">
-        <h3>RENEWAL 2026 春</h3>
-        <p>Tìm kiếm ở đây</p>
-        <p>Cập nhật mới</p>
+        <h3>PHIM MỚI 2025</h3>
+        <p>Những blockbuster đáng chờ đợi</p>
+        <p>Đặt vé sớm - Ưu đãi lớn</p>
         <button class="btn btn-secondary mt-10">Xem thêm</button>
     </div>
 </section>
 
 @section Scripts {
     <script>
-        // Page-specific JavaScript
         $(document).ready(function () {
-            // Initialize carousel
-            initializeCarousel();
+            const hasMoviesFromServer = @Json.Serialize(Model.HasMovies);
 
-            // Load featured movies
-            loadFeaturedMovies();
+            if (!hasMoviesFromServer) {
+                loadFeaturedMovies();
+            } else {
+                initializeCarousel();
+                updateStarRatings();
+            }
         });
 
-        function switchTab(tabName) {
-            // Hide all tabs
-            document.querySelectorAll('.tab-pane').forEach(tab => {
-                tab.style.display = 'none';
-            });
-
-            // Remove active class from all buttons
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-
-            // Show selected tab
-            document.getElementById(tabName + '-tab').style.display = 'block';
-
-            // Add active class to clicked button
-            event.target.classList.add('active');
-        }
-
-        function viewMovieDetail(movieId) {
-            window.location.href = '@Url.Action("Details", "Movie")/' + movieId;
-        }
-
-        function bookMovie(movieId, event) {
-            event.stopPropagation();
-
-            @if (User.Identity.IsAuthenticated)
-                {
-                    <text>
-                        window.location.href = '@Url.Action("Book", "Booking")/' + movieId;
-                    </text>
-            }
-                else
-                {
-                    <text>
-                        alert('Vui lòng đăng nhập để đặt vé!');
-                        window.location.href = '@Url.Action("Login", "Account")';
-                    </text>
-            }
-                        }
-
         function loadFeaturedMovies() {
-            // AJAX call to load featured movies
-            $.get('@Url.Action("GetFeaturedMovies", "Movie")', function (data) {
+            $('#loadingState').show();
+            $('#noMoviesMessage').hide();
+
+            $.get('@Url.Action("GetFeaturedMovies", "Home")', function (data) {
+                $('#loadingState').hide();
+
                 if (data && data.length > 0) {
                     updateMovieCarousel(data);
+                    initializeCarousel();
+                } else {
+                    $('#noMoviesMessage').show();
                 }
-            }).fail(function () {
-                console.log('Failed to load featured movies');
+            }).fail(function (xhr, status, error) {
+                console.error('Failed to load featured movies:', error);
+                $('#loadingState').hide();
+                $('#noMoviesMessage').show();
             });
         }
 
         function updateMovieCarousel(movies) {
-            const carousel = document.getElementById('movieCarousel');
-            carousel.innerHTML = '';
+            const carousel = $('#movieCarousel');
+
+            carousel.find('.movie-card').remove();
 
             movies.forEach(movie => {
                 const movieCard = createMovieCard(movie);
-                carousel.appendChild(movieCard);
+                carousel.append(movieCard);
             });
+
+            updateStarRatings();
+            updateCarouselDots(movies.length);
         }
 
         function createMovieCard(movie) {
-            const card = document.createElement('div');
-            card.className = 'movie-card';
-            card.onclick = () => viewMovieDetail(movie.id);
+            const genresText = movie.genres && movie.genres.length > 0
+                ? movie.genres.map(g => g.name).join(' • ')
+                : 'Chưa phân loại';
 
-            card.innerHTML = `
+            const posterHtml = movie.posterUrl
+                ? `<img src="${movie.posterUrl}" alt="${movie.title}"
+                                   onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" />
+                               <div class="poster-fallback" style="display:none;">
+                                   <i class="fas fa-film"></i>
+                                   <span>${movie.title}</span>
+                               </div>`
+                : `<div class="poster-fallback">
+                                   <i class="fas fa-film"></i>
+                                   <span>${movie.title}</span>
+                               </div>`;
+
+            return $(`
+                            <div class="movie-card" onclick="viewMovieDetail(${movie.id})">
                                 <div class="movie-poster">
-                                    ${movie.posterUrl ?
-                    `<img src="${movie.posterUrl}" alt="${movie.title}" />` :
-                    `<span>${movie.title}</span>`
-                }
+                                    ${posterHtml}
                                 </div>
                                 <div class="movie-info">
                                     <div class="movie-title">${movie.title}</div>
-                                    <div class="movie-genre">${movie.genre}</div>
+                                    <div class="movie-genre">${genresText}</div>
                                     <div class="movie-rating">
-                                        <span class="rating-stars">${generateStars(movie.rating)}</span>
+                                        <span class="rating-stars" data-rating="${movie.rating}">★★★★☆</span>
                                         <span>${movie.rating}/10</span>
+                                    </div>
+                                    <div class="movie-duration">
+                                        <i class="fas fa-clock"></i> ${movie.duration} phút
                                     </div>
                                     <button class="book-btn" onclick="bookMovie(${movie.id}, event)">Đặt vé</button>
                                 </div>
-                            `;
+                            </div>
+                        `);
+        }
 
-            return card;
+        function updateStarRatings() {
+            $('.rating-stars').each(function () {
+                const rating = parseFloat($(this).data('rating')) || 0;
+                const stars = generateStars(rating);
+                $(this).html(stars);
+            });
         }
 
         function generateStars(rating) {
@@ -257,33 +211,53 @@
                 '☆'.repeat(emptyStars);
         }
 
-        function initializeCarousel() {
-            const carousel = document.getElementById('movieCarousel');
-            const dots = document.querySelectorAll('.dot');
+        function updateCarouselDots(movieCount) {
+            const dotsContainer = $('#carouselDots');
+            dotsContainer.empty();
 
+            const maxDots = Math.min(movieCount, 12);
+            for (let i = 1; i <= maxDots; i++) {
+                const dot = $(`<span class="dot${i === 1 ? ' active' : ''}" onclick="currentSlide(${i})"></span>`);
+                dotsContainer.append(dot);
+            }
+        }
+
+        function initializeCarousel() {
+            const dots = $('.dot');
+            if (dots.length === 0) {
+                const movieCards = $('.movie-card').length;
+                updateCarouselDots(movieCards);
+            }
+
+            // Auto slide carousel
             setInterval(() => {
-                const activeIndex = Array.from(dots).findIndex(dot => dot.classList.contains('active'));
-                const nextIndex = (activeIndex + 1) % dots.length;
-                currentSlide(nextIndex + 1);
+                const activeDot = $('.dot.active');
+                const nextIndex = activeDot.index() + 1;
+                const totalDots = $('.dot').length;
+
+                if (nextIndex >= totalDots) {
+                    currentSlide(1);
+                } else {
+                    currentSlide(nextIndex + 1);
+                }
             }, 5000);
         }
 
         function currentSlide(n) {
-            const dots = document.querySelectorAll('.dot');
-            const carousel = document.getElementById('movieCarousel');
+            const dots = $('.dot');
+            const carousel = $('#movieCarousel');
 
-            dots.forEach(dot => dot.classList.remove('active'));
-
+            dots.removeClass('active');
             if (dots[n - 1]) {
-                dots[n - 1].classList.add('active');
+                $(dots[n - 1]).addClass('active');
             }
 
-          
-            const cardWidth = 270; 
-            carousel.scrollTo({
-                left: (n - 1) * cardWidth,
-                behavior: 'smooth'
-            });
+            const cardWidth = 270;
+            carousel.scrollLeft((n - 1) * cardWidth);
+        }
+
+        function viewMovieDetail(movieId) {
+            window.location.href = '@Url.Action("Details", "Movie", new { area = "Public" })/' + movieId;
         }
     </script>
 }
