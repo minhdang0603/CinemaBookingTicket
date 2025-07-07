@@ -61,7 +61,7 @@ public class MappingConfig : Profile
 				src.ShowTime));
 		CreateMap<BookingCreateDTO, Booking>()
 			.ForMember(dest => dest.BookingCode, opt => opt.MapFrom(src =>
-				Guid.NewGuid().ToString()))
+				"PENDING"))
 			.ForMember(dest => dest.BookingStatus, opt => opt.MapFrom(src =>
 				Constant.Payment_Status_Pending))
 			.ForMember(dest => dest.TotalAmount, opt => opt.MapFrom(src =>
@@ -138,6 +138,29 @@ public class MappingConfig : Profile
 				src.Screen != null && src.Screen.Theater != null ? src.Screen.Theater.Name : string.Empty))
 			.ForMember(dest => dest.ScreenName, opt => opt.MapFrom(src =>
 				src.Screen != null ? src.Screen.Name : string.Empty));
+
+		// Mapping for ShowTimeSeatStatusDTO
+		CreateMap<ShowTime, ShowTimeSeatStatusDTO>()
+			.ForMember(dest => dest.ShowTimeId, opt => opt.MapFrom(src => src.Id))
+			.ForMember(dest => dest.MovieTitle, opt => opt.MapFrom(src =>
+				src.Movie != null ? src.Movie.Title : string.Empty))
+			.ForMember(dest => dest.ShowDate, opt => opt.MapFrom(src => src.ShowDate))
+			.ForMember(dest => dest.StartTime, opt => opt.MapFrom(src => src.StartTime))
+			.ForMember(dest => dest.ScreenName, opt => opt.MapFrom(src =>
+				src.Screen != null ? src.Screen.Name : string.Empty))
+			.ForMember(dest => dest.TheaterName, opt => opt.MapFrom(src =>
+				src.Screen != null && src.Screen.Theater != null ? src.Screen.Theater.Name : string.Empty))
+			.ForMember(dest => dest.BasePrice, opt => opt.MapFrom(src => src.BasePrice))
+			.ForMember(dest => dest.Seats, opt => opt.Ignore()); // Seats are populated separately
+
+		// Mapping for SeatBookingStatusDTO
+		CreateMap<Seat, SeatBookingStatusDTO>()
+			.ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
+			.ForMember(dest => dest.SeatRow, opt => opt.MapFrom(src => src.SeatRow))
+			.ForMember(dest => dest.SeatNumber, opt => opt.MapFrom(src => src.SeatNumber))
+			.ForMember(dest => dest.SeatType, opt => opt.MapFrom(src => src.SeatType))
+			.ForMember(dest => dest.Price, opt => opt.Ignore())  // Price is calculated in service
+			.ForMember(dest => dest.IsBooked, opt => opt.Ignore()); // IsBooked is determined in service
 
 		CreateMap<ShowTimeCreateDTO, ShowTime>()
 				.ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src =>

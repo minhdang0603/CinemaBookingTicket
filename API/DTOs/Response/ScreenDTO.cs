@@ -10,7 +10,5 @@
         public int SeatsPerRow { get; set; }
 
         public TheaterDTO Theater { get; set; } = null!;
-
-        public bool IsActive { get; set; }
     }
 }

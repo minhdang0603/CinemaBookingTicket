@@ -66,6 +66,16 @@ namespace Web.Services
             });
         }
 
+        public Task<T> GetShowTimeSeatStatusAsync<T>(int showTimeId, string? token = null)
+        {
+            return SendAsync<T>(new APIRequest
+            {
+                ApiType = Constant.ApiType.GET,
+                Url = $"{_baseUrl}/api/showtime/{showTimeId}/seats",
+                Token = token
+            });
+        }
+
         public Task<T> UpdateShowTimeAsync<T>(int showTimeId, ShowTimeUpdateDTO updatedShowTime, string? token = null)
         {
             return SendAsync<T>(new APIRequest

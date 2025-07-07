@@ -41,11 +41,11 @@ public class BookingController : ControllerBase
         await _bookingService.DeleteBookingAsync(bookingId);
         return Ok(APIResponse<object>.Builder()
             .WithStatusCode(HttpStatusCode.NoContent)
-			.WithSuccess(true)
+            .WithSuccess(true)
             .Build());
     }
 
-    [HttpGet("{bookingId:int}")]
+    [HttpGet("{bookingId:int}", Name = "GetBookingByIdAsync")]
     [Authorize]
     public async Task<ActionResult<APIResponse<BookingDTO>>> GetBookingByIdAsync(int bookingId)
     {

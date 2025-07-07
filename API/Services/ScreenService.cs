@@ -47,8 +47,8 @@ namespace API.Services
                         SeatRow = seatRow.ToString(),
                         SeatNumber = seatNumber,
                         IsActive = true,
-                        CreatedAt = DateTime.UtcNow,
-                        LastUpdatedAt = DateTime.UtcNow,
+                        CreatedAt = DateTime.Now,
+                        LastUpdatedAt = DateTime.Now,
                         SeatType = await _unitOfWork.SeatType.GetAsync(st => st.Name == Constant.Seat_Type_Standard)
                     };
 

@@ -10,6 +10,6 @@ namespace Web.Services.IServices
         Task<T> GetShowTimeByIdAsync<T>(int showTimeId);
         Task<T> UpdateShowTimeAsync<T>(int showTimeId, ShowTimeUpdateDTO updatedShowTime, string? token = null);
         Task<T> DeleteShowTimeAsync<T>(int showTimeId, string? token = null);
-
+        Task<T> GetShowTimeSeatStatusAsync<T>(int showTimeId, string? token = null);
     }
 }

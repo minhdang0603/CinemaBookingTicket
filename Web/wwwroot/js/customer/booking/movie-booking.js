@@ -2,64 +2,16 @@
 let selectedSeats = [];
 let currentStep = 1;
 
-// Seat configuration
-const seatConfig = {
-    'A': { count: 11, type: 'standard', price: 70000 },
-    'B': { count: 11, type: 'standard', price: 70000 },
-    'C': { count: 9, type: 'standard', price: 70000 },
-    'D': { count: 9, type: 'vip', price: 100000 },
-    'E': { count: 9, type: 'vip', price: 100000 },
-    'F': { count: 9, type: 'vip', price: 100000 },
-    'G': { count: 9, type: 'vip', price: 100000 },
-    'H': { count: 9, type: 'vip', price: 100000 },
-    'I': { count: 10, type: 'vip', price: 100000 },
-    'J': { count: 8, type: 'couple', price: 150000 }
-};
-
-const takenSeats = ['A5', 'B3', 'D7', 'F2', 'H8', 'J4']; // Example taken seats
-
 // Initialize seats functionality
 function initializeSeats() {
-    generateSeatMap();
+    attachSeatHandlers();
     updateUI();
 }
 
-// Generate seat map
-function generateSeatMap() {
-    const seatMap = document.getElementById('seat-map');
-    
-    if (!seatMap) return; // Safety check
-
-    Object.keys(seatConfig).forEach(row => {
-        const seatRow = document.createElement('div');
-        seatRow.className = 'seat-row';
-
-        // Row label
-        const rowLabel = document.createElement('div');
-        rowLabel.className = 'row-label';
-        rowLabel.textContent = row;
-        seatRow.appendChild(rowLabel);
-
-        // Generate seats
-        for (let i = seatConfig[row].count; i >= 1; i--) {
-            const seatId = row + i;
-            const seat = document.createElement('button');
-            seat.className = `seat ${seatConfig[row].type}`;
-            seat.textContent = seatId;
-            seat.dataset.seatId = seatId;
-            seat.dataset.price = seatConfig[row].price;
-
-            if (takenSeats.includes(seatId)) {
-                seat.classList.add('taken');
-                seat.disabled = true;
-            } else {
-                seat.addEventListener('click', () => toggleSeat(seat));
-            }
-
-            seatRow.appendChild(seat);
-        }
-
-        seatMap.appendChild(seatRow);
+// Attach click handlers to seats
+function attachSeatHandlers() {
+    document.querySelectorAll('.seat:not(.taken)').forEach(seat => {
+        seat.addEventListener('click', () => toggleSeat(seat));
     });
 }
 
@@ -67,13 +19,14 @@ function generateSeatMap() {
 function toggleSeat(seat) {
     const seatId = seat.dataset.seatId;
     const price = parseInt(seat.dataset.price);
+    const seatCode = seat.dataset.seatCode;
 
     if (seat.classList.contains('selected')) {
         seat.classList.remove('selected');
         selectedSeats = selectedSeats.filter(s => s.id !== seatId);
     } else {
         seat.classList.add('selected');
-        selectedSeats.push({ id: seatId, price: price });
+        selectedSeats.push({ id: seatId, price: price, code: seatCode });
     }
 
     updateUI();
@@ -87,7 +40,7 @@ function toggleSeat(seat) {
 // Update UI
 function updateUI() {
     const selectedSeatsText = selectedSeats.length > 0
-        ? selectedSeats.map(s => s.id).join(', ')
+        ? selectedSeats.map(s => s.code).join(', ')
         : '...';
 
     const totalAmount = calculateTotalAmount();

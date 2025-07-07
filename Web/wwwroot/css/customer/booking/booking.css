@@ -1,5 +1,5 @@
 /* Movie Booking Page CSS - extends base.css */
-@import url('../base.css');
+@import url('../../base.css');
 /* Movie Booking Specific Variables */
 :root {
     --primary-color: #1a1a2e;
@@ -13,9 +13,9 @@
     --bg-darker: #020c1b;
     --seat-standard: #64748b;
     --seat-vip: #f59e0b;
-    --seat-couple: #8b5cf6;
+    --seat-premium: #8b5cf6;
     --seat-selected: #10b981;
-    --seat-taken: #ef4444;
+    --seat-unavailable: #6b7280;
     --border-radius: var(--radius-lg);
     --shadow: var(--shadow-lg);
     --shadow-hover: var(--shadow-xl);
@@ -26,7 +26,7 @@ body {
     background: linear-gradient(135deg, var(--bg-darker) 0%, var(--primary-color) 100%);
     color: var(--text-white);
     min-height: 100vh;
-    padding-bottom: 120px;  /*Space for fixed action buttons*/ 
+    padding-bottom: 120px; /*Space for fixed action buttons*/
 }
 
 .container-fluid {
@@ -39,7 +39,6 @@ body {
     backdrop-filter: blur(10px);
     padding: 20px 0;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    position: sticky;
     top: 0;
     z-index: 100;
 }
@@ -54,44 +53,44 @@ body {
     transition: all 0.3s ease;
 }
 
-.step-item.active {
-    color: var(--accent-color);
-}
+    .step-item.active {
+        color: var(--accent-color);
+    }
 
-.step-item .step-icon {
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.1);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 20px;
-    margin-bottom: 8px;
-    transition: all 0.3s ease;
-}
+    .step-item .step-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        margin-bottom: 8px;
+        transition: all 0.3s ease;
+    }
 
-.step-item.active .step-icon {
-    background: var(--accent-color);
-    color: white;
-    transform: scale(1.1);
-    box-shadow: 0 0 20px rgba(233, 69, 96, 0.5);
-}
+    .step-item.active .step-icon {
+        background: var(--accent-color);
+        color: white;
+        transform: scale(1.1);
+        box-shadow: 0 0 20px rgba(233, 69, 96, 0.5);
+    }
 
-.step-item::after {
-    content: '';
-    position: absolute;
-    top: 25px;
-    right: -50%;
-    width: 100%;
-    height: 2px;
-    background: rgba(255, 255, 255, 0.2);
-    z-index: -1;
-}
+    .step-item::after {
+        content: '';
+        position: absolute;
+        top: 25px;
+        right: -50%;
+        width: 100%;
+        height: 2px;
+        background: rgba(255, 255, 255, 0.2);
+        z-index: -1;
+    }
 
-.step-item:last-child::after {
-    display: none;
-}
+    .step-item:last-child::after {
+        display: none;
+    }
 
 /* Main Content */
 .booking-content {
@@ -108,10 +107,10 @@ body {
     transition: all 0.3s ease;
 }
 
-.movie-info-card:hover {
-    transform: translateY(-5px);
-    box-shadow: var(--shadow-hover);
-}
+    .movie-info-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-hover);
+    }
 
 .movie-title {
     font-size: 1.1rem;
@@ -166,16 +165,16 @@ body {
     overflow: hidden;
 }
 
-.screen::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
-    animation: screenShine 3s infinite;
-}
+    .screen::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+        animation: screenShine 3s infinite;
+    }
 
 /* Seat Map */
 .seat-map {
@@ -199,53 +198,54 @@ body {
     color: var(--text-light);
 }
 
+/* Seat button style (custom for border color) */
 .seat {
-    width: 32px;
-    height: 32px;
-    border-radius: 8px;
-    border: none;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    position: relative;
-    font-size: 11px;
-    font-weight: 500;
+    background-color: #222 !important;
+    color: #fff;
+    border-radius: 6px;
+    min-width: 36px;
+    min-height: 36px;
+    margin: 2px;
+    font-weight: bold;
+    font-size: 15px;
+    border-width: 2.5px !important;
+    border-style: solid !important;
+    transition: border-color 0.2s, background 0.2s;
 }
 
-.seat:hover {
-    transform: scale(1.15);
-}
+    .seat:hover {
+        transform: scale(1.15);
+    }
 
-.seat.standard {
-    background: var(--seat-standard);
-    color: white;
-}
+    .seat.standard {
+        background: var(--seat-standard);
+        color: white;
+    }
 
-.seat.vip {
-    background: var(--seat-vip);
-    color: white;
-}
+    .seat.vip {
+        background: var(--seat-vip);
+        color: white;
+    }
 
-.seat.couple {
-    background: var(--seat-couple);
-    color: white;
-    width: 68px;
-}
+    .seat.premium {
+        background: var(--seat-premium);
+        color: white;
+    }
 
-.seat.selected {
-    background: var(--seat-selected) !important;
-    box-shadow: 0 0 15px rgba(16, 185, 129, 0.6);
-    animation: pulse 2s infinite;
-}
+    .seat.selected {
+        background: var(--seat-selected) !important;
+        box-shadow: 0 0 15px rgba(16, 185, 129, 0.6);
+        animation: pulse 2s infinite;
+        border-width: 0px !important;
+    }
 
-.seat.taken {
-    background: var(--seat-taken);
-    cursor: not-allowed;
-    opacity: 0.6;
-}
-
-.seat.taken:hover {
-    transform: none;
-}
+    .seat.unavailable {
+        background: var(--seat-unavailable) !important;
+        color: white;
+        cursor: not-allowed;
+        pointer-events: none;
+        border-width: 0px !important;
+    }
 
 /* Legend */
 .legend {
@@ -259,14 +259,16 @@ body {
 .legend-item {
     display: flex;
     align-items: center;
-    gap: 8px;
-    font-size: 0.9rem;
+    margin-bottom: 6px;
 }
 
 .legend-seat {
-    width: 20px;
-    height: 20px;
-    border-radius: 4px;
+    display: inline-block;
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    margin-right: 8px;
+    vertical-align: middle;
 }
 
 /* Action Buttons */
@@ -286,17 +288,17 @@ body {
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
 }
 
-.action-buttons .row {
-    align-items: stretch; /* Ensure both buttons have the same height */
-    margin: 0; /* Remove default Bootstrap margin */
-}
+    .action-buttons .row {
+        align-items: stretch; /* Ensure both buttons have the same height */
+        margin: 0; /* Remove default Bootstrap margin */
+    }
 
-.action-buttons .col-4,
-.action-buttons .col-8 {
-    padding: 0 5px; /* Adjust spacing between buttons */
-    display: flex; /* Make columns flex */
-    align-items: stretch; /* Stretch to full height */
-}
+    .action-buttons .col-4,
+    .action-buttons .col-8 {
+        padding: 0 5px; /* Adjust spacing between buttons */
+        display: flex; /* Make columns flex */
+        align-items: stretch; /* Stretch to full height */
+    }
 
 .btn-custom {
     padding: 14px 20px; /* Consistent padding for both buttons */
@@ -321,11 +323,11 @@ body {
     min-height: 50px;
 }
 
-.btn-back:hover {
-    background: rgba(255, 255, 255, 0.2);
-    color: white;
-    transform: translateY(-2px);
-}
+    .btn-back:hover {
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        transform: translateY(-2px);
+    }
 
 .btn-continue {
     background: linear-gradient(135deg, var(--accent-color), #c73650);
@@ -334,27 +336,27 @@ body {
     min-height: 50px;
 }
 
-.btn-continue:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 20px rgba(233, 69, 96, 0.4);
-    color: white;
-}
+    .btn-continue:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(233, 69, 96, 0.4);
+        color: white;
+    }
 
-.btn-continue:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    transform: none;
-    box-shadow: none;
-    pointer-events: none;
-}
+    .btn-continue:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+        pointer-events: none;
+    }
 
-.btn-continue.disabled {
-    opacity: 0.5 !important;
-    cursor: not-allowed !important;
-    transform: none !important;
-    box-shadow: none !important;
-    pointer-events: none !important;
-}
+    .btn-continue.disabled {
+        opacity: 0.5 !important;
+        cursor: not-allowed !important;
+        transform: none !important;
+        box-shadow: none !important;
+        pointer-events: none !important;
+    }
 
 .btn-custom i {
     font-size: 1rem; /* Consistent icon size */
@@ -381,20 +383,41 @@ body {
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
 }
 
 @keyframes screenShine {
-    0% { left: -100%; }
-    50% { left: 100%; }
-    100% { left: 100%; }
+    0% {
+        left: -100%;
+    }
+
+    50% {
+        left: 100%;
+    }
+
+    100% {
+        left: 100%;
+    }
 }
 
 @keyframes pulse {
-    0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.6); }
-    70% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+    0% {
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.6);
+    }
+
+    70% {
+        box-shadow: 0 0 0 10px rgba(16, 185, 129, 0);
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+    }
 }
 
 /* Legend Seat Specific Colors */
@@ -402,24 +425,9 @@ body {
     background: var(--seat-selected) !important;
 }
 
-.legend-seat.taken {
-    background: var(--seat-taken) !important;
-}
 
 .legend-seat.unavailable {
-    background: #6b7280 !important;
-}
-
-.legend-seat.standard {
-    background: var(--seat-standard) !important;
-}
-
-.legend-seat.vip {
-    background: var(--seat-vip) !important;
-}
-
-.legend-seat.couple {
-    background: var(--seat-couple) !important;
+    background: var(--seat-unavailable) !important;
 }
 
 /* Total Section */
@@ -441,10 +449,10 @@ body {
     transition: opacity 0.3s ease-in-out;
 }
 
-.step-content.active {
-    display: block;
-    opacity: 1;
-}
+    .step-content.active {
+        display: block;
+        opacity: 1;
+    }
 
 /* Section Titles */
 .section-title {
@@ -455,20 +463,20 @@ body {
     align-items: center;
 }
 
-.section-title i {
-    color: var(--accent-color);
-    margin-right: 10px;
-}
+    .section-title i {
+        color: var(--accent-color);
+        margin-right: 10px;
+    }
 
 /* Step Indicator Updates */
 .step-item.completed {
     color: var(--success-color);
 }
 
-.step-item.completed .step-icon {
-    background: var(--success-color);
-    color: white;
-}
+    .step-item.completed .step-icon {
+        background: var(--success-color);
+        color: white;
+    }
 
 /* Ticket Info Styles */
 .ticket-info-section {
@@ -492,11 +500,11 @@ body {
     align-items: center;
 }
 
-.modal-header h4 {
-    color: var(--text-white);
-    margin: 0;
-    font-weight: 600;
-}
+    .modal-header h4 {
+        color: var(--text-white);
+        margin: 0;
+        font-weight: 600;
+    }
 
 .close-btn {
     background: none;
@@ -531,31 +539,31 @@ body {
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.detail-row:last-child {
-    border-bottom: none;
-}
+    .detail-row:last-child {
+        border-bottom: none;
+    }
 
-.detail-row.total-row {
-    border-top: 2px solid rgba(100, 255, 218, 0.3);
-    margin-top: 15px;
-    padding-top: 20px;
-    font-weight: 700;
-}
+    .detail-row.total-row {
+        border-top: 2px solid rgba(100, 255, 218, 0.3);
+        margin-top: 15px;
+        padding-top: 20px;
+        font-weight: 700;
+    }
 
-.detail-row .label {
-    color: var(--text-light);
-    font-weight: 500;
-}
+    .detail-row .label {
+        color: var(--text-light);
+        font-weight: 500;
+    }
 
-.detail-row .value {
-    color: var(--text-white);
-    font-weight: 400;
-}
+    .detail-row .value {
+        color: var(--text-white);
+        font-weight: 400;
+    }
 
-.detail-row.total-row .value {
-    color: var(--gold-color);
-    font-size: 1.2rem;
-}
+    .detail-row.total-row .value {
+        color: var(--gold-color);
+        font-size: 1.2rem;
+    }
 
 .btn-proceed-payment {
     background: linear-gradient(135deg, var(--accent-color), #c73650);
@@ -568,7 +576,7 @@ body {
     transition: all 0.3s ease;
 }
 
-.btn-proceed-payment:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-hover);
-}
+    .btn-proceed-payment:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-hover);
+    }

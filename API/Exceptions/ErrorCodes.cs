@@ -30,7 +30,8 @@ namespace API.Exceptions
         public static Error ConcessionCategoryAlreadyExists(string name) => new($"The concession category with name = {name} already exists", HttpStatusCode.Conflict);
         public static Error ConcessionCategoryNotFound(int id) => new($"The concession category with id = {id} was not found", HttpStatusCode.NotFound);
         public static Error ConcessionNotFound(int id) => new($"The concession with id = {id} was not found", HttpStatusCode.NotFound);
-
         public static Error ConcessionAlreadyExists(string name) => new($"The concession with name = {name} already exists", HttpStatusCode.Conflict);
-    }
+        public static Error SeatIsNotAvailable() 
+            => new($"Some seats are not available for booking. Please try another!", HttpStatusCode.BadRequest);
+	}
 }

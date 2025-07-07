@@ -6,6 +6,13 @@
     <link rel="stylesheet" href="~/css/customer/booking/payment.css" asp-append-version="true" />
 }
 
+@if (ViewBag.BookingExpiry != null)
+{
+    <div class="container mt-2">
+        <partial name="_BookingTimer" model="ViewBag.BookingExpiry" />
+    </div>
+}
+
 <!-- Step Indicator -->
 <div class="step-indicator">
     <div class="container">
@@ -55,7 +62,8 @@
             </a>
         </div>
         <div class="col-8">
-            <a href="@Url.Action("Confirmation", "Booking")" class="btn btn-custom btn-continue w-100" id="continue-btn">
+            <a href="@Url.Action("Confirmation", "Booking")" class="btn btn-custom btn-continue w-100"
+                id="continue-btn">
                 <span class="d-md-none">
                     <span id="mobile-total">0</span>₫ |
                 </span>
@@ -77,7 +85,8 @@
                 <div class="cinema-name">Beta Đan Phượng</div>
                 <div class="showtime">
                     <i class="fas fa-clock"></i> Suất <strong>11:00 27/06/2025</strong><br>
-                    <i class="fas fa-map-marker-alt"></i> Phòng chiếu <strong>P3</strong> - Ghế <span id="selected-seats">@ViewBag.SelectedSeats</span>
+                    <i class="fas fa-map-marker-alt"></i> Phòng chiếu <strong>P3</strong> - Ghế <span
+                        id="selected-seats">@ViewBag.SelectedSeats</span>
                 </div>
             </div>
 
@@ -138,7 +147,8 @@
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Số điện thoại *</label>
-                                <input type="tel" class="form-control" id="customer-phone" name="CustomerPhone" required>
+                                <input type="tel" class="form-control" id="customer-phone" name="CustomerPhone"
+                                    required>
                                 <div class="error-message">Giá trị không được phép để trống</div>
                             </div>
                             <div class="col-12">
@@ -208,56 +218,56 @@
 @section Scripts {
     <script src="~/js/customer/booking/concession-payment.js" asp-append-version="true"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             // Initialize payment functionality
             if (typeof initializeConcessionPayment === 'function') {
                 initializeConcessionPayment();
             }
-            
+
             // Load booking data
             loadBookingData();
-            
+
             // Update summary
             updateSummary();
-            
+
             // Handle form submission
-            document.getElementById('continue-btn').addEventListener('click', function(e) {
+            document.getElementById('continue-btn').addEventListener('click', function (e) {
                 e.preventDefault();
                 if (validatePaymentForm()) {
                     // Update hidden combo data
                     document.getElementById('combo-data').value = JSON.stringify(combos);
-                    
+
                     // Submit form
                     document.getElementById('payment-form').submit();
                 }
             });
         });
-        
+
         function loadBookingData() {
             const selectedSeatsText = '@ViewBag.SelectedSeats' || '...';
             const totalAmount = '@ViewBag.TotalAmount' || '0';
-            
+
             document.getElementById('selected-seats').textContent = selectedSeatsText;
             document.getElementById('total-amount').textContent = totalAmount;
             document.getElementById('mobile-total').textContent = totalAmount;
         }
-        
+
         function validatePaymentForm() {
             const name = document.getElementById('customer-name').value.trim();
             const phone = document.getElementById('customer-phone').value.trim();
-            
+
             let isValid = true;
-            
+
             if (!name) {
                 document.getElementById('customer-name').classList.add('error');
                 isValid = false;
             }
-            
+
             if (!phone) {
                 document.getElementById('customer-phone').classList.add('error');
                 isValid = false;
             }
-            
+
             return isValid;
         }
     </script>

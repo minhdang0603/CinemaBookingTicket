@@ -1,20 +1,28 @@
 // Concession and Payment functionality
 
-// Combo data
-const combos = {
-    family: { price: 213000, quantity: 0 },
-    sweet: { price: 88000, quantity: 0 },
-    beta: { price: 68000, quantity: 0 }
-};
+// Dynamic combos object, populated from DOM
+const combos = {};
+
+document.addEventListener('DOMContentLoaded', function () {
+    // Khởi tạo combos từ DOM
+    document.querySelectorAll('.combo-item').forEach(function (item) {
+        const comboId = item.querySelector('.quantity').id.replace('-qty', '');
+        const priceText = item.querySelector('.combo-price').textContent.replace(/[^\d]/g, '');
+        const price = parseInt(priceText, 10) || 0;
+        combos[comboId] = { price: price, quantity: 0 };
+    });
+    // Lấy seat base amount từ DOM nếu có
+    const seatBaseAmountEl = document.getElementById('seat-base-amount');
+    window.seatBaseAmount = seatBaseAmountEl ? parseInt(seatBaseAmountEl.dataset.amount, 10) || 0 : 0;
+});
 
 // Concession Functions
-function updateComboQuantity(comboType, change) {
-    const currentQty = combos[comboType].quantity;
+function updateComboQuantity(comboId, change) {
+    if (!combos[comboId]) return;
+    const currentQty = combos[comboId].quantity;
     const newQty = Math.max(0, currentQty + change);
-
-    combos[comboType].quantity = newQty;
-    document.getElementById(`${comboType}-qty`).textContent = newQty;
-
+    combos[comboId].quantity = newQty;
+    document.getElementById(`${comboId}-qty`).textContent = newQty;
     updateUI();
     updateSummary();
 }
@@ -24,26 +32,11 @@ function selectPaymentMethod(method) {
     document.querySelectorAll('.payment-option').forEach(option => {
         option.classList.remove('selected');
     });
-
     document.querySelector(`[data-method="${method}"]`).classList.add('selected');
 }
 
 // Update order summary in payment step
 function updateSummary() {
-    // This function should be called when updating the payment summary
-    // It depends on selectedSeats which should be available globally
-    if (typeof selectedSeats !== 'undefined') {
-        // Update seat summary
-        const seatCount = selectedSeats.length;
-        const seatTotal = selectedSeats.reduce((sum, seat) => sum + seat.price, 0);
-
-        const seatCountEl = document.getElementById('seat-count');
-        const seatTotalEl = document.getElementById('seat-total');
-        
-        if (seatCountEl) seatCountEl.textContent = seatCount;
-        if (seatTotalEl) seatTotalEl.textContent = seatTotal.toLocaleString('vi-VN') + ' ₫';
-    }
-
     // Update combo summary
     const totalComboQty = Object.values(combos).reduce((sum, combo) => sum + combo.quantity, 0);
     const comboTotal = Object.values(combos).reduce((sum, combo) => sum + (combo.price * combo.quantity), 0);
@@ -63,16 +56,16 @@ function updateSummary() {
     }
 
     // Update total
-    const seatTotal = (typeof selectedSeats !== 'undefined') 
-        ? selectedSeats.reduce((sum, seat) => sum + seat.price, 0) 
-        : 0;
+    const seatTotal = (typeof window.seatBaseAmount !== 'undefined') ? window.seatBaseAmount : 0;
     const grandTotal = seatTotal + comboTotal;
     
     const paymentTotalEl = document.getElementById('payment-total');
     const totalAmountEl = document.getElementById('total-amount');
+    const mobileTotalEl = document.getElementById('mobile-total');
     
     if (paymentTotalEl) paymentTotalEl.textContent = grandTotal.toLocaleString('vi-VN') + ' ₫';
     if (totalAmountEl) totalAmountEl.textContent = grandTotal.toLocaleString('vi-VN');
+    if (mobileTotalEl) mobileTotalEl.textContent = grandTotal.toLocaleString('vi-VN');
 }
 
 // Initialize event listeners for concession and payment

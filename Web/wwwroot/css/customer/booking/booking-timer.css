@@ -1,0 +1,35 @@
+.booking-timer-container {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.booking-timer-label {
+    font-weight: bold;
+}
+
+.booking-timer {
+    font-family: monospace;
+    font-size: 1.2em;
+    font-weight: bold;
+}
+
+.text-warning {
+    color: #ffc107;
+}
+
+.text-danger {
+    color: #dc3545;
+    margin-top: 0px !important
+}
+
+.blink {
+    animation: blink 1s linear infinite;
+}
+
+@keyframes blink {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}

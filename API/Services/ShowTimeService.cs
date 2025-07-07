@@ -5,6 +5,7 @@ using API.Exceptions;
 using API.Repositories.IRepositories;
 using API.Services.IServices;
 using AutoMapper;
+using Utility;
 
 namespace API.Services
 {
@@ -311,6 +312,55 @@ namespace API.Services
 			await _unitOfWork.SaveAsync();
 			_logger.LogInformation($"ShowTime with ID {id} updated successfully.");
 			return _mapper.Map<ShowTimeDTO>(showTime);
+		}
+
+		public async Task<ShowTimeSeatStatusDTO> GetShowTimeSeatStatusAsync(int showTimeId)
+		{
+			_logger.LogInformation($"Getting seat status for showtime ID: {showTimeId}");
+
+			// Lấy showtime và kiểm tra tồn tại
+			var showtime = await _unitOfWork.ShowTime.GetAsync(
+				filter: st => st.Id == showTimeId && st.IsActive,
+				includeProperties: "Movie,Screen,Screen.Theater,Screen.Seats,Screen.Seats.SeatType"
+			);
+
+			if (showtime == null)
+			{
+				_logger.LogError($"ShowTime with ID {showTimeId} not found or inactive");
+				throw new AppException(ErrorCodes.ShowTimeNotFound(showTimeId));
+			}
+
+			// Lấy tất cả booking details cho showtime này (ghế đã được đặt)
+			var bookingDetails = await _unitOfWork.BookingDetail.GetAllAsync(
+				filter: bd => bd.Booking.ShowTimeId == showTimeId &&
+						 (bd.Booking.BookingStatus.ToLower() == Constant.Booking_Status_Confirmed ||
+						  bd.Booking.BookingStatus.ToLower() == Constant.Booking_Status_Pending),
+				includeProperties: "Booking,Seat"
+			);
+
+			// Tạo set chứa ID của các ghế đã được đặt
+			var bookedSeatIds = new HashSet<int>(bookingDetails.Select(bd => bd.SeatId));
+
+			// Map showtime to ShowTimeSeatStatusDTO using AutoMapper
+			var result = _mapper.Map<ShowTimeSeatStatusDTO>(showtime);
+
+			// Map seats and add booking status information
+			var seatsList = showtime.Screen.Seats
+				.Where(s => s.IsActive)
+				.Select(seat =>
+				{
+					var seatDTO = _mapper.Map<SeatBookingStatusDTO>(seat);
+					seatDTO.Price = showtime.BasePrice * seat.SeatType.PriceMultiplier;
+					seatDTO.IsBooked = bookedSeatIds.Contains(seat.Id);
+					return seatDTO;
+				})
+				.OrderBy(s => s.SeatRow)
+				.ThenBy(s => s.SeatNumber)
+				.ToList();
+
+			result.Seats = seatsList;
+
+			return result;
 		}
 
 	}

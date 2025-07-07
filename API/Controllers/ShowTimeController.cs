@@ -190,5 +190,27 @@ namespace API.Controllers
                 .WithResult(showTime)
                 .Build());
         }
+
+        [HttpGet("{id:int}/seats")]
+        [Authorize(Roles = Constant.Role_Customer + "," + Constant.Role_Employee + "," + Constant.Role_Admin)]
+        public async Task<ActionResult<APIResponse<ShowTimeSeatStatusDTO>>> GetShowTimeSeatStatus([FromRoute] int id)
+        {
+            if (id <= 0)
+            {
+                return BadRequest(APIResponse<ShowTimeSeatStatusDTO>.Builder()
+                    .WithStatusCode(HttpStatusCode.BadRequest)
+                    .WithSuccess(false)
+                    .WithErrorMessages(new List<string> { "Invalid showtime ID." })
+                    .Build());
+            }
+
+            var seatStatus = await _showTimeService.GetShowTimeSeatStatusAsync(id);
+
+            return Ok(APIResponse<ShowTimeSeatStatusDTO>.Builder()
+                .WithStatusCode(HttpStatusCode.OK)
+                .WithSuccess(true)
+                .WithResult(seatStatus)
+                .Build());
+        }
     }
 }

@@ -49,7 +49,7 @@ namespace Web.Areas.Admin.Controllers
             if (showTimeResponse == null || !showTimeResponse.IsSuccess)
             {
                 _logger.LogError("Failed to retrieve show times.");
-                TempData["Error"] = showTimeResponse?.ErrorMessages?.First();
+                TempData["error"] = showTimeResponse?.ErrorMessages?.First();
                 return View(new List<ShowTimeDTO>());
             }
 

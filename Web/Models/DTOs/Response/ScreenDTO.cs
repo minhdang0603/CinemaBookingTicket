@@ -13,7 +13,5 @@ namespace Web.Models.DTOs.Response
         public int SeatsPerRow { get; set; }
 
         public TheaterDTO? Theater { get; set; }
-
-        public List<SeatDTO> Seats { get; set; } = new List<SeatDTO>();
     }
 }

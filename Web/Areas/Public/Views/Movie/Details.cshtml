@@ -179,8 +179,8 @@
                                         <div class="showtimes-grid">
                                             @foreach (var showtime in showtimes)
                                             {
-                                                <a asp-area="Public" asp-controller="Booking" asp-action="Index"
-                                                    asp-route-movieId="@Model.Movie.Id" asp-route-showtimeId="@showtime.Id"
+                                                <a asp-area="Customer" asp-controller="Booking" asp-action="Index"
+                                                    asp-route-showtimeId="@showtime.Id"
                                                     class="mt-2"
                                                     title="@showtime.ShowDate.ToString("dd/MM/yyyy") - @showtime.Screen?.Name - @showtime.BasePrice.ToString("C")">
                                                     <div class="showtime-slot">

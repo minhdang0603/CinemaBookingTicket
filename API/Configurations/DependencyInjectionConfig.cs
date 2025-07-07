@@ -10,6 +10,7 @@ namespace API.Configurations
     {
         public static void AddDependencyInjectionConfiguration(this IServiceCollection services)
         {
+            // Repository and service registrations
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IDbInitializer, DbInitializer>();
             services.AddTransient<IEmailService, BrevoEmailService>();
@@ -25,6 +26,9 @@ namespace API.Configurations
             services.AddScoped<IShowTimeService, ShowTimeService>();
             services.AddScoped<IConcessionCategoryService, ConcessionCategoryService>();
             services.AddScoped<IConcessionService, ConcessionService>();
+
+            // Register background service for booking cleanup
+            services.AddHostedService<BookingCleanupService>();
         }
     }
 }

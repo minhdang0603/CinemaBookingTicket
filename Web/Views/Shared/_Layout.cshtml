@@ -1,6 +1,5 @@
 ﻿<!DOCTYPE html>
 <html lang="vi">
-
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -12,7 +11,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css">
     <!-- DataTables CDN -->
     <link rel="stylesheet" href="https://cdn.datatables.net/2.3.2/css/dataTables.dataTables.css" />
-    
+
     <!-- Render Styles section from views -->
     @await RenderSectionAsync("Styles", required: false)
 </head>
@@ -40,7 +39,7 @@
                     <ul class="dropdown-menu">
                         <li><a asp-area="" asp-controller="Movie" asp-action="MovieList">Phim đang chiếu</a></li>
                         <li><a asp-area="" asp-controller="Movie" asp-action="MovieList">Phim sắp chiếu</a></li>
-                        
+
                     </ul>
                 </li>
                 <li class="dropdown">
@@ -69,7 +68,7 @@
                     <button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
                     CINEMA
                 </div>
-                
+
                 <div class="user-section">
                     @if (User.Identity.IsAuthenticated)
                     {
@@ -93,7 +92,7 @@
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    @* <script src="https://kit.fontawesome.com/your-fontawesome-kit.js" crossorigin="anonymous"></script> *@
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
     <script src="https://cdn.datatables.net/2.3.2/js/dataTables.js"></script>
 

@@ -5,6 +5,7 @@ using Web.Services;
 using Web.Services.IServices;
 using Newtonsoft.Json;
 using System.Text.Json.Serialization;
+using Utility;
 
 namespace Web
 {
@@ -18,7 +19,7 @@ namespace Web
             {
                 options.JsonSerializerOptions.Converters.Add(new TimeOnlyJsonConverter());
                 options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve;
-			});
+            });
 
             // Đăng ký AutoMapper
             builder.Services.AddAutoMapper(typeof(MappingConfig));

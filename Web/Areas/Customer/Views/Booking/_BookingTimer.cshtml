@@ -1,0 +1,6 @@
+@model DateTime
+
+<div class="booking-timer-container">
+    ⏳<div class="booking-timer-label">Thời gian giữ chỗ:</div>
+    <div id="booking-timer" class="booking-timer" data-expiry="@Model.ToString("o")"></div>
+</div>

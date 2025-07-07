@@ -12,6 +12,7 @@ namespace API.Services.IServices
         Task<ShowTimeDTO> DeleteShowTimeAsync(int id);
         Task<List<ShowTimeDTO>> GetAllShowTimesWithPaginationAsync(int pageNumber, int pageSize, bool? isActive = true);
         Task<ShowTimeDTO> GetShowTimeByIdAsync(int id, bool? isActive = true);
+        Task<ShowTimeSeatStatusDTO> GetShowTimeSeatStatusAsync(int showTimeId);
     }
 
 }

@@ -1,9 +1,12 @@
+@model ConcessionViewModel
+
 @{
     ViewData["Title"] = "Concession - Book Ticket";
 }
 
 @section Styles {
     <link rel="stylesheet" href="~/css/customer/booking/concession.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/customer/booking/booking-timer.css" asp-append-version="true" />
 }
 
 <!-- Step Indicator -->
@@ -50,14 +53,14 @@
 <div class="action-buttons fade-in">
     <div class="row g-3">
         <div class="col-4">
-            <a href="@Url.Action("Index", "Booking")" class="btn btn-custom btn-back w-100">
+            <a asp-action="Index" asp-controller="Booking" asp-route-showTimeId="@Model.ShowTimeId" class="btn btn-custom btn-back w-100">
                 <i class="fas fa-arrow-left"></i>
             </a>
         </div>
         <div class="col-8">
             <a href="@Url.Action("Payment", "Booking")" class="btn btn-custom btn-continue w-100" id="continue-btn">
                 <span class="d-md-none">
-                    <span id="mobile-total">0</span>₫ |
+                    <span id="mobile-total">@Model.TotalAmount.ToString("N0")</span>₫ |
                 </span>
                 <span>Tiếp tục</span>
                 <i class="fas fa-arrow-right"></i>
@@ -66,6 +69,7 @@
     </div>
 </div>
 
+
 <!-- Main Content -->
 <div class="container booking-content">
     <div class="row">
@@ -73,11 +77,15 @@
         <div class="col-lg-4 order-lg-2">
             <!-- Movie Info -->
             <div class="movie-info-card fade-in">
-                <div class="movie-title">Doraemon Movie 44: Nobita Và Cuộc Phiêu Lưu Vào Thế Giới Trong Tranh</div>
-                <div class="cinema-name">Beta Đan Phượng</div>
+                @if (ViewBag.BookingExpiry != null)
+                {
+                    <partial name="_BookingTimer" model="ViewBag.BookingExpiry" />
+                }
+                <div class="movie-title">@Model.MovieTitle</div>
+                <div class="cinema-name">@Model.CinemaName</div>
                 <div class="showtime">
-                    <i class="fas fa-clock"></i> Suất <strong>11:00 27/06/2025</strong><br>
-                    <i class="fas fa-map-marker-alt"></i> Phòng chiếu <strong>P3</strong> - Ghế <span id="selected-seats">@ViewBag.SelectedSeats</span>
+                    <i class="fas fa-clock"></i> Suất <strong>@Model.ShowTime</strong><br>
+                    <i class="fas fa-map-marker-alt"></i> Phòng chiếu <strong>@Model.ScreenName</strong> - Ghế <span id="selected-seats">@string.Join(", ", Model.SeatName)</span>
                 </div>
             </div>
 
@@ -85,7 +93,7 @@
             <div class="total-card fade-in">
                 <div class="total-section-label">TỔNG ĐƠN HÀNG</div>
                 <div class="total-amount">
-                    <span id="total-amount">@ViewBag.TotalAmount</span> ₫
+                    <span id="total-amount">@Model.TotalAmount.ToString("N0")</span> ₫
                 </div>
             </div>
         </div>
@@ -99,97 +107,55 @@
                 </h3>
 
                 <div class="combo-list">
-                    <!-- Family Combo -->
-                    <div class="combo-item">
-                        <div class="combo-info">
-                            <h5 class="combo-name">Family Combo 69oz</h5>
-                            <p class="combo-description">
-                                <span class="highlight">TIẾT KIỆM 95K!!!</span> Gồm: 2 Bắp (69oz) + 4 Nước có gaz (22oz) + 2 Snack Oishi (80g)
-                            </p>
-                        </div>
-                        <div class="combo-controls">
-                            <div class="combo-price">213.000 ₫</div>
-                            <div class="quantity-controls">
-                                <button class="qty-btn minus" onclick="updateComboQuantity('family', -1)">-</button>
-                                <span class="quantity" id="family-qty">0</span>
-                                <button class="qty-btn plus" onclick="updateComboQuantity('family', 1)">+</button>
-                            </div>
-                        </div>
-                    </div>
 
-                    <!-- Sweet Combo -->
-                    <div class="combo-item">
-                        <div class="combo-info">
-                            <h5 class="combo-name">Sweet Combo 69oz</h5>
-                            <p class="combo-description">
-                                <span class="highlight">TIẾT KIỆM 46K!!!</span> Gồm: 1 Bắp (69oz) + 2 Nước có gaz (22oz)
-                            </p>
-                        </div>
-                        <div class="combo-controls">
-                            <div class="combo-price">88.000 ₫</div>
-                            <div class="quantity-controls">
-                                <button class="qty-btn minus" onclick="updateComboQuantity('sweet', -1)">-</button>
-                                <span class="quantity" id="sweet-qty">0</span>
-                                <button class="qty-btn plus" onclick="updateComboQuantity('sweet', 1)">+</button>
+                    @foreach(var combo in Model.Concessions)
+                    {
+                        <div class="combo-item">
+                            <div class="combo-info">
+                                <h5 class="combo-name">@combo.Name</h5>
+                                <p class="combo-description">
+                                    @Html.Raw(combo.Description)
+                                </p>
+                            </div>
+                            <div class="combo-controls">
+                                <div class="combo-price">@combo.Price.ToString("N0")đ</div>
+                                <div class="quantity-controls">
+                                    <button class="qty-btn minus" onclick="updateComboQuantity('@combo.Id', -1)">-</button>
+                                    <span class="quantity" id="@combo.Id-qty">0</span>
+                                    <button class="qty-btn plus" onclick="updateComboQuantity('@combo.Id', 1)">+</button>
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <!-- Beta Combo -->
-                    <div class="combo-item">
-                        <div class="combo-info">
-                            <h5 class="combo-name">Beta Combo 69oz</h5>
-                            <p class="combo-description">
-                                <span class="highlight">TIẾT KIỆM 28K!!!</span> Gồm: 1 Bắp (69oz) + 1 Nước có gaz (22oz)
-                            </p>
-                        </div>
-                        <div class="combo-controls">
-                            <div class="combo-price">68.000 ₫</div>
-                            <div class="quantity-controls">
-                                <button class="qty-btn minus" onclick="updateComboQuantity('beta', -1)">-</button>
-                                <span class="quantity" id="beta-qty">0</span>
-                                <button class="qty-btn plus" onclick="updateComboQuantity('beta', 1)">+</button>
-                            </div>
-                        </div>
-                    </div>
+                    }
                 </div>
             </div>
         </div>
     </div>
 </div>
 
+<span id="seat-base-amount" data-amount="@Model.TotalAmount" style="display:none"></span>
+
 @section Scripts {
     <script src="~/js/customer/booking/concession-payment.js" asp-append-version="true"></script>
+    <script src="~/js/customer/booking/booking-timer.js" asp-append-version="true"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             // Initialize concession functionality
             if (typeof initializeConcessionPayment === 'function') {
                 initializeConcessionPayment();
             }
-            
-            // Load saved data from session/localStorage
-            loadBookingData();
-            
+
             // Update UI
-            updateUI();
+            // updateUI();
         });
-        
-        function loadBookingData() {
-            // Load selected seats from ViewBag or session
-            const selectedSeatsText = '@ViewBag.SelectedSeats' || '...';
-            const totalAmount = '@ViewBag.TotalAmount' || '0';
-            
-            document.getElementById('selected-seats').textContent = selectedSeatsText;
-            document.getElementById('total-amount').textContent = totalAmount;
-            document.getElementById('mobile-total').textContent = totalAmount;
-        }
-        
+
         function updateUI() {
             // Calculate total including combos
             if (typeof calculateTotalAmount === 'function') {
                 const total = calculateTotalAmount();
-                document.getElementById('total-amount').textContent = total.toLocaleString('vi-VN');
-                document.getElementById('mobile-total').textContent = total.toLocaleString('vi-VN');
+                document.getElementById('total-amount').textContent += total.toLocaleString('vi-VN');
+                document.getElementById('mobile-total').textContent += total.toLocaleString('vi-VN');
             }
         }
     </script>

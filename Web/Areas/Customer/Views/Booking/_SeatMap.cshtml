@@ -1,0 +1,35 @@
+@model SeatBookingViewModel
+
+<!-- Seat Map -->
+<div class="seat-map" id="seat-map">
+    @{
+        var seatsByRow = Model.Seats.GroupBy(s => s.SeatRow).OrderBy(g => g.Key);
+        foreach (var row in seatsByRow)
+        {
+            <div class="seat-row">
+                <div class="row-label">@row.Key</div>
+                @foreach (var seat in row.OrderBy(s => s.SeatNumber))
+                {
+                    string seatTypeClass = seat.SeatType.Name.ToLower();
+                    string seatStatus = seat.IsBooked ? "unavailable" : "";
+                    <button class="seat @seatTypeClass @seatStatus" @(seat.IsBooked ? "disabled" : "") data-seat-id="@seat.Id"
+                        data-price="@seat.Price" data-seat-code="@seat.SeatCode"
+                        style="border: 2.5px solid @seat.SeatType.Color">
+                        @seat.SeatCode
+                    </button>
+                }
+            </div>
+        }
+    }
+</div>
+
+<!-- Seat Types Legend -->
+<div class="legend">
+    @foreach (var seatType in Model.SeatTypes)
+    {
+        <div class="legend-item">
+            <div class="legend-seat @seatType.Name.ToLower()" style="border: 2.5px solid @seatType.Color"></div>
+            <span>@seatType.Name (@seatType.PriceFormatted)</span>
+        </div>
+    }
+</div>
