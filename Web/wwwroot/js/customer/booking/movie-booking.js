@@ -46,13 +46,23 @@ function updateUI() {
     const totalAmount = calculateTotalAmount();
     const formattedTotal = totalAmount.toLocaleString('vi-VN');
 
-    const selectedSeatsEl = document.getElementById('selected-seats');
-    const totalAmountEl = document.getElementById('total-amount');
-    const mobileTotal = document.getElementById('mobile-total');
+    // Update all instances of selected seats text
+    const selectedSeatsElements = document.querySelectorAll('#selected-seats');
+    selectedSeatsElements.forEach(el => {
+        if (el) el.textContent = selectedSeatsText;
+    });
     
-    if (selectedSeatsEl) selectedSeatsEl.textContent = selectedSeatsText;
-    if (totalAmountEl) totalAmountEl.textContent = formattedTotal;
-    if (mobileTotal) mobileTotal.textContent = formattedTotal;
+    // Update all total amount displays
+    const totalAmountElements = document.querySelectorAll('#total-amount');
+    totalAmountElements.forEach(el => {
+        if (el) el.textContent = formattedTotal;
+    });
+    
+    // Update mobile totals
+    const mobileTotalElements = document.querySelectorAll('[id^="mobile-total"]');
+    mobileTotalElements.forEach(el => {
+        if (el) el.textContent = formattedTotal;
+    });
 
     updateButtonStates();
 }
@@ -71,47 +81,35 @@ function calculateTotalAmount() {
 
 // Update button states based on current step
 function updateButtonStates() {
-    const continueBtn = document.getElementById('continue-btn');
-    const backBtn = document.getElementById('back-btn');
-    
-    if (!continueBtn) return;
+    // Update both desktop and mobile continue buttons
+    const continueButtons = document.querySelectorAll('#continue-btn, #mobile-continue-btn');
+    if (continueButtons.length === 0) return;
 
-    switch (currentStep) {
-        case 1: // Seat selection
-            if (selectedSeats.length > 0) {
-                continueBtn.removeAttribute('disabled');
-                continueBtn.classList.remove('disabled');
-                continueBtn.style.pointerEvents = 'auto';
-                continueBtn.style.cursor = 'pointer';
-            } else {
-                continueBtn.setAttribute('disabled', 'true');
-                continueBtn.classList.add('disabled');
-                continueBtn.style.pointerEvents = 'none';
-                continueBtn.style.cursor = 'not-allowed';
-            }
-            break;
+    continueButtons.forEach(btn => {
+        switch (currentStep) {
+            case 1: // Seat selection
+                if (selectedSeats.length > 0) {
+                    btn.removeAttribute('disabled');
+                    btn.classList.remove('disabled');
+                    btn.style.pointerEvents = 'auto';
+                    btn.style.cursor = 'pointer';
+                } else {
+                    btn.setAttribute('disabled', 'true');
+                    btn.classList.add('disabled');
+                    btn.style.pointerEvents = 'none';
+                    btn.style.cursor = 'not-allowed';
+                }
+                break;
 
-        case 2: // Concession (optional step)
-        case 3: // Payment
-            continueBtn.removeAttribute('disabled');
-            continueBtn.classList.remove('disabled');
-            continueBtn.style.pointerEvents = 'auto';
-            continueBtn.style.cursor = 'pointer';
-            break;
-
-        case 4: // Ticket info
-            continueBtn.style.display = 'none';
-            break;
-    }
-    
-    // Back button visibility
-    if (backBtn) {
-        if (currentStep > 1) {
-            backBtn.style.display = 'block';
-        } else {
-            backBtn.style.display = 'none';
+            case 2: // Concession (optional step)
+            case 3: // Payment
+                btn.removeAttribute('disabled');
+                btn.classList.remove('disabled');
+                btn.style.pointerEvents = 'auto';
+                btn.style.cursor = 'pointer';
+                break;
         }
-    }
+    });
 }
 
 // Reset booking data

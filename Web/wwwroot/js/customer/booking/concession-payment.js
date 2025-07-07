@@ -59,13 +59,25 @@ function updateSummary() {
     const seatTotal = (typeof window.seatBaseAmount !== 'undefined') ? window.seatBaseAmount : 0;
     const grandTotal = seatTotal + comboTotal;
     
-    const paymentTotalEl = document.getElementById('payment-total');
+    // Update all total displays - for both sidebar and mobile view
     const totalAmountEl = document.getElementById('total-amount');
-    const mobileTotalEl = document.getElementById('mobile-total');
+    const mobileTotalEl = document.getElementById('mobile-total-2');
+    const mobileTotalElAlt = document.getElementById('mobile-total'); // In case there's another mobile total element
     
-    if (paymentTotalEl) paymentTotalEl.textContent = grandTotal.toLocaleString('vi-VN') + ' ₫';
     if (totalAmountEl) totalAmountEl.textContent = grandTotal.toLocaleString('vi-VN');
     if (mobileTotalEl) mobileTotalEl.textContent = grandTotal.toLocaleString('vi-VN');
+    if (mobileTotalElAlt) mobileTotalElAlt.textContent = grandTotal.toLocaleString('vi-VN');
+    
+    // For payment page
+    const paymentTotalEl = document.getElementById('payment-total');
+    if (paymentTotalEl) paymentTotalEl.textContent = grandTotal.toLocaleString('vi-VN') + ' ₫';
+}
+
+// Calculate total amount - useful for other scripts that need this value
+function calculateTotalAmount() {
+    const seatTotal = (typeof window.seatBaseAmount !== 'undefined') ? window.seatBaseAmount : 0;
+    const comboTotal = Object.values(combos).reduce((sum, combo) => sum + (combo.price * combo.quantity), 0);
+    return seatTotal + comboTotal;
 }
 
 // Initialize event listeners for concession and payment
@@ -93,6 +105,7 @@ if (typeof window !== 'undefined') {
     window.updateComboQuantity = updateComboQuantity;
     window.selectPaymentMethod = selectPaymentMethod;
     window.updateSummary = updateSummary;
+    window.calculateTotalAmount = calculateTotalAmount;
     window.initializeConcessionPayment = initializeConcessionPayment;
     window.combos = combos;
 }

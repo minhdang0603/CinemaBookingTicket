@@ -49,51 +49,52 @@
     </div>
 </div>
 
-<!-- Fixed Action Buttons -->
-<div class="action-buttons fade-in">
-    <div class="row g-3">
-        <div class="col-4">
-            <a asp-action="Index" asp-controller="Booking" asp-route-showTimeId="@Model.ShowTimeId" class="btn btn-custom btn-back w-100">
-                <i class="fas fa-arrow-left"></i>
-            </a>
-        </div>
-        <div class="col-8">
-            <a href="@Url.Action("Payment", "Booking")" class="btn btn-custom btn-continue w-100" id="continue-btn">
-                <span class="d-md-none">
-                    <span id="mobile-total">@Model.TotalAmount.ToString("N0")</span>₫ |
-                </span>
-                <span>Tiếp tục</span>
-                <i class="fas fa-arrow-right"></i>
-            </a>
-        </div>
-    </div>
-</div>
-
-
 <!-- Main Content -->
-<div class="container booking-content">
+<div class="container booking-content has-sidebar-actions">
     <div class="row">
         <!-- Sidebar -->
         <div class="col-lg-4 order-lg-2">
-            <!-- Movie Info -->
-            <div class="movie-info-card fade-in">
-                @if (ViewBag.BookingExpiry != null)
-                {
-                    <partial name="_BookingTimer" model="ViewBag.BookingExpiry" />
-                }
-                <div class="movie-title">@Model.MovieTitle</div>
-                <div class="cinema-name">@Model.CinemaName</div>
-                <div class="showtime">
-                    <i class="fas fa-clock"></i> Suất <strong>@Model.ShowTime</strong><br>
-                    <i class="fas fa-map-marker-alt"></i> Phòng chiếu <strong>@Model.ScreenName</strong> - Ghế <span id="selected-seats">@string.Join(", ", Model.SeatName)</span>
+            <div class="sidebar-sticky">
+                <!-- Movie Info -->
+                <div class="movie-info-card fade-in">
+                    @if (ViewBag.BookingExpiry != null)
+                    {
+                        <partial name="_BookingTimer" model="ViewBag.BookingExpiry" />
+                    }
+                    <div class="movie-title">@Model.MovieTitle</div>
+                    <div class="cinema-name">@Model.CinemaName</div>
+                    <div class="showtime">
+                        <i class="fas fa-clock"></i> Suất <strong>@Model.ShowTime</strong><br>
+                        <i class="fas fa-map-marker-alt"></i> Phòng chiếu <strong>@Model.ScreenName</strong> - Ghế <span
+                            id="selected-seats">@string.Join(", ", Model.SeatName)</span>
+                    </div>
                 </div>
-            </div>
 
-            <!-- Total -->
-            <div class="total-card fade-in">
-                <div class="total-section-label">TỔNG ĐƠN HÀNG</div>
-                <div class="total-amount">
-                    <span id="total-amount">@Model.TotalAmount.ToString("N0")</span> ₫
+                <!-- Total -->
+                <div class="total-card fade-in">
+                    <div class="total-section-label">TỔNG ĐƠN HÀNG</div>
+                    <div class="total-amount">
+                        <span id="total-amount">@Model.TotalAmount.ToString("N0")</span> ₫
+                    </div>
+                </div>
+
+                <!-- Action Buttons inside sidebar -->
+                <div class="sidebar-action-buttons action-buttons fade-in">
+                    <div class="row g-3">
+                        <div class="col-4">
+                            <a asp-action="Index" asp-controller="Booking" asp-route-showTimeId="@Model.ShowTimeId"
+                                class="btn btn-custom btn-back w-100">
+                                <i class="fas fa-arrow-left"></i>
+                            </a>
+                        </div>
+                        <div class="col-8">
+                            <a href="@Url.Action("Payment", "Booking")" class="btn btn-custom btn-continue w-100"
+                                id="continue-btn">
+                                <span>Tiếp tục</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -108,7 +109,7 @@
 
                 <div class="combo-list">
 
-                    @foreach(var combo in Model.Concessions)
+                    @foreach (var combo in Model.Concessions)
                     {
                         <div class="combo-item">
                             <div class="combo-info">
@@ -134,6 +135,28 @@
     </div>
 </div>
 
+<!-- Mobile action buttons (visible only on mobile) -->
+<div class="action-buttons fade-in d-lg-none">
+    <div class="row g-3">
+        <div class="col-4">
+            <a asp-action="Index" asp-controller="Booking" asp-route-showTimeId="@Model.ShowTimeId"
+                class="btn btn-custom btn-back w-100">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+        </div>
+        <div class="col-8">
+            <a href="@Url.Action("Payment", "Booking")" class="btn btn-custom btn-continue w-100"
+                id="mobile-continue-btn">
+                <span>
+                    <span id="mobile-total-2">@Model.TotalAmount.ToString("N0")</span>₫ |
+                </span>
+                <span>Tiếp tục</span>
+                <i class="fas fa-arrow-right"></i>
+            </a>
+        </div>
+    </div>
+</div>
+
 <span id="seat-base-amount" data-amount="@Model.TotalAmount" style="display:none"></span>
 
 @section Scripts {
@@ -141,22 +164,33 @@
     <script src="~/js/customer/booking/booking-timer.js" asp-append-version="true"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
+            // Add class to body for CSS targeting
+            document.body.classList.add('has-sidebar-actions');
+
             // Initialize concession functionality
             if (typeof initializeConcessionPayment === 'function') {
                 initializeConcessionPayment();
             }
 
-            // Update UI
-            // updateUI();
+            // Sync continue buttons if needed
+            document.getElementById('continue-btn').addEventListener('click', function (e) {
+                // Event will be handled by the link's href
+            });
+
+            if (document.getElementById('mobile-continue-btn')) {
+                document.getElementById('mobile-continue-btn').addEventListener('click', function (e) {
+                    // Sync with desktop continue button
+                    window.location.href = document.getElementById('continue-btn').getAttribute('href');
+                });
+            }
         });
 
         function updateUI() {
             // Calculate total including combos
             if (typeof calculateTotalAmount === 'function') {
                 const total = calculateTotalAmount();
-                document.getElementById('total-amount').textContent += total.toLocaleString('vi-VN');
-                document.getElementById('mobile-total').textContent += total.toLocaleString('vi-VN');
             }
         }
     </script>
 }
+  

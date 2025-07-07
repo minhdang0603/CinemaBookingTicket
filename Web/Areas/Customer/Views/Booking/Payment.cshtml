@@ -53,48 +53,47 @@
     </div>
 </div>
 
-<!-- Fixed Action Buttons -->
-<div class="action-buttons fade-in">
-    <div class="row g-3">
-        <div class="col-4">
-            <a href="@Url.Action("Concession", "Booking")" class="btn btn-custom btn-back w-100">
-                <i class="fas fa-arrow-left"></i>
-            </a>
-        </div>
-        <div class="col-8">
-            <a href="@Url.Action("Confirmation", "Booking")" class="btn btn-custom btn-continue w-100"
-                id="continue-btn">
-                <span class="d-md-none">
-                    <span id="mobile-total">0</span>₫ |
-                </span>
-                <span>Xác nhận</span>
-                <i class="fas fa-arrow-right"></i>
-            </a>
-        </div>
-    </div>
-</div>
-
 <!-- Main Content -->
-<div class="container booking-content">
+<div class="container booking-content has-sidebar-actions">
     <div class="row">
         <!-- Sidebar -->
         <div class="col-lg-4 order-lg-2">
-            <!-- Movie Info -->
-            <div class="movie-info-card fade-in">
-                <div class="movie-title">Doraemon Movie 44: Nobita Và Cuộc Phiêu Lưu Vào Thế Giới Trong Tranh</div>
-                <div class="cinema-name">Beta Đan Phượng</div>
-                <div class="showtime">
-                    <i class="fas fa-clock"></i> Suất <strong>11:00 27/06/2025</strong><br>
-                    <i class="fas fa-map-marker-alt"></i> Phòng chiếu <strong>P3</strong> - Ghế <span
-                        id="selected-seats">@ViewBag.SelectedSeats</span>
+            <div class="sidebar-sticky">
+                <!-- Movie Info -->
+                <div class="movie-info-card fade-in">
+                    <div class="movie-title">Doraemon Movie 44: Nobita Và Cuộc Phiêu Lưu Vào Thế Giới Trong Tranh
+                    </div>
+                    <div class="cinema-name">Beta Đan Phượng</div>
+                    <div class="showtime">
+                        <i class="fas fa-clock"></i> Suất <strong>11:00 27/06/2025</strong><br>
+                        <i class="fas fa-map-marker-alt"></i> Phòng chiếu <strong>P3</strong> - Ghế <span
+                            id="selected-seats">@ViewBag.SelectedSeats</span>
+                    </div>
                 </div>
-            </div>
 
-            <!-- Total -->
-            <div class="total-card fade-in">
-                <div class="total-section-label">TỔNG ĐƠN HÀNG</div>
-                <div class="total-amount">
-                    <span id="total-amount">@ViewBag.TotalAmount</span> ₫
+                <!-- Total -->
+                <div class="total-card fade-in">
+                    <div class="total-section-label">TỔNG ĐƠN HÀNG</div>
+                    <div class="total-amount">
+                        <span id="total-amount">@ViewBag.TotalAmount</span> ₫
+                    </div>
+                </div>
+
+                <!-- Action Buttons inside sidebar -->
+                <div class="sidebar-action-buttons action-buttons fade-in">
+                    <div class="row g-3">
+                        <div class="col-4">
+                            <a href="@Url.Action("Concession", "Booking")" class="btn btn-custom btn-back w-100">
+                                <i class="fas fa-arrow-left"></i>
+                            </a>
+                        </div>
+                        <div class="col-8">
+                            <a href="javascript:void(0)" class="btn btn-custom btn-continue w-100" id="continue-btn">
+                                <span>Xác nhận</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -215,22 +214,48 @@
     </div>
 </div>
 
+<!-- Mobile action buttons (visible only on mobile) -->
+<div class="action-buttons fade-in d-lg-none">
+    <div class="row g-3">
+        <div class="col-4">
+            <a href="@Url.Action("Concession", "Booking")" class="btn btn-custom btn-back w-100">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+        </div>
+        <div class="col-8">
+            <a href="javascript:void(0)" class="btn btn-custom btn-continue w-100" id="mobile-continue-btn">
+                <span>
+                    <span id="mobile-total-2">@ViewBag.TotalAmount</span>₫ |
+                </span>
+                <span>Xác nhận</span>
+                <i class="fas fa-arrow-right"></i>
+            </a>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
     <script src="~/js/customer/booking/concession-payment.js" asp-append-version="true"></script>
+    <script src="~/js/customer/booking/booking-timer.js" asp-append-version="true"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            // Initialize payment functionality
-            if (typeof initializeConcessionPayment === 'function') {
-                initializeConcessionPayment();
-            }
+            // Add class to body for CSS targeting
+            document.body.classList.add('has-sidebar-actions');
 
             // Load booking data
             loadBookingData();
 
+            // Initialize payment options
+            document.querySelectorAll('.payment-option').forEach(option => {
+                option.addEventListener('click', function () {
+                    selectPaymentMethod(this.dataset.method);
+                });
+            });
+
             // Update summary
             updateSummary();
 
-            // Handle form submission
+            // Handle form submission for both desktop and mobile buttons
             document.getElementById('continue-btn').addEventListener('click', function (e) {
                 e.preventDefault();
                 if (validatePaymentForm()) {
@@ -241,6 +266,17 @@
                     document.getElementById('payment-form').submit();
                 }
             });
+
+            if (document.getElementById('mobile-continue-btn')) {
+                document.getElementById('mobile-continue-btn').addEventListener('click', function (e) {
+                    e.preventDefault();
+                    // Trigger the same validation and submission as the desktop button
+                    if (validatePaymentForm()) {
+                        document.getElementById('combo-data').value = JSON.stringify(combos);
+                        document.getElementById('payment-form').submit();
+                    }
+                });
+            }
         });
 
         function loadBookingData() {
@@ -249,7 +285,12 @@
 
             document.getElementById('selected-seats').textContent = selectedSeatsText;
             document.getElementById('total-amount').textContent = totalAmount;
-            document.getElementById('mobile-total').textContent = totalAmount;
+
+            // Update all mobile total displays
+            const mobileTotalEl = document.getElementById('mobile-total');
+            const mobileTotalEl2 = document.getElementById('mobile-total-2');
+            if (mobileTotalEl) mobileTotalEl.textContent = totalAmount;
+            if (mobileTotalEl2) mobileTotalEl2.textContent = totalAmount;
         }
 
         function validatePaymentForm() {

@@ -142,6 +142,7 @@ public class MappingConfig : Profile
 		// Mapping for ShowTimeSeatStatusDTO
 		CreateMap<ShowTime, ShowTimeSeatStatusDTO>()
 			.ForMember(dest => dest.ShowTimeId, opt => opt.MapFrom(src => src.Id))
+			.ForMember(dest => dest.MovieId, opt => opt.MapFrom(src => src.Movie.Id))
 			.ForMember(dest => dest.MovieTitle, opt => opt.MapFrom(src =>
 				src.Movie != null ? src.Movie.Title : string.Empty))
 			.ForMember(dest => dest.ShowDate, opt => opt.MapFrom(src => src.ShowDate))

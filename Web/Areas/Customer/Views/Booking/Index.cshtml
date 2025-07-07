@@ -1,4 +1,4 @@
-﻿@model Web.Models.ViewModels.SeatBookingViewModel
+﻿@model SeatBookingViewModel
 @{
     ViewData["Title"] = "Book Ticket";
 }
@@ -49,50 +49,51 @@
     </div>
 </div>
 
-<!-- Fixed Action Buttons -->
-<div class="action-buttons fade-in">
-    <div class="row g-3">
-        <div class="col-4">
-            <a href="@Url.Action("Index", "Movie")" class="btn btn-custom btn-back w-100">
-                <i class="fas fa-arrow-left"></i>
-            </a>
-        </div>
-        <div class="col-8">
-            <a class="btn btn-custom btn-continue w-100" id="continue-btn" disabled>
-                <span class="d-md-none">
-                    <span id="mobile-total">0</span>₫ |
-                </span>
-                <span>Tiếp tục</span>
-                <i class="fas fa-arrow-right"></i>
-            </a>
-        </div>
-    </div>
-</div>
-
 <!-- Main Content -->
-<div class="container booking-content">
+<div class="container booking-content has-sidebar-actions">
     <div class="row">
         <!-- Sidebar -->
         <div class="col-lg-4 order-lg-2">
-            <!-- Movie Info -->
-            <div class="movie-info-card fade-in">
-                <div class="movie-title">@Model.MovieTitle</div>
-                <div class="cinema-name">@Model.TheaterName</div>
-                <div class="showtime">
-                    <i class="fas fa-clock"></i> Suất <strong>
-                        @Model.ShowtimeTime.ToString("HH:mm")
-                        @Model.ShowtimeDate.ToString("dd/MM/yyyy")
-                    </strong><br>
-                    <i class="fas fa-map-marker-alt"></i> Phòng chiếu <strong>@Model.ScreenName</strong> - Ghế <span
-                        id="selected-seats">...</span>
+            <div class="sidebar-sticky">
+                <!-- Movie Info -->
+                <div class="movie-info-card fade-in">
+                    <div class="movie-title">@Model.MovieTitle</div>
+                    <div class="cinema-name">@Model.TheaterName</div>
+                    <div class="showtime">
+                        <i class="fas fa-clock"></i> Suất <strong>
+                            @Model.ShowtimeTime.ToString("HH:mm")
+                            @Model.ShowtimeDate.ToString("dd/MM/yyyy")
+                        </strong><br>
+                        <i class="fas fa-map-marker-alt"></i> Phòng chiếu <strong>@Model.ScreenName</strong> - Ghế <span
+                            id="selected-seats">...</span>
+                    </div>
                 </div>
-            </div>
 
-            <!-- Total -->
-            <div class="total-card fade-in">
-                <div class="total-section-label">TỔNG ĐƠN HÀNG</div>
-                <div class="total-amount">
-                    <span id="total-amount">0</span> ₫
+                <!-- Total -->
+                <div class="total-card fade-in">
+                    <div class="total-section-label">TỔNG ĐƠN HÀNG</div>
+                    <div class="total-amount">
+                        <span id="total-amount">0</span> ₫
+                    </div>
+                </div>
+
+                <!-- Action Buttons inside sidebar -->
+                <div class="sidebar-action-buttons action-buttons fade-in">
+                    <div class="row g-3">
+                        <div class="col-4">
+                            <a asp-action="Details" asp-controller="Movie" asp-area="Public" asp-route-id="@Model.MovieId"
+                                class="btn btn-custom btn-back w-100">
+                                <i class="fas fa-arrow-left"></i>
+                            </a>
+                        </div>
+                        <div class="col-8">
+                            <a href="javascript:void(0)" class="btn btn-custom btn-continue w-100" id="continue-btn"
+                                disabled>
+                                <span>Tiếp tục</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -124,17 +125,41 @@
     </div>
 </div>
 
+<!-- Mobile action buttons (visible only on mobile) -->
+<div class="action-buttons fade-in d-lg-none">
+    <div class="row g-3">
+        <div class="col-4">
+            <a asp-action="Details" asp-controller="Movie" asp-area="Public" asp-route-id="@Model.MovieId"
+                class="btn btn-custom btn-back w-100">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+        </div>
+        <div class="col-8">
+            <a href="javascript:void(0)" class="btn btn-custom btn-continue w-100" id="mobile-continue-btn" disabled>
+                <span>
+                    <span id="mobile-total">0</span>₫ |
+                </span>
+                <span>Tiếp tục</span>
+                <i class="fas fa-arrow-right"></i>
+            </a>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
     <script src="~/js/customer/booking/movie-booking.js" asp-append-version="true"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
+            // Add class to body for CSS targeting
+            document.body.classList.add('has-sidebar-actions');
+
             // Initialize seats when the partial view is loaded
             if (typeof initializeSeats === 'function') {
                 initializeSeats();
             }
 
-            // Handle continue button click
-            document.getElementById('continue-btn').addEventListener('click', function (e) {
+            // Handle continue button click for both desktop and mobile
+            const continueAction = function (e) {
                 e.preventDefault();
 
                 if (selectedSeats && selectedSeats.length > 0) {
@@ -195,7 +220,12 @@
                         text: 'Vui lòng chọn ít nhất một ghế để tiếp tục'
                     });
                 }
-            });
+            };
+
+            // Apply click handler to both buttons
+            document.getElementById('continue-btn').addEventListener('click', continueAction);
+            document.getElementById('mobile-continue-btn').addEventListener('click', continueAction);
         });
     </script>
 }
+ 

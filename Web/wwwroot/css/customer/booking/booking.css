@@ -21,12 +21,43 @@
     --shadow-hover: var(--shadow-xl);
 }
 
+/* Sticky sidebar for desktop */
+@media (min-width: 992px) {
+    .sidebar-sticky {
+        position: sticky;
+        top: 30px;
+        z-index: 10;
+    }
+    
+    /* When sidebar has action buttons inside */
+    .sidebar-action-buttons {
+        margin-top: 20px;
+    }
+    
+    /* Hide the fixed action buttons on desktop when we have sidebar buttons */
+    .has-sidebar-actions .action-buttons:not(.sidebar-action-buttons) {
+        display: none !important;
+    }
+    
+    /* Remove bottom padding on desktop when using sidebar actions */
+    body.has-sidebar-actions {
+        padding-bottom: 40px;
+    }
+}
+
 body {
     font-family: 'Inter', sans-serif;
     background: linear-gradient(135deg, var(--bg-darker) 0%, var(--primary-color) 100%);
     color: var(--text-white);
     min-height: 100vh;
     padding-bottom: 120px; /*Space for fixed action buttons*/
+}
+
+/* Remove bottom padding on desktop when using sidebar actions */
+@media (min-width: 992px) {
+    body.has-sidebar-actions {
+        padding-bottom: 40px;
+    }
 }
 
 .container-fluid {
@@ -271,7 +302,7 @@ body {
     vertical-align: middle;
 }
 
-/* Action Buttons */
+/* Action Buttons - Base Styles */
 .action-buttons {
     position: fixed;
     bottom: 20px;
@@ -288,17 +319,45 @@ body {
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
 }
 
-    .action-buttons .row {
-        align-items: stretch; /* Ensure both buttons have the same height */
-        margin: 0; /* Remove default Bootstrap margin */
+/* Sidebar Action Buttons - Override fixed positioning for desktop */
+@media (min-width: 992px) {
+    .sidebar-action-buttons {
+        position: static;
+        transform: none;
+        left: auto;
+        bottom: auto;
+        width: 100%;
+        max-width: none;
+        box-shadow: none;
+        background: transparent;
+        border: none;
+        padding: 0;
+        margin-top: 20px;
     }
+    
+    /* For mobile - full width at bottom */
+    .action-buttons:not(.sidebar-action-buttons) {
+        width: 100%;
+        max-width: 100%;
+        bottom: 0;
+        left: 0;
+        transform: none;
+        border-radius: 0;
+    }
+}
 
-    .action-buttons .col-4,
-    .action-buttons .col-8 {
-        padding: 0 5px; /* Adjust spacing between buttons */
-        display: flex; /* Make columns flex */
-        align-items: stretch; /* Stretch to full height */
-    }
+/* Common action button styles */
+.action-buttons .row {
+    align-items: stretch; /* Ensure both buttons have the same height */
+    margin: 0; /* Remove default Bootstrap margin */
+}
+
+.action-buttons .col-4,
+.action-buttons .col-8 {
+    padding: 0 5px; /* Adjust spacing between buttons */
+    display: flex; /* Make columns flex */
+    align-items: stretch; /* Stretch to full height */
+}
 
 .btn-custom {
     padding: 14px 20px; /* Consistent padding for both buttons */

@@ -64,6 +64,7 @@ namespace Web.Areas.Customer.Controllers
 			var viewModel = new SeatBookingViewModel
 			{
 				ShowtimeId = showTimeId,
+				MovieId = showTimeWithSeatStatus.MovieId,
 				ScreenName = showTimeWithSeatStatus.ScreenName,
 				MovieTitle = showTimeWithSeatStatus.MovieTitle,
 				TheaterName = showTimeWithSeatStatus.TheaterName,

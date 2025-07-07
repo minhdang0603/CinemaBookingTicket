@@ -1,6 +1,22 @@
 /* Payment Styles - extends booking.css */
 @import url('./booking.css');
 
+/* Enhanced sidebar sticky positioning */
+@media (min-width: 992px) {
+    .sidebar-sticky {
+        position: sticky;
+        top: 30px;
+        z-index: 10;
+        margin-bottom: 40px;
+    }
+    
+    /* Sidebar action buttons styling */
+    .sidebar-action-buttons {
+        margin-top: 20px;
+        transition: all 0.3s ease;
+    }
+}
+
 /* Payment Specific Styles */
 .payment-section {
     background: rgba(255, 255, 255, 0.03);
@@ -91,6 +107,38 @@
     display: flex;
     flex-direction: column;
     gap: 15px;
+}
+
+/* Enhanced mobile styles */
+@media (max-width: 991px) {
+    .sidebar-sticky {
+        margin-bottom: 30px;
+    }
+    
+    /* Hide sidebar action buttons on mobile */
+    .sidebar-action-buttons {
+        display: none;
+    }
+    
+    /* Ensure fixed action buttons at bottom on mobile only */
+    .action-buttons {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        background: rgba(10, 25, 47, 0.95);
+        backdrop-filter: blur(10px);
+        padding: 15px;
+        box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.3);
+        z-index: 1000;
+    }
+}
+
+/* Remove bottom space on desktop */
+@media (min-width: 992px) {
+    body.has-sidebar-actions {
+        padding-bottom: 40px;
+    }
 }
 
 .payment-option {

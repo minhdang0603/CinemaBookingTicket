@@ -5,7 +5,8 @@ namespace Web.Models.ViewModels
     public class SeatBookingViewModel
     {
         public int ShowtimeId { get; set; }
-        public string ScreenName { get; set; } = string.Empty;
+        public int MovieId { get; set; }
+		public string ScreenName { get; set; } = string.Empty;
         public string MovieTitle { get; set; } = string.Empty;
         public string TheaterName { get; set; } = string.Empty;
         public DateTime ShowtimeDate { get; set; }
