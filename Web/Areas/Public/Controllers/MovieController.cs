@@ -11,16 +11,18 @@ namespace Web.Areas.Public.Controllers
     public class MovieController : Controller
     {
         private readonly IMovieService _movieService;
+        private readonly IShowtimeService _showtimeService;
         private readonly ILogger<MovieController> _logger;
 
-        public MovieController(IMovieService movieService, ILogger<MovieController> logger)
+        public MovieController(IMovieService movieService, ILogger<MovieController> logger, IShowtimeService showtimeService)
         {
             _movieService = movieService;
             _logger = logger;
+            _showtimeService = showtimeService;
         }
 
         [HttpGet]
-        public async Task<IActionResult> Details(int id)
+        public async Task<IActionResult> Details(int id, DateOnly? date = null, int? provinceId = null)
         {
             if (id <= 0)
             {
@@ -51,8 +53,20 @@ namespace Web.Areas.Public.Controllers
                     return RedirectToAction("Index", "Home");
                 }
 
-                // Lấy showtimes từ API mới
-                var showtimeResponse = await _movieService.GetShowtimesByMovieIdAsync<APIResponse>(id);
+                // Mặc định hiển thị lịch chiếu hôm nay nếu không có filter date
+                var filterDate = date ?? DateOnly.FromDateTime(DateTime.Today);
+
+                // Lấy tất cả showtimes để có thông tin provinces và dates
+                var allShowtimesResponse = await _showtimeService.GetShowTimesByMovieIdAsync<APIResponse>(id);
+                var allShowtimes = new List<ShowTimeLiteDTO>();
+                if (allShowtimesResponse != null && allShowtimesResponse.IsSuccess)
+                {
+                    allShowtimes = JsonConvert.DeserializeObject<List<ShowTimeLiteDTO>>(
+                        Convert.ToString(allShowtimesResponse.Result) ?? string.Empty) ?? new List<ShowTimeLiteDTO>();
+                }
+
+                // Lấy showtimes đã filter
+                var showtimeResponse = await _showtimeService.GetShowTimesByMovieIdAsync<APIResponse>(id, filterDate, provinceId);
                 var showtimes = new List<ShowTimeLiteDTO>();
                 if (showtimeResponse != null && showtimeResponse.IsSuccess)
                 {
@@ -64,7 +78,10 @@ namespace Web.Areas.Public.Controllers
                 var viewModel = new MovieDetailViewModel
                 {
                     Movie = movie,
-                    ShowTimes = showtimes
+                    ShowTimes = showtimes,
+                    AllShowTimes = allShowtimes, // để lấy provinces và dates
+                    SelectedDate = filterDate,
+                    SelectedProvinceId = provinceId
                 };
 
                 return View(viewModel);

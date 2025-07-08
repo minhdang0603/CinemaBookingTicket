@@ -18,7 +18,46 @@ namespace Web.Models.ViewModels
     {
         public MovieDTO Movie { get; set; } = new MovieDTO();
         public List<ShowTimeLiteDTO> ShowTimes { get; set; } = new List<ShowTimeLiteDTO>();
+        public List<ShowTimeLiteDTO> AllShowTimes { get; set; } = new List<ShowTimeLiteDTO>(); // For filter options
+        public DateOnly? SelectedDate { get; set; }
+        public int? SelectedProvinceId { get; set; }
         public bool HasShowtimes => ShowTimes?.Any() == true;
+
+        /// <summary>
+        /// Gets provinces from all showtimes (theaters' provinces)
+        /// </summary>
+        public IEnumerable<ProvinceDTO> AvailableProvinces
+        {
+            get
+            {
+                if (AllShowTimes == null)
+                    return Enumerable.Empty<ProvinceDTO>();
+
+                return AllShowTimes
+                    .Where(st => st.Screen?.Theater?.Province != null)
+                    .Select(st => st.Screen!.Theater!.Province!)
+                    .GroupBy(p => p.Id)
+                    .Select(g => g.First())
+                    .OrderBy(p => p.Name);
+            }
+        }
+
+        /// <summary>
+        /// Gets available dates from all showtimes for date filter
+        /// </summary>
+        public IEnumerable<DateOnly> AvailableDates
+        {
+            get
+            {
+                if (AllShowTimes == null)
+                    return Enumerable.Empty<DateOnly>();
+
+                return AllShowTimes
+                    .Select(st => st.ShowDate)
+                    .Distinct()
+                    .OrderBy(d => d);
+            }
+        }
 
         /// <summary>
         /// Groups showtimes by theater, then by screen

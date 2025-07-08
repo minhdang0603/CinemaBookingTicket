@@ -13,6 +13,7 @@ namespace API.Services.IServices
         Task<List<ShowTimeDTO>> GetAllShowTimesWithPaginationAsync(int pageNumber, int pageSize, bool? isActive = true);
         Task<ShowTimeDTO> GetShowTimeByIdAsync(int id, bool? isActive = true);
         Task<ShowTimeSeatStatusDTO> GetShowTimeSeatStatusAsync(int showTimeId);
+        Task<List<ShowTimeDTO>> GetShowTimesByMovieIdAsync(int movieId, DateOnly? date = null, int? provinceId = null);
     }
 
 }

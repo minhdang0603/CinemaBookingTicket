@@ -133,22 +133,48 @@
                 Lịch chiếu tại rạp gần bạn
             </h3>
 
-            <div class="row mb-4">
-                <div class="col-md-4 mb-3">
-                    <select class="form-select custom-form-select">
-                        <option>Tp. Hồ Chí Minh</option>
-                        <option>Hà Nội</option>
-                        <option>Đà Nẵng</option>
-                    </select>
+            <form method="get" asp-area="Public" asp-controller="Movie" asp-action="Details"
+                asp-route-id="@(Model?.Movie?.Id ?? 0)">
+                <div class="row mb-4">
+                    <div class="col-md-4 mb-3">
+                        <select name="provinceId" class="form-select custom-form-select">
+                            <option value="">Tất cả tỉnh/thành</option>
+                            @if (Model?.AvailableProvinces?.Any() == true)
+                            {
+                                @foreach (var province in Model.AvailableProvinces)
+                                {
+                                    <option value="@province.Id" selected="@(Model.SelectedProvinceId == province.Id)">
+                                        @province.Name
+                                    </option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <select name="date" class="form-select custom-form-select">
+                            @if (Model?.AvailableDates?.Any() == true)
+                            {
+                                @foreach (var date in Model.AvailableDates)
+                                {
+                                    var isToday = date == DateOnly.FromDateTime(DateTime.Today);
+                                    var isTomorrow = date == DateOnly.FromDateTime(DateTime.Today.AddDays(1));
+                                    var displayText = isToday ? "Hôm nay" : (isTomorrow ? "Ngày mai" :
+                                    date.ToString("dd/MM/yyyy"));
+
+                                    <option value="@date.ToString("yyyy-MM-dd")" selected="@(Model.SelectedDate == date)">
+                                        @displayText (@date.ToString("dd/MM"))
+                                    </option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-search"></i> Tìm kiếm
+                        </button>
+                    </div>
                 </div>
-                <div class="col-md-4 mb-3">
-                    <select class="form-select custom-form-select">
-                        <option>Hôm nay</option>
-                        <option>Ngày mai</option>
-                        <option>Cuối tuần</option>
-                    </select>
-                </div>
-            </div>
+            </form>
 
             <!-- Cinema List -->
             <div class="cinema-list">
@@ -180,11 +206,11 @@
                                             @foreach (var showtime in showtimes)
                                             {
                                                 <a asp-area="Customer" asp-controller="Booking" asp-action="Index"
-                                                    asp-route-showtimeId="@showtime.Id"
-                                                    class="mt-2"
+                                                    asp-route-showtimeId="@showtime.Id" class="mt-2"
                                                     title="@showtime.ShowDate.ToString("dd/MM/yyyy") - @showtime.Screen?.Name - @showtime.BasePrice.ToString("C")">
                                                     <div class="showtime-slot">
                                                         <span class="time">@showtime.StartTime.ToString("HH:mm")</span>
+                                                        <small class="date">@showtime.ShowDate.ToString("dd/MM")</small>
                                                     </div>
                                                 </a>
                                             }
@@ -198,7 +224,16 @@
                 else
                 {
                     <div class="text-center">
-                        <p class="text-muted">Lịch chiếu sẽ được cập nhật sớm.</p>
+                        <p class="text-muted">
+                            @if (Model?.SelectedDate != null || Model?.SelectedProvinceId != null)
+                            {
+                                <span>Không tìm thấy lịch chiếu phù hợp với bộ lọc đã chọn.</span>
+                            }
+                            else
+                            {
+                                <span>Lịch chiếu sẽ được cập nhật sớm.</span>
+                            }
+                        </p>
                     </div>
                 }
             </div>

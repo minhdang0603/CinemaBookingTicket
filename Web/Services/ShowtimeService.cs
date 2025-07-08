@@ -86,5 +86,13 @@ namespace Web.Services
                 Token = token
             });
         }
+        public Task<T> GetShowTimesByMovieIdAsync<T>(int movieId, DateOnly? date = null, int? provinceId = null)
+        {
+            return SendAsync<T>(new APIRequest
+            {
+                ApiType = Constant.ApiType.GET,
+                Url = $"{_baseUrl}/api/showtime/movie/{movieId}?date={date}&provinceId={provinceId}"
+            });
+        }
     }
 }

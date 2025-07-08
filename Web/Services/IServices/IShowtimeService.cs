@@ -11,5 +11,6 @@ namespace Web.Services.IServices
         Task<T> UpdateShowTimeAsync<T>(int showTimeId, ShowTimeUpdateDTO updatedShowTime, string? token = null);
         Task<T> DeleteShowTimeAsync<T>(int showTimeId, string? token = null);
         Task<T> GetShowTimeSeatStatusAsync<T>(int showTimeId, string? token = null);
+        Task<T> GetShowTimesByMovieIdAsync<T>(int movieId, DateOnly? date = null, int? provinceId = null);
     }
 }
