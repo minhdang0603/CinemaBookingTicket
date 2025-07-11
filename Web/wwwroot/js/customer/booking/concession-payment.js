@@ -1,5 +1,3 @@
-// Concession and Payment functionality
-
 // Dynamic combos object, populated from DOM
 const combos = {};
 
@@ -27,14 +25,6 @@ function updateComboQuantity(comboId, change) {
     updateSummary();
 }
 
-// Payment Method Selection
-function selectPaymentMethod(method) {
-    document.querySelectorAll('.payment-option').forEach(option => {
-        option.classList.remove('selected');
-    });
-    document.querySelector(`[data-method="${method}"]`).classList.add('selected');
-}
-
 // Update order summary in payment step
 function updateSummary() {
     // Update combo summary
@@ -60,17 +50,17 @@ function updateSummary() {
     const grandTotal = seatTotal + comboTotal;
     
     // Update all total displays - for both sidebar and mobile view
-    const totalAmountEl = document.getElementById('total-amount');
-    const mobileTotalEl = document.getElementById('mobile-total-2');
-    const mobileTotalElAlt = document.getElementById('mobile-total'); // In case there's another mobile total element
+    const formattedTotal = grandTotal.toLocaleString('vi-VN');
     
-    if (totalAmountEl) totalAmountEl.textContent = grandTotal.toLocaleString('vi-VN');
-    if (mobileTotalEl) mobileTotalEl.textContent = grandTotal.toLocaleString('vi-VN');
-    if (mobileTotalElAlt) mobileTotalElAlt.textContent = grandTotal.toLocaleString('vi-VN');
+    // Update all total amount displays
+    document.querySelectorAll('#total-amount').forEach(el => {
+        if (el) el.textContent = formattedTotal;
+    });
     
-    // For payment page
-    const paymentTotalEl = document.getElementById('payment-total');
-    if (paymentTotalEl) paymentTotalEl.textContent = grandTotal.toLocaleString('vi-VN') + ' ₫';
+    // Update all mobile total displays
+    document.querySelectorAll('[id^="mobile-total"]').forEach(el => {
+        if (el) el.textContent = formattedTotal;
+    });
 }
 
 // Calculate total amount - useful for other scripts that need this value
@@ -80,32 +70,10 @@ function calculateTotalAmount() {
     return seatTotal + comboTotal;
 }
 
-// Initialize event listeners for concession and payment
-function initializeConcessionPayment() {
-    // Payment method selection
-    document.querySelectorAll('.payment-option').forEach(option => {
-        option.addEventListener('click', function() {
-            selectPaymentMethod(this.dataset.method);
-        });
-    });
-
-    // Form validation
-    document.querySelectorAll('.form-control').forEach(input => {
-        input.addEventListener('input', function() {
-            this.classList.remove('error');
-        });
-    });
-
-    // Initialize summary
-    updateSummary();
-}
-
 // Export functions for global access
 if (typeof window !== 'undefined') {
     window.updateComboQuantity = updateComboQuantity;
-    window.selectPaymentMethod = selectPaymentMethod;
     window.updateSummary = updateSummary;
     window.calculateTotalAmount = calculateTotalAmount;
-    window.initializeConcessionPayment = initializeConcessionPayment;
     window.combos = combos;
 }

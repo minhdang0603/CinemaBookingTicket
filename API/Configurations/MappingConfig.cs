@@ -185,16 +185,37 @@ public class MappingConfig : Profile
 				true));
 		CreateMap<ConcessionCategoryUpdateDTO, ConcessionCategory>();
 
-		// ====================== CONCESSION Order DETAIL MAPPING =====================
+		// ===================== CONCESSION ORDER MAPPING =====================
+		CreateMap<ConcessionOrder, ConcessionOrderDTO>()
+			.ForMember(dest => dest.ConcessionOrderItems, opt => opt.MapFrom(src =>
+				src.ConcessionOrderDetails));
+
+		CreateMap<ConcessionOrderCreateDTO, ConcessionOrder>()
+			.ForMember(dest => dest.OrderDate, opt => opt.MapFrom(src =>
+				DateTime.Now))
+			.ForMember(dest => dest.TotalAmount, opt => opt.MapFrom(src =>
+				src.ConcessionOrderDetails.Sum(d => d.Quantity * d.UnitPrice)))
+			.ForMember(dest => dest.OrderStatus, opt => opt.MapFrom(src =>
+				Constant.Payment_Status_Pending))
+			.ForMember(dest => dest.IsActive, opt => opt.MapFrom(src =>
+				true))
+			.ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src =>
+				DateTime.Now))
+			.ForMember(dest => dest.LastUpdatedAt, opt => opt.MapFrom(src =>
+				DateTime.Now));
+
+		// ===================== CONCESSION ORDER DETAIL MAPPING =====================
 		CreateMap<ConcessionOrderDetail, ConcessionOrderDetailDTO>()
-			.ForMember(dest => dest.Name, opt => opt.MapFrom(src =>
+			.ForMember(dest => dest.ConcessionName, opt => opt.MapFrom(src =>
 				src.Concession != null ? src.Concession.Name : string.Empty))
-			.ForMember(dest => dest.Description, opt => opt.MapFrom(src =>
-				src.Concession != null ? src.Concession.Description : string.Empty))
-			.ForMember(dest => dest.UnitPrice, opt => opt.MapFrom(src =>
-				src.Concession != null ? src.Concession.Price : 0))
-			.ForMember(dest => dest.ImageUrl, opt => opt.MapFrom(src =>
-				src.Concession != null ? src.Concession.ImageUrl : string.Empty));
+			.ForMember(dest => dest.TotalPrice, opt => opt.MapFrom(src =>
+				src.UnitPrice * src.Quantity));
+
+		CreateMap<ConcessionOrderDetailItemDTO, ConcessionOrderDetail>()
+			.ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src =>
+				DateTime.Now))
+			.ForMember(dest => dest.LastUpdatedAt, opt => opt.MapFrom(src =>
+				DateTime.Now));
 		// ====================== CONCESSION MAPPING =====================
 		CreateMap<Concession, ConcessionDTO>()
 			.ForMember(dest => dest.Category, opt => opt.MapFrom(src =>
@@ -214,5 +235,7 @@ public class MappingConfig : Profile
 			.ForMember(dest => dest.IsActive, opt => opt.MapFrom(src => true));
 		CreateMap<ProvinceUpdateDTO, Province>();
 		CreateMap<Province, ProvinceDetailDTO>();
+
+		CreateMap<Payment, PaymentDTO>();
 	}
 }

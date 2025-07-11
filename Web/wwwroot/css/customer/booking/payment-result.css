@@ -1,0 +1,73 @@
+.payment-success {
+    color: #28a745;
+    border: 1px solid #d4edda;
+    background-color: #f8fff9;
+}
+
+.payment-failed {
+    color: #dc3545;
+    border: 1px solid #f8d7da;
+    background-color: #fff8f8;
+}
+
+.payment-status-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+
+.payment-status-message {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.payment-status-container {
+    padding: 2rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.btn-try-again {
+    background-color: #dc3545;
+    color: white;
+}
+
+.btn-try-again:hover {
+    background-color: #c82333;
+    color: white;
+}
+
+.ticket-info-section {
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+}
+
+.fade-in {
+    animation: fadeIn 0.8s ease-in forwards;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.detail-row {
+    transition: transform 0.2s ease-in-out;
+    padding: 8px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.detail-row:last-child {
+    border-bottom: none;
+}
+
+.detail-row:hover {
+    transform: translateX(5px);
+}
+
+.total-row {
+    font-weight: bold;
+    margin-top: 10px;
+    border-top: 2px solid #eee;
+    padding-top: 15px;
+}

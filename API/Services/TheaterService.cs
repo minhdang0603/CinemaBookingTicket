@@ -73,7 +73,7 @@ namespace API.Services
             var theater = await _unitOfWork.Theater.GetAsync(t => t.Id == id && t.IsActive == isActive, includeProperties: "Province,Screens");
 
             if (theater == null)
-                throw new AppException(ErrorCodes.TheaterNotFound(id));
+                throw new AppException(ErrorCodes.EntityNotFound("Theater", id));
 
             return _mapper.Map<TheaterDetailDTO>(theater);
         }

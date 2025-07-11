@@ -71,7 +71,7 @@ public class MovieService : IMovieService
         if (movie == null)
         {
             _logger.LogError($"Movie with ID {id} not found");
-            throw new AppException(ErrorCodes.MovieNotFound(id));
+            throw new AppException(ErrorCodes.EntityNotFound("Movie", id));
         }
         // Xóa bỏ các showtimes liên quan đến movie
         var showTimes = await _unitOfWork.ShowTime.GetAllAsync(st => st.MovieId == id);
@@ -119,7 +119,7 @@ public class MovieService : IMovieService
         if (movie == null)
         {
             _logger.LogError($"Movie with ID {id} not found");
-            throw new AppException(ErrorCodes.MovieNotFound(id));
+            throw new AppException(ErrorCodes.EntityNotFound("Movie", id));
         }
         return _mapper.Map<MovieDTO>(movie);
     }
@@ -149,7 +149,7 @@ public class MovieService : IMovieService
         if (movie == null)
         {
             _logger.LogError($"Movie with ID {id} not found");
-            throw new AppException(ErrorCodes.MovieNotFound(id));
+            throw new AppException(ErrorCodes.EntityNotFound("Movie", id));
         }
 
         // Map các trường thông thường
@@ -247,11 +247,11 @@ public class MovieService : IMovieService
         //    includeProperties: "Screen.Theater.Province"
         //);
 
-		var showTimes = await _unitOfWork.ShowTime.GetAllAsync(
-			st => st.MovieId == movieId && st.IsActive == true,
-			includeProperties: "Screen.Theater.Province"
-		);
+        var showTimes = await _unitOfWork.ShowTime.GetAllAsync(
+            st => st.MovieId == movieId && st.IsActive == true,
+            includeProperties: "Screen.Theater.Province"
+        );
 
-		return _mapper.Map<List<ShowTimeLiteDTO>>(showTimes);
+        return _mapper.Map<List<ShowTimeLiteDTO>>(showTimes);
     }
 }

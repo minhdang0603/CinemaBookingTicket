@@ -43,11 +43,11 @@ public class PaymentController : ControllerBase
                 .Build());
         }
 
-        _logger.LogInformation("Creating VNPay payment URL for booking ID: {BookingId}, Amount: {Amount}", 
+        _logger.LogInformation("Creating VNPay payment URL for booking ID: {BookingId}, Amount: {Amount}",
             request.BookingId, request.Amount);
 
         var paymentUrl = await _paymentService.CreateVNPayPaymentUrl(request);
-        
+
         return Ok(APIResponse<string>.Builder()
                 .WithStatusCode(HttpStatusCode.OK)
                 .WithSuccess(true)
@@ -57,40 +57,27 @@ public class PaymentController : ControllerBase
 
     [HttpGet("vnpay-check")]
     [AllowAnonymous]
-    public async Task<ActionResult<APIResponse<VNPayResponseDTO>>> VNPayCheck([FromQuery] IQueryCollection queryParams)
+    public async Task<ActionResult<APIResponse<VNPayResponseDTO>>> VNPayCheck([FromQuery] VNPayCallbackDTO callbackData)
     {
-        _logger.LogInformation("Processing VNPay return with parameters: {@Params}",
-            queryParams.ToDictionary(x => x.Key, x => x.Value.ToString()));
-        
+        _logger.LogInformation("Processing VNPay return with parameters: {@Params}", callbackData);
+
+        // Chuyển đổi từ DTO sang Dictionary để tương thích với code hiện tại
+        var queryParams = callbackData.ToDictionary();
+
+        _logger.LogInformation("Processing VNPay callback: TxnRef={TxnRef}, ResponseCode={ResponseCode}",
+            callbackData.vnp_TxnRef, callbackData.vnp_ResponseCode);
+
         var response = await _paymentService.ProcessVNPayReturnAsync(queryParams);
 
-        _logger.LogInformation("VNPay payment processed: Success={Success}, OrderId={OrderId}, TransactionId={TransactionId}", 
+        _logger.LogInformation("VNPay payment processed: Success={Success}, OrderId={OrderId}, TransactionId={TransactionId}",
             response.Success, response.OrderId, response.TransactionId);
-        
+
         return Ok(APIResponse<VNPayResponseDTO>.Builder()
             .WithStatusCode(HttpStatusCode.OK)
             .WithSuccess(response.Success)
             .WithResult(response)
-            .WithErrorMessages(response.Success ? null : new List<string> { response.Message })
+            .WithErrorMessages(response.Success ? new List<string>() : new List<string> { response.Message })
             .Build());
-    }
-
-    [HttpPost("vnpay-ipn")]
-    [AllowAnonymous]
-    public async Task<ActionResult<APIResponse<VNPayIPNResponseDTO>>> VNPayIPN([FromQuery] IQueryCollection queryParams)
-    {
-        _logger.LogInformation("Received VNPay IPN callback with parameters: {@Params}",
-            queryParams.ToDictionary(x => x.Key, x => x.Value.ToString()));
-            
-        var response = await _paymentService.ProcessVNPayIPNAsync(queryParams);
-        
-        _logger.LogInformation("VNPay IPN processed: RspCode={RspCode}, Message={Message}", 
-            response.RspCode, response.Message);
-            
-        return Ok(APIResponse<VNPayIPNResponseDTO>.Builder()
-                    .WithResult(response)
-                    .WithSuccess(true)
-                    .Build());
     }
 
     [HttpGet("by-booking/{bookingId}")]
@@ -98,9 +85,9 @@ public class PaymentController : ControllerBase
     public async Task<ActionResult<APIResponse<PaymentDTO>>> GetPaymentByBookingId(int bookingId)
     {
         _logger.LogInformation("Getting payment for booking ID: {BookingId}", bookingId);
-        
+
         var payment = await _paymentService.GetPaymentsByBookingIdAsync(bookingId);
-        
+
         return Ok(APIResponse<PaymentDTO>.Builder()
             .WithStatusCode(HttpStatusCode.OK)
             .WithResult(payment)
@@ -113,7 +100,7 @@ public class PaymentController : ControllerBase
     public async Task<ActionResult<APIResponse<PaymentDTO>>> GetPaymentStatus(string paymentId)
     {
         _logger.LogInformation("Getting payment status for payment ID: {PaymentId}", paymentId);
-        
+
         if (!int.TryParse(paymentId, out int id))
         {
             return BadRequest(APIResponse<object>.Builder()
@@ -121,13 +108,13 @@ public class PaymentController : ControllerBase
                 .WithErrorMessages(new List<string> { "Invalid payment ID format" })
                 .Build());
         }
-        
+
         // Để frontend có thể kiểm tra trạng thái thanh toán, ta có thể triển khai phương thức
         // GetPaymentByIdAsync trong IPaymentService. Hiện tại sử dụng phương pháp khác để mô phỏng.
-        
+
         // Truy vấn trực tiếp payment qua unit of work
-        var payment = await _paymentService.UpdatePaymentStatusAsync(id, null);
-        
+        var payment = await _paymentService.UpdatePaymentStatusAsync(id, string.Empty);
+
         return Ok(APIResponse<PaymentDTO>.Builder()
             .WithStatusCode(HttpStatusCode.OK)
             .WithResult(payment)

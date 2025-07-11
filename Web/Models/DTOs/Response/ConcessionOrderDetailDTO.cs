@@ -3,9 +3,9 @@ namespace Web.Models.DTOs.Response;
 public class ConcessionOrderDetailDTO
 {
     public int Id { get; set; }
-    public string Name { get; set; }
-    public string Description { get; set; }
-    public decimal UnitPrice { get; set; }
-    public string ImageUrl { get; set; }
+    public int ConcessionId { get; set; }
+    public string ConcessionName { get; set; } = string.Empty;
     public int Quantity { get; set; }
+    public decimal UnitPrice { get; set; }
+    public decimal TotalPrice { get; set; }
 }

@@ -51,7 +51,7 @@ namespace API.Services
             if (genre == null)
             {
                 _logger.LogError($"Genre with ID {id} not found");
-                throw new AppException(ErrorCodes.MovieNotFound(id));
+                throw new AppException(ErrorCodes.EntityNotFound("Genre", id));
             }
             genre.IsActive = false;
             genre.LastUpdatedAt = DateTime.Now;
@@ -95,7 +95,7 @@ namespace API.Services
             if (genre == null)
             {
                 _logger.LogError($"Genre with ID {id} not found");
-                throw new AppException(ErrorCodes.GenreNotFound(id));
+                throw new AppException(ErrorCodes.EntityNotFound("Genre", id));
             }
             return _mapper.Map<GenreDTO>(genre);
         }
@@ -113,7 +113,7 @@ namespace API.Services
             if (genre == null)
             {
                 _logger.LogError($"Genre with ID {id} not found");
-                throw new AppException(ErrorCodes.GenreNotFound(id));
+                throw new AppException(ErrorCodes.EntityNotFound("Genre", id));
             }
             genre = _mapper.Map(genreUpdateDTO, genre);
             await _unitOfWork.Genre.UpdateAsync(genre);

@@ -95,7 +95,7 @@ namespace API.Services
             var screen = await _unitOfWork.Screen.GetAsync(s => s.Id == id && s.IsActive == isActive, includeProperties: "Seats,Theater");
 
             if (screen == null)
-                throw new AppException(ErrorCodes.ScreenNotFound(id));
+                throw new AppException(ErrorCodes.EntityNotFound("Screen", id));
 
             return _mapper.Map<ScreenDetailDTO>(screen);
         }

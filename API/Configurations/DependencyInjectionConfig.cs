@@ -26,6 +26,7 @@ namespace API.Configurations
             services.AddScoped<IShowTimeService, ShowTimeService>();
             services.AddScoped<IConcessionCategoryService, ConcessionCategoryService>();
             services.AddScoped<IConcessionService, ConcessionService>();
+            services.AddScoped<IConcessionOrderService, ConcessionOrderService>();
 
             // Register background service for booking cleanup
             services.AddHostedService<BookingCleanupService>();

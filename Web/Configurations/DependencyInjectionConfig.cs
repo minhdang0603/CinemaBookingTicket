@@ -19,6 +19,7 @@ namespace Web.Configurations
             services.AddScoped<IProvinceService, ProvinceService>();
             services.AddScoped<IBookingService, BookingService>();
             services.AddScoped<IPaymentService, PaymentService>();
-		}
+            services.AddScoped<IConcessionOrderService, ConcessionOrderService>();
+        }
     }
 }

@@ -27,7 +27,7 @@ public class UserService : IUserService
 
     public async Task DeleteUserAsync(string userId)
     {
-        var user = await _userManager.FindByIdAsync(userId) ?? throw new AppException(ErrorCodes.UserNotFound(userId));
+        var user = await _userManager.FindByIdAsync(userId) ?? throw new AppException(ErrorCodes.EntityNotFound("User", userId));
 
         var result = await _userManager.DeleteAsync(user);
         if (!result.Succeeded)
@@ -53,7 +53,7 @@ public class UserService : IUserService
                       ?? throw new AppException(ErrorCodes.UnauthorizedAccess());
 
         var user = await _userManager.Users.FirstOrDefaultAsync(u => u.Id == userId)
-                            ?? throw new AppException(ErrorCodes.UserNotFound(userId));
+                            ?? throw new AppException(ErrorCodes.EntityNotFound("User", userId));
 
         return _mapper.Map<UserDTO>(user);
     }
@@ -61,14 +61,14 @@ public class UserService : IUserService
     public async Task<UserDTO> GetUserDetailsAsync(string userId)
     {
         var user = await _userManager.Users.FirstOrDefaultAsync(u => u.Id == userId)
-                            ?? throw new AppException(ErrorCodes.UserNotFound(userId));
+                            ?? throw new AppException(ErrorCodes.EntityNotFound("User", userId));
         return _mapper.Map<UserDTO>(user);
     }
 
     public async Task<UserDTO> UpdateUserDetailsAsync(UserUpdateDTO updateUserRequest)
     {
         var user = await _userManager.Users.FirstOrDefaultAsync(u => u.Id == updateUserRequest.UserId)
-                            ?? throw new AppException(ErrorCodes.UserNotFound(updateUserRequest.UserId));
+                            ?? throw new AppException(ErrorCodes.EntityNotFound("User", updateUserRequest.UserId));
 
         _mapper.Map(updateUserRequest, user);
         var result = await _userManager.UpdateAsync(user);

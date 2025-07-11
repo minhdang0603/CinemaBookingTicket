@@ -39,7 +39,7 @@ public class ConcessionService : IConcessionService
         if (concession == null)
         {
             _logger.LogError($"Concession with ID {id} not found");
-            throw new AppException(ErrorCodes.ConcessionNotFound(id));
+            throw new AppException(ErrorCodes.EntityNotFound("Concession", id));
         }
         return _mapper.Map<ConcessionDTO>(concession);
     }
@@ -77,7 +77,7 @@ public class ConcessionService : IConcessionService
         if (concession == null)
         {
             _logger.LogError($"Concession with ID {id} not found");
-            throw new AppException(ErrorCodes.ConcessionNotFound(id));
+            throw new AppException(ErrorCodes.EntityNotFound("Concession", id));
         }
 
         _mapper.Map(concessionUpdateDTO, concession);
@@ -94,7 +94,7 @@ public class ConcessionService : IConcessionService
         if (concession == null)
         {
             _logger.LogError($"Concession with ID {id} not found");
-            throw new AppException(ErrorCodes.ConcessionNotFound(id));
+            throw new AppException(ErrorCodes.EntityNotFound("Concession", id));
         }
 
         concession.IsActive = false;

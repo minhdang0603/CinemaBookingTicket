@@ -30,13 +30,13 @@ namespace API.Services
 			if (movie == null)
 			{
 				_logger.LogError($"Movie with ID {dto.MovieId} does not exist.");
-				throw new AppException(ErrorCodes.MovieNotFound(dto.MovieId));
+				throw new AppException(ErrorCodes.EntityNotFound("Movie", dto.MovieId));
 			}
 
 			if (screen == null)
 			{
 				_logger.LogError($"Screen with ID {dto.ScreenId} does not exist.");
-				throw new AppException(ErrorCodes.ScreenNotFound(dto.ScreenId));
+				throw new AppException(ErrorCodes.EntityNotFound("Screen", dto.ScreenId));
 			}
 
 			// Tính end time dựa trên movie duration và start time
@@ -178,7 +178,7 @@ namespace API.Services
 			if (showTime == null)
 			{
 				_logger.LogError($"ShowTime with ID {id} not found.");
-				throw new AppException(ErrorCodes.ShowTimeNotFound(id));
+				throw new AppException(ErrorCodes.EntityNotFound("ShowTime", id));
 			}
 
 			showTime.IsActive = false;
@@ -236,7 +236,7 @@ namespace API.Services
 			if (showTime == null)
 			{
 				_logger.LogError($"ShowTime with ID {id} not found.");
-				throw new AppException(ErrorCodes.ShowTimeNotFound(id));
+				throw new AppException(ErrorCodes.EntityNotFound("ShowTime", id));
 			}
 			return _mapper.Map<ShowTimeDTO>(showTime);
 		}
@@ -255,13 +255,13 @@ namespace API.Services
 			if (movie == null)
 			{
 				_logger.LogError($"Movie with ID {dto.MovieId} does not exist.");
-				throw new AppException(ErrorCodes.MovieNotFound(dto.MovieId));
+				throw new AppException(ErrorCodes.EntityNotFound("Movie", dto.MovieId));
 			}
 
 			if (screen == null)
 			{
 				_logger.LogError($"Screen with ID {dto.ScreenId} does not exist.");
-				throw new AppException(ErrorCodes.ScreenNotFound(dto.ScreenId));
+				throw new AppException(ErrorCodes.EntityNotFound("Screen", dto.ScreenId));
 			}
 
 			// Tính end time dựa trên movie duration và start time
@@ -303,7 +303,7 @@ namespace API.Services
 			if (showTime == null)
 			{
 				_logger.LogError($"ShowTime with ID {id} not found.");
-				throw new AppException(ErrorCodes.ShowTimeNotFound(id));
+				throw new AppException(ErrorCodes.EntityNotFound("ShowTime", id));
 			}
 
 			showTime = _mapper.Map(dto, showTime);
@@ -327,7 +327,7 @@ namespace API.Services
 			if (showtime == null)
 			{
 				_logger.LogError($"ShowTime with ID {showTimeId} not found or inactive");
-				throw new AppException(ErrorCodes.ShowTimeNotFound(showTimeId));
+				throw new AppException(ErrorCodes.EntityNotFound("ShowTime", showTimeId));
 			}
 
 			// Lấy tất cả booking details cho showtime này (ghế đã được đặt)

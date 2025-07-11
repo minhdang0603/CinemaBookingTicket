@@ -20,9 +20,9 @@ namespace Web.Services
         }
 
         // POST /api/payment/create-vnpay-payment (Authorize)
-        public Task<string> CreateVNPayPaymentAsync(VNPayRequestDTO request, string token)
+        public Task<T> CreateVNPayPaymentAsync<T>(VNPayRequestDTO request, string token)
         {
-            return SendAsync<string>(new APIRequest
+            return SendAsync<T>(new APIRequest
             {
                 ApiType = Constant.ApiType.POST,
                 Url = $"{_baseUrl}/api/payment/create-vnpay-payment",
@@ -32,9 +32,9 @@ namespace Web.Services
         }
 
         // GET /api/payment/vnpay-check (AllowAnonymous)
-        public Task<VNPayResponseDTO> VNPayCheckAsync(string queryString)
+        public Task<T> VNPayCheckAsync<T>(string queryString)
         {
-            return SendAsync<VNPayResponseDTO>(new APIRequest
+			return SendAsync<T>(new APIRequest
             {
                 ApiType = Constant.ApiType.GET,
                 Url = $"{_baseUrl}/api/payment/vnpay-check{queryString}",
@@ -42,9 +42,9 @@ namespace Web.Services
         }
 
         // GET /api/payment/by-booking/{bookingId} (Authorize)
-        public Task<PaymentDTO> GetPaymentByBookingIdAsync(int bookingId, string token)
+        public Task<T> GetPaymentByBookingIdAsync<T>(int bookingId, string token)
         {
-            return SendAsync<PaymentDTO>(new APIRequest
+            return SendAsync<T>(new APIRequest
             {
                 ApiType = Constant.ApiType.GET,
                 Url = $"{_baseUrl}/api/payment/by-booking/{bookingId}",
@@ -53,9 +53,9 @@ namespace Web.Services
         }
 
         // GET /api/payment/payment-status/{paymentId} (AllowAnonymous)
-        public Task<PaymentDTO> GetPaymentStatusAsync(string paymentId)
+        public Task<T> GetPaymentStatusAsync<T>(string paymentId)
         {
-            return SendAsync<PaymentDTO>(new APIRequest
+            return SendAsync<T>(new APIRequest
             {
                 ApiType = Constant.ApiType.GET,
                 Url = $"{_baseUrl}/api/payment/payment-status/{paymentId}"

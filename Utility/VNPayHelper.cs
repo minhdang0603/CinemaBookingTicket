@@ -6,7 +6,7 @@ namespace Utility
 {
     public static class VNPayHelper
     {
-        public static string CreatePaymentUrl(decimal amount, string orderInfo, string ipAddress, string returnUrl, string tmnCode, string hashSecret, string baseUrl, string ipnUrl = null, string txnRef = null)
+        public static string CreatePaymentUrl(decimal amount, string orderInfo, string ipAddress, string returnUrl, string tmnCode, string hashSecret, string baseUrl, string txnRef = null)
         {
             var vnpParams = new SortedList<string, string>
             {
@@ -24,12 +24,6 @@ namespace Utility
                 { "vnp_TxnRef", string.IsNullOrEmpty(txnRef) ? DateTime.Now.Ticks.ToString() : txnRef},
                 { "vnp_ExpireDate", DateTime.Now.AddMinutes(15).ToString("yyyyMMddHHmmss") }
             };
-
-            // Thêm IPN URL nếu có
-            if (!string.IsNullOrEmpty(ipnUrl))
-            {
-                vnpParams.Add("vnp_IpnUrl", ipnUrl);
-            }
 
             // Generate Secure Hash
             var queryString = string.Join("&", vnpParams.Select(kvp => $"{WebUtility.UrlEncode(kvp.Key)}={WebUtility.UrlEncode(kvp.Value)}"));
@@ -57,35 +51,35 @@ namespace Utility
             return hash.ToString();
         }
 
-
-        public static string ComputeHmacSha512(string key, string data)
-        {
-            using (var hmac = new HMACSHA512(Encoding.UTF8.GetBytes(key)))
-            {
-                var hashBytes = hmac.ComputeHash(Encoding.UTF8.GetBytes(data));
-                return BitConverter.ToString(hashBytes).Replace("-", "").ToUpper();
-            }
-        }
-
-        public static string ComputeSha512Hash(string input)
-        {
-            using (var sha512 = SHA512.Create())
-            {
-                byte[] bytes = sha512.ComputeHash(Encoding.UTF8.GetBytes(input));
-                return BitConverter.ToString(bytes).Replace("-", "").ToLower();
-            }
-        }
-
         public static bool ValidateResponse(SortedList<string, string> responseData, string hashSecret)
         {
+            if (!responseData.ContainsKey("vnp_SecureHash"))
+            {
+                return false; // Không có chữ ký bảo mật, xác thực thất bại
+            }
+
+            // Lấy chữ ký từ dữ liệu phản hồi
             string secureHash = responseData["vnp_SecureHash"];
-            responseData.Remove("vnp_SecureHash");
 
-            var queryString = string.Join("&", responseData.Select(kvp => $"{kvp.Key}={Uri.EscapeDataString(kvp.Value)}"));
-            var signData = $"{hashSecret}{queryString}";
-            var checkSum = ComputeSha512Hash(signData);
+            // Tạo bản sao của responseData để tránh thay đổi dữ liệu gốc
+            var validationData = new SortedList<string, string>(responseData);
+            validationData.Remove("vnp_SecureHash");
 
-            return checkSum.Equals(secureHash, StringComparison.InvariantCultureIgnoreCase);
+            // Loại bỏ vnp_SecureHashType nếu có
+            if (validationData.ContainsKey("vnp_SecureHashType"))
+            {
+                validationData.Remove("vnp_SecureHashType");
+            }
+
+            // Tạo chuỗi query string để tính toán chữ ký
+            // Sử dụng WebUtility.UrlEncode để phù hợp với cách mã hóa của VNPay
+            var queryString = string.Join("&", validationData.Select(kvp => $"{WebUtility.UrlEncode(kvp.Key)}={WebUtility.UrlEncode(kvp.Value)}"));
+
+            // Tính toán chữ ký bằng phương thức HmacSha512 - giống với phương thức tạo URL thanh toán
+            var checkSum = HmacSha512(hashSecret, queryString);
+
+            // So sánh chữ ký đã tính với chữ ký nhận được
+            return checkSum.Equals(secureHash, StringComparison.OrdinalIgnoreCase);
         }
     }
 }

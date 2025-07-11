@@ -9,11 +9,13 @@
     <link rel="stylesheet" href="~/css/customer/booking/booking-timer.css" asp-append-version="true" />
 }
 
+@Html.AntiForgeryToken()
+
 <!-- Step Indicator -->
 <div class="step-indicator">
     <div class="container">
         <div class="row">
-            <div class="col-3">
+            <div class="col-4">
                 <div class="step-item completed" data-step="1">
                     <div class="step-icon">
                         <i class="fas fa-th"></i>
@@ -21,7 +23,7 @@
                     <span>Chọn ghế</span>
                 </div>
             </div>
-            <div class="col-3">
+            <div class="col-4">
                 <div class="step-item active" data-step="2">
                     <div class="step-icon">
                         <i class="fas fa-shopping-bag"></i>
@@ -29,20 +31,12 @@
                     <span>Bắp nước</span>
                 </div>
             </div>
-            <div class="col-3">
+            <div class="col-4">
                 <div class="step-item" data-step="3">
                     <div class="step-icon">
                         <i class="fas fa-credit-card"></i>
                     </div>
                     <span>Thanh toán</span>
-                </div>
-            </div>
-            <div class="col-3">
-                <div class="step-item" data-step="4">
-                    <div class="step-icon">
-                        <i class="fas fa-inbox"></i>
-                    </div>
-                    <span>Thông tin vé</span>
                 </div>
             </div>
         </div>
@@ -145,10 +139,9 @@
             </a>
         </div>
         <div class="col-8">
-            <a href="@Url.Action("Payment", "Booking")" class="btn btn-custom btn-continue w-100"
-                id="mobile-continue-btn">
+            <a href="javascript:void(0)" class="btn btn-custom btn-continue w-100" id="mobile-continue-btn">
                 <span>
-                    <span id="mobile-total-2">@Model.TotalAmount.ToString("N0")</span>₫ |
+                    <span id="mobile-total">@Model.TotalAmount.ToString("N0")</span>₫ |
                 </span>
                 <span>Tiếp tục</span>
                 <i class="fas fa-arrow-right"></i>
@@ -158,6 +151,7 @@
 </div>
 
 <span id="seat-base-amount" data-amount="@Model.TotalAmount" style="display:none"></span>
+<span id="booking-id" data-id="@Model.BookingId" style="display:none"></span>
 
 @section Scripts {
     <script src="~/js/customer/booking/concession-payment.js" asp-append-version="true"></script>
@@ -167,22 +161,83 @@
             // Add class to body for CSS targeting
             document.body.classList.add('has-sidebar-actions');
 
-            // Initialize concession functionality
-            if (typeof initializeConcessionPayment === 'function') {
-                initializeConcessionPayment();
-            }
+            // Handle continue button click for both desktop and mobile
+            const continueAction = function (e) {
+                e.preventDefault();
 
-            // Sync continue buttons if needed
-            document.getElementById('continue-btn').addEventListener('click', function (e) {
-                // Event will be handled by the link's href
-            });
-
-            if (document.getElementById('mobile-continue-btn')) {
-                document.getElementById('mobile-continue-btn').addEventListener('click', function (e) {
-                    // Sync with desktop continue button
-                    window.location.href = document.getElementById('continue-btn').getAttribute('href');
+                // Hiển thị loading spinner
+                Swal.fire({
+                    title: 'Đang xử lý...',
+                    text: 'Vui lòng đợi trong giây lát',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
                 });
-            }
+
+                // Lấy bookingId từ hidden span
+                const bookingId = document.getElementById('booking-id').dataset.id;
+
+                // Chuẩn bị dữ liệu ConcessionOrderCreateDTO
+                const concessionOrderDetails = [];
+
+                // Lặp qua tất cả các combo đã chọn (có số lượng > 0)
+                for (const [comboId, comboData] of Object.entries(combos)) {
+                    if (comboData.quantity > 0) {
+                        concessionOrderDetails.push({
+                            concessionId: parseInt(comboId),
+                            quantity: comboData.quantity,
+                            unitPrice: comboData.price
+                        });
+                    }
+                }
+
+                // Nếu không có combo nào được chọn, chuyển thẳng đến trang thanh toán
+                if (concessionOrderDetails.length === 0) {
+                    window.location.href = '@Url.Action("Payment", "Booking")';
+                    return;
+                }
+
+                const concessionOrderData = {
+                    bookingId: parseInt(bookingId),
+                    concessionOrderDetails: concessionOrderDetails
+                };
+
+                // Gọi API để tạo concession order trong database
+                fetch('@Url.Action("CreateConcessionOrder", "Booking")', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+                    },
+                    body: JSON.stringify(concessionOrderData)
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            window.location.href = data.redirect || '@Url.Action("Payment", "Booking")';
+                        } else {
+                            // Hiển thị lỗi nếu có
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Lỗi',
+                                text: data.message || 'Đã xảy ra lỗi khi đặt bắp nước. Vui lòng thử lại.'
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Lỗi',
+                            text: 'Đã xảy ra lỗi khi đặt bắp nước. Vui lòng thử lại.'
+                        });
+                    });
+            };
+
+            // Apply click handler to both buttons
+            document.getElementById('continue-btn').addEventListener('click', continueAction);
+            document.getElementById('mobile-continue-btn').addEventListener('click', continueAction);
         });
 
         function updateUI() {
@@ -193,4 +248,3 @@
         }
     </script>
 }
-  

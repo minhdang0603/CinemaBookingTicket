@@ -1,50 +1,11 @@
 @{
-    ViewData["Title"] = "Confirmation - Book Ticket";
+    ViewData["Title"] = "Kết quả thanh toán";
 }
 
 @section Styles {
     <link rel="stylesheet" href="~/css/customer/booking/confirmation.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/customer/booking/payment-result.css" asp-append-version="true" />
 }
-
-<!-- Step Indicator -->
-<div class="step-indicator">
-    <div class="container">
-        <div class="row">
-            <div class="col-3">
-                <div class="step-item completed" data-step="1">
-                    <div class="step-icon">
-                        <i class="fas fa-th"></i>   
-                    </div>
-                    <span>Chọn ghế</span>
-                </div>
-            </div>
-            <div class="col-3">
-                <div class="step-item completed" data-step="2">
-                    <div class="step-icon">
-                        <i class="fas fa-shopping-bag"></i>
-                    </div>
-                    <span>Bắp nước</span>
-                </div>
-            </div>
-            <div class="col-3">
-                <div class="step-item completed" data-step="3">
-                    <div class="step-icon">
-                        <i class="fas fa-credit-card"></i>
-                    </div>
-                    <span>Thanh toán</span>
-                </div>
-            </div>
-            <div class="col-3">
-                <div class="step-item active" data-step="4">
-                    <div class="step-icon">
-                        <i class="fas fa-inbox"></i>
-                    </div>
-                    <span>Thông tin vé</span>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
 
 <!-- Main Content -->
 <div class="container booking-content">
@@ -52,130 +13,140 @@
         <div class="col-lg-10">
             <div class="ticket-info-section fade-in">
                 <h3 class="section-title mb-4">
-                    <i class="fas fa-ticket-alt me-2"></i>
-                    Thông tin vé của bạn
+                    <i class="fas fa-receipt me-2"></i>
+                    Kết quả thanh toán
                 </h3>
 
                 <div class="confirmation-modal">
                     <div class="modal-header">
-                        <h4>Xác nhận đặt vé thành công!</h4>
+                        <h4>@(ViewBag.PaymentStatus == "success" ? "Thanh toán thành công!" : "Thanh toán thất bại!")
+                        </h4>
                         <a href="@Url.Action("Index", "Home")" class="close-btn">
                             <i class="fas fa-times"></i>
                         </a>
                     </div>
                     <div class="modal-body">
-                        <div class="ticket-details">
-                            <div class="detail-row">
-                                <span class="label">Phim:</span>
-                                <span class="value">Doraemon Movie 44: Nobita Và Cuộc Phiêu Lưu Vào Thế Giới Trong Tranh</span>
+                        @if (ViewBag.PaymentStatus == "success")
+                        {
+                            <div class="payment-status-container payment-success">
+                                <div class="payment-status-icon">
+                                    <i class="fas fa-check-circle"></i>
+                                </div>
+                                <div class="payment-status-message">
+                                    Thanh toán đã được xử lý thành công!
+                                </div>
+                                <p>Vé của bạn đã được đặt thành công. Thông tin vé sẽ được gửi đến email của bạn.</p>
                             </div>
-                            <div class="detail-row">
-                                <span class="label">Rạp:</span>
-                                <span class="value">Beta Đan Phượng</span>
-                            </div>
-                            <div class="detail-row">
-                                <span class="label">Phòng chiếu:</span>
-                                <span class="value">P3</span>
-                            </div>
-                            <div class="detail-row">
-                                <span class="label">Suất chiếu:</span>
-                                <span class="value">11:00 27/06/2025</span>
-                            </div>
-                            <div class="detail-row">
-                                <span class="label">Ghế:</span>
-                                <span class="value">@ViewBag.SelectedSeats</span>
-                            </div>
-                            <div class="detail-row">
-                                <span class="label">Thông tin khách hàng:</span>
-                                <span class="value">
-                                    @ViewBag.CustomerName<br>
-                                    @ViewBag.CustomerPhone
-                                    @if (!string.IsNullOrEmpty(ViewBag.CustomerEmail))
-                                    {
-                                        <br>@ViewBag.CustomerEmail
-                                    }
-                                </span>
-                            </div>
-                            <div class="detail-row">
-                                <span class="label">Hình thức thanh toán:</span>
-                                <span class="value">@ViewBag.PaymentMethod</span>
-                            </div>
-                            <div class="detail-row total-row">
-                                <span class="label">Tổng tiền:</span>
-                                <span class="value">@ViewBag.TotalAmount ₫</span>
-                            </div>
-                        </div>
 
-                        <div class="text-center">
-                            <button class="btn btn-proceed-payment" onclick="proceedToPayment()">
-                                <i class="fas fa-credit-card me-2"></i>
-                                Thanh toán ngay
-                            </button>
-                            <div class="mt-3">
-                                <a href="@Url.Action("Index", "Booking")" class="btn btn-custom btn-back">
-                                    <i class="fas fa-arrow-left me-2"></i>
-                                    Đặt vé mới
+                            <div class="ticket-details">
+                                <div class="detail-row">
+                                    <span class="label">Mã đặt vé:</span>
+                                    <span class="value">@((ViewBag.BookingCode as string) ?? (ViewBag.BookingId as
+                                                                            string))</span>
+                                </div>
+                                @if (!string.IsNullOrEmpty(ViewBag.TransactionId as string))
+                                {
+                                    <div class="detail-row">
+                                        <span class="label">Mã giao dịch:</span>
+                                        <span class="value">@ViewBag.TransactionId</span>
+                                    </div>
+                                }
+                                @if (!string.IsNullOrEmpty(ViewBag.MovieTitle as string))
+                                {
+                                    <div class="detail-row">
+                                        <span class="label">Phim:</span>
+                                        <span class="value">@ViewBag.MovieTitle</span>
+                                    </div>
+                                }
+                                @if (!string.IsNullOrEmpty(ViewBag.TheaterName as string))
+                                {
+                                    <div class="detail-row">
+                                        <span class="label">Rạp:</span>
+                                        <span class="value">@ViewBag.TheaterName</span>
+                                    </div>
+                                }
+                                @if (!string.IsNullOrEmpty(ViewBag.ScreenName as string))
+                                {
+                                    <div class="detail-row">
+                                        <span class="label">Phòng:</span>
+                                        <span class="value">@ViewBag.ScreenName</span>
+                                    </div>
+                                }
+                                @if (ViewBag.ShowDate != null)
+                                {
+                                    <div class="detail-row">
+                                        <span class="label">Ngày chiếu:</span>
+                                        <span class="value">@(ViewBag.ShowDate != null ?
+                                                                                ((DateTime)ViewBag.ShowDate).ToString("dd/MM/yyyy") : "")</span>
+                                    </div>
+                                }
+                                @if (ViewBag.ShowTime != null)
+                                {
+                                    <div class="detail-row">
+                                        <span class="label">Giờ chiếu:</span>
+                                        <span class="value">@(ViewBag.ShowTime?.ToString("HH:mm"))</span>
+                                    </div>
+                                }
+                                <div class="detail-row">
+                                    <span class="label">Ghế:</span>
+                                    <span class="value">@ViewBag.SelectedSeats</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="label">Hình thức thanh toán:</span>
+                                    <span class="value">@ViewBag.PaymentMethod</span>
+                                </div>
+                                <div class="detail-row total-row">
+                                    <span class="label">Tổng tiền đã thanh toán:</span>
+                                    <span class="value">@(decimal.TryParse(ViewBag.TotalAmount as string, out decimal
+                                                                            amount) ? string.Format("{0:N0}", amount) : "0") đ</span>
+                                </div>
+                            </div>
+
+                            <div class="text-center mt-4">
+                                <a href="@Url.Action("Index", "Home", new { area = "Public" })"
+                                    class="btn btn-custom btn-success">
+                                    <i class="fas fa-home me-2"></i>
+                                    Về trang chủ
                                 </a>
                             </div>
-                        </div>
+                        }
+                        else
+                        {
+                            <div class="payment-status-container payment-failed">
+                                <div class="payment-status-icon">
+                                    <i class="fas fa-times-circle"></i>
+                                </div>
+                                <div class="payment-status-message">
+                                    Thanh toán thất bại!
+                                </div>
+                                <p>@ViewBag.PaymentMessage</p>
+                                <p>Vui lòng thử lại hoặc chọn phương thức thanh toán khác.</p>
+                            </div>
+
+                            <div class="text-center mt-4">
+                                <a href="@Url.Action("Payment", "Booking", new { area = "Customer" })"
+                                    class="btn btn-custom btn-try-again">
+                                    <i class="fas fa-redo me-2"></i>
+                                    Thử lại
+                                </a>
+                                <a href="@Url.Action("Index", "Home", new { area = "Public" })"
+                                    class="btn btn-custom btn-secondary ms-2">
+                                    <i class="fas fa-home me-2"></i>
+                                    Về trang chủ
+                                </a>
+                            </div>
+                        }
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+</div>
 
 @section Scripts {
     <script>
-        function proceedToPayment() {
-            // Add loading state
-            const btn = event.target;
-            const originalText = btn.innerHTML;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Đang xử lý...';
-            btn.disabled = true;
-            
-            // Here you would integrate with actual payment gateway
-            alert('Chuyển hướng đến cổng thanh toán...');
-            
-            // For demo purposes, simulate payment success
-            setTimeout(() => {
-                alert('Thanh toán thành công! Vé đã được gửi đến email của bạn.');
-                window.location.href = '@Url.Action("Index", "Home")';
-            }, 2000);
-        }
-        
-        document.addEventListener('DOMContentLoaded', function() {
-            // Add fade-in animation with stagger effect
-            const elements = document.querySelectorAll('.fade-in');
-            elements.forEach((el, index) => {
-                setTimeout(() => {
-                    el.style.opacity = '1';
-                }, 100 + (index * 200));
-            });
-            
-            // Add hover effects to detail rows
-            const detailRows = document.querySelectorAll('.detail-row');
-            detailRows.forEach(row => {
-                row.addEventListener('mouseenter', function() {
-                    this.style.transform = 'translateX(5px)';
-                });
-                
-                row.addEventListener('mouseleave', function() {
-                    this.style.transform = 'translateX(0)';
-                });
-            });
-            
-            // Add success sound effect (optional)
-            if (typeof Audio !== 'undefined') {
-                try {
-                    // You can add a success sound here
-                    // const successSound = new Audio('/sounds/success.mp3');
-                    // successSound.play().catch(e => console.log('Sound play failed:', e));
-                } catch (e) {
-                    console.log('Audio not supported');
-                }
-            }
-            
+        document.addEventListener('DOMContentLoaded', function () {
             // Auto-scroll to content on mobile
             if (window.innerWidth <= 768) {
                 setTimeout(() => {
@@ -184,14 +155,6 @@
                         block: 'start'
                     });
                 }, 500);
-            }
-        });
-        
-        // Add keyboard shortcuts
-        document.addEventListener('keydown', function(e) {
-            // Escape to go back
-            if (e.key === 'Escape') {
-                window.location.href = '@Url.Action("Index", "Booking")';
             }
         });
     </script>

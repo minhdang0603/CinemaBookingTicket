@@ -1,6 +1,13 @@
 /* Payment Styles - extends booking.css */
 @import url('./booking.css');
 
+/* Payment Specific Styles */
+.payment-section {
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: var(--border-radius);
+    padding: 30px;
+}
+
 /* Enhanced sidebar sticky positioning */
 @media (min-width: 992px) {
     .sidebar-sticky {
@@ -17,13 +24,24 @@
     }
 }
 
-/* Payment Specific Styles */
-.payment-section {
-    background: rgba(255, 255, 255, 0.03);
-    border-radius: var(--border-radius);
-    padding: 30px;
+/* Mobile specific overrides */
+@media (max-width: 991px) {
+    .sidebar-sticky {
+        margin-bottom: 30px;
+    }
+    
+    /* Hide sidebar action buttons on mobile */
+    .sidebar-action-buttons {
+        display: none;
+    }
+    
+    /* Mobile padding adjustment */
+    body {
+        padding-bottom: 100px !important; /* Space for fixed mobile buttons */
+    }
 }
 
+/* Order summary styles */
 .order-summary {
     background: rgba(255, 255, 255, 0.05);
     border-radius: 12px;
@@ -109,31 +127,6 @@
     gap: 15px;
 }
 
-/* Enhanced mobile styles */
-@media (max-width: 991px) {
-    .sidebar-sticky {
-        margin-bottom: 30px;
-    }
-    
-    /* Hide sidebar action buttons on mobile */
-    .sidebar-action-buttons {
-        display: none;
-    }
-    
-    /* Ensure fixed action buttons at bottom on mobile only */
-    .action-buttons {
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        width: 100%;
-        background: rgba(10, 25, 47, 0.95);
-        backdrop-filter: blur(10px);
-        padding: 15px;
-        box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.3);
-        z-index: 1000;
-    }
-}
-
 /* Remove bottom space on desktop */
 @media (min-width: 992px) {
     body.has-sidebar-actions {
@@ -211,4 +204,61 @@
 
 .payment-option:not(.selected) .payment-check {
     color: rgba(255, 255, 255, 0.3);
+}
+
+/* Action Buttons - Base Styles (copied from booking.css for consistency) */
+.action-buttons {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 400px;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    border-radius: var(--border-radius);
+    padding: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    z-index: 1000;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+/* Sidebar Action Buttons - Override fixed positioning for desktop */
+@media (min-width: 992px) {
+    .sidebar-action-buttons {
+        position: static;
+        transform: none;
+        left: auto;
+        bottom: auto;
+        width: 100%;
+        max-width: none;
+        box-shadow: none;
+        background: transparent;
+        border: none;
+        padding: 0;
+        margin-top: 20px;
+    }
+    
+    /* For mobile - full width at bottom */
+    .action-buttons:not(.sidebar-action-buttons) {
+        width: 100%;
+        max-width: 100%;
+        bottom: 0;
+        left: 0;
+        transform: none;
+        border-radius: 0;
+    }
+}
+
+/* Common action button styles */
+.action-buttons .row {
+    align-items: stretch; /* Ensure both buttons have the same height */
+    margin: 0; /* Remove default Bootstrap margin */
+}
+
+.action-buttons .col-4,
+.action-buttons .col-8 {
+    padding: 0 5px; /* Adjust spacing between buttons */
+    display: flex; /* Make columns flex */
+    align-items: stretch; /* Stretch to full height */
 }

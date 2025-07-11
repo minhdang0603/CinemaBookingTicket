@@ -54,7 +54,7 @@ public class ConcessionCategoryService : IConcessionCategoryService
         if (concessionCategory == null)
         {
             _logger.LogError($"Concession Category with ID {id} not found");
-            throw new AppException(ErrorCodes.ConcessionCategoryNotFound(id));
+            throw new AppException(ErrorCodes.EntityNotFound("ConcessionCategory", id));
         }
 
         _mapper.Map(concessionCategoryUpdateDTO, concessionCategory);
@@ -71,7 +71,7 @@ public class ConcessionCategoryService : IConcessionCategoryService
         if (concessionCategory == null)
         {
             _logger.LogError($"Concession Category with ID {id} not found");
-            throw new AppException(ErrorCodes.ConcessionCategoryNotFound(id));
+            throw new AppException(ErrorCodes.EntityNotFound("ConcessionCategory", id));
         }
 
         concessionCategory.IsActive = false; // Soft delete
@@ -87,7 +87,7 @@ public class ConcessionCategoryService : IConcessionCategoryService
         if (concessionCategory == null)
         {
             _logger.LogError($"Concession Category with ID {id} not found");
-            throw new AppException(ErrorCodes.ConcessionCategoryNotFound(id));
+            throw new AppException(ErrorCodes.EntityNotFound("ConcessionCategory", id));
         }
 
         return _mapper.Map<ConcessionCategoryDTO>(concessionCategory);

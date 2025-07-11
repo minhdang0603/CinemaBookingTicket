@@ -39,7 +39,7 @@ public class BookingService : IBookingService
 
 		if (booking == null || booking.ApplicationUser.Id != userId)
 		{
-			throw new AppException(ErrorCodes.BookingNotFound(bookingId));
+			throw new AppException(ErrorCodes.EntityNotFound("Booking", bookingId));
 		}
 
 		booking.BookingStatus = Constant.Booking_Status_Cancelled;
@@ -88,7 +88,7 @@ public class BookingService : IBookingService
 		// Check if booking exists and belongs to the user
 		if (booking == null)
 		{
-			throw new AppException(ErrorCodes.BookingNotFound(bookingId));
+			throw new AppException(ErrorCodes.EntityNotFound("Booking", bookingId));
 		}
 
 		if (booking.ApplicationUser.Id != userId && !_httpContextAccessor.HttpContext.User.IsInRole(Constant.Role_Admin))
@@ -96,6 +96,23 @@ public class BookingService : IBookingService
 			throw new AppException(ErrorCodes.UnauthorizedAccess());
 		}
 
+		// Find and delete all concession orders associated with the booking
+		var concessionOrders = await _unitOfWork.ConcessionOrder.GetAllAsync(co => co.BookingId == bookingId,
+			includeProperties: "ConcessionOrderDetails");
+
+		foreach (var concessionOrder in concessionOrders)
+		{
+			// Delete all concession order details first
+			foreach (var detail in concessionOrder.ConcessionOrderDetails.ToList())
+			{
+				await _unitOfWork.ConcessionOrderDetail.RemoveAsync(detail);
+			}
+
+			// Delete the concession order
+			await _unitOfWork.ConcessionOrder.RemoveAsync(concessionOrder);
+		}
+
+		// Delete the booking
 		await _unitOfWork.Booking.RemoveAsync(booking);
 
 		// Log the action
@@ -120,7 +137,7 @@ public class BookingService : IBookingService
 
 		if (booking == null)
 		{
-			throw new AppException(ErrorCodes.BookingNotFound(bookingId));
+			throw new AppException(ErrorCodes.EntityNotFound("Booking", bookingId));
 		}
 
 		// Kiểm tra quyền truy cập
