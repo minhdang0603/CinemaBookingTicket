@@ -11,7 +11,7 @@
                 @foreach (var seat in row.OrderBy(s => s.SeatNumber))
                 {
                     string seatTypeClass = seat.SeatType.Name.ToLower();
-                    
+
                     // Only mark seats as unavailable if they're booked by other users
                     // If the seat belongs to the current booking (based on ViewBag), don't mark as unavailable
                     bool isCurrentUserSeat = false;
@@ -19,7 +19,7 @@
                     {
                         var existingSeats = ViewBag.ExistingBookedSeats.Split(',');
                         string seatIdString = seat.Id.ToString();
-                        
+
                         // Kiểm tra từng phần tử trong mảng
                         foreach (var existingSeat in existingSeats)
                         {
@@ -30,13 +30,12 @@
                             }
                         }
                     }
-                    
+
                     string seatStatus = (seat.IsBooked && !isCurrentUserSeat) ? "unavailable" : "";
                     bool isDisabled = seat.IsBooked && !isCurrentUserSeat;
-                    
+
                     <button class="seat @seatTypeClass @seatStatus" @(isDisabled ? "disabled" : "") data-seat-id="@seat.Id"
-                        data-price="@seat.Price" data-seat-code="@seat.SeatCode"
-                        style="border: 2.5px solid @seat.SeatType.Color">
+                        data-price="@seat.Price" data-seat-code="@seat.SeatCode" style="border: 2.5px solid @seat.SeatType.Color">
                         @seat.SeatCode
                     </button>
                 }

@@ -48,11 +48,11 @@ namespace Web.Areas.Customer.Controllers
 		{
 			// Get authenticated user token
 			string token = GetUserToken();
-			
+
 			// Check for existing booking and handle it appropriately
 			var bookingInfo = await GetExistingBookingInfoAsync(showTimeId, token);
 			BookingDTO? existingBooking = bookingInfo.ExistingBooking;
-			
+
 			// Fetch seat status for the showtime
 			var showTimeWithSeatStatus = await GetShowTimeSeatStatusAsync(showTimeId, token);
 			if (showTimeWithSeatStatus == null)
@@ -62,7 +62,7 @@ namespace Web.Areas.Customer.Controllers
 
 			// Create view model for seat booking
 			var viewModel = CreateSeatBookingViewModel(showTimeId, showTimeWithSeatStatus);
-			
+
 			// If there's an existing booking, mark selected seats
 			if (existingBooking != null && existingBooking.BookingItems != null && existingBooking.BookingItems.Any())
 			{
@@ -270,7 +270,7 @@ namespace Web.Areas.Customer.Controllers
 
 				// Update the booking
 				var bookingResponse = await _bookingService.UpdateBookingAsync<APIResponse>(bookingUpdateDTO, token);
-				
+
 				if (bookingResponse == null || !bookingResponse.IsSuccess)
 				{
 					return Json(new
@@ -282,7 +282,7 @@ namespace Web.Areas.Customer.Controllers
 
 				// Get updated booking details
 				var bookingResult = JsonConvert.DeserializeObject<BookingDTO>(bookingResponse.Result?.ToString() ?? "{}");
-				
+
 				if (bookingResult == null)
 				{
 					return Json(new { success = false, message = "Failed to update booking" });
@@ -375,9 +375,9 @@ namespace Web.Areas.Customer.Controllers
 			{
 				string token = GetUserToken();
 				await _bookingService.CancelBookingAsync(bookingId.Value, token);
-				
+
 				ClearBookingSession();
-				
+
 				return Json(new { success = true, message = "Booking canceled successfully" });
 			}
 			catch (Exception ex)
@@ -398,22 +398,22 @@ namespace Web.Areas.Customer.Controllers
 			int? existingBookingId = HttpContext.Session.GetInt32("BookingId");
 			string? expiryString = HttpContext.Session.GetString("BookingExpiry");
 			DateTime? expiryTime = null;
-			
+
 			if (!string.IsNullOrEmpty(expiryString) && DateTime.TryParse(expiryString, out DateTime expiry))
 			{
 				expiryTime = expiry;
 			}
-			
+
 			BookingDTO? existingBooking = null;
-			
+
 			if (existingBookingId.HasValue && expiryTime.HasValue && DateTime.Now < expiryTime.Value)
 			{
 				var existingBookingResponse = await _bookingService.GetBookingByIdAsync<APIResponse>(existingBookingId.Value, token);
-				
+
 				if (existingBookingResponse != null && existingBookingResponse.IsSuccess)
 				{
 					existingBooking = JsonConvert.DeserializeObject<BookingDTO>(existingBookingResponse.Result?.ToString() ?? "{}");
-					
+
 					if (existingBooking != null && existingBooking.ShowTime.Id != showTimeId)
 					{
 						_logger.LogInformation("User navigated to different showtime. Clearing previous booking {BookingId}", existingBookingId.Value);
@@ -432,7 +432,7 @@ namespace Web.Areas.Customer.Controllers
 				await _bookingService.DeleteBookingAsync<APIResponse>(existingBookingId.Value, token);
 				ClearBookingSession();
 			}
-			
+
 			return (existingBooking, expiryTime);
 		}
 
@@ -455,7 +455,7 @@ namespace Web.Areas.Customer.Controllers
 				TempData["error"] = "Seat status data is invalid.";
 				return null;
 			}
-			
+
 			return showTimeWithSeatStatus;
 		}
 
@@ -488,12 +488,12 @@ namespace Web.Areas.Customer.Controllers
 		private void PopulateExistingBookingData(SeatBookingViewModel viewModel, BookingDTO existingBooking, DateTime? expiryTime)
 		{
 			var existingBookedSeatNames = existingBooking.BookingItems.Select(item => item.SeatName).ToList();
-			
+
 			var existingBookedSeatIds = viewModel.Seats
 				.Where(s => existingBookedSeatNames.Contains(s.SeatCode))
 				.Select(s => s.Id)
 				.ToList();
-			
+
 			ViewBag.ExistingBookingId = existingBooking.Id;
 			ViewBag.ExistingBookingExpiry = expiryTime;
 			ViewBag.ExistingBookedSeats = string.Join(",", existingBookedSeatIds);
@@ -604,7 +604,7 @@ namespace Web.Areas.Customer.Controllers
 
 			var concessionOrdersList = JsonConvert.DeserializeObject<List<ConcessionOrderDTO>>(
 				concessionOrdersResponseObj.Result?.ToString() ?? "[]");
-				
+
 			if (concessionOrdersList == null || !concessionOrdersList.Any())
 			{
 				return;
@@ -638,15 +638,15 @@ namespace Web.Areas.Customer.Controllers
 			{
 				BookingId = viewModel.BookingId,
 				Amount = viewModel.TotalAmount,
-				OrderInfo = $"Payment for booking {viewModel.BookingId}" + 
-				            (viewModel.ConcessionOrderId.HasValue ? $" with concession order {viewModel.ConcessionOrderId}" : ""),
+				OrderInfo = $"Payment for booking {viewModel.BookingId}" +
+							(viewModel.ConcessionOrderId.HasValue ? $" with concession order {viewModel.ConcessionOrderId}" : ""),
 				ClientIpAddress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "127.0.0.1"
 			}, token);
 
 			if (paymentResponse == null || !paymentResponse.IsSuccess)
 			{
-				return (false, 
-					paymentResponse?.ErrorMessages?.FirstOrDefault() ?? "Failed to create payment.", 
+				return (false,
+					paymentResponse?.ErrorMessages?.FirstOrDefault() ?? "Failed to create payment.",
 					string.Empty);
 			}
 
@@ -670,7 +670,7 @@ namespace Web.Areas.Customer.Controllers
 			}
 
 			var vnPayResponse = JsonConvert.DeserializeObject<VNPayResponseDTO>(vnPayCheckResponse.Result?.ToString() ?? "{}");
-			
+
 			if (vnPayResponse == null)
 			{
 				return null;
@@ -733,23 +733,23 @@ namespace Web.Areas.Customer.Controllers
 
 		private bool IsValidBookingData(BookingCreateDTO bookingCreateDTO)
 		{
-			return bookingCreateDTO.ShowTimeId > 0 && 
-				   bookingCreateDTO.BookingDetails != null && 
+			return bookingCreateDTO.ShowTimeId > 0 &&
+				   bookingCreateDTO.BookingDetails != null &&
 				   bookingCreateDTO.BookingDetails.Any();
 		}
 
 		private bool IsValidBookingUpdateData(BookingUpdateDTO bookingUpdateDTO)
 		{
-			return bookingUpdateDTO.BookingId > 0 && 
-				   bookingUpdateDTO.ShowTimeId > 0 && 
-				   bookingUpdateDTO.BookingDetails != null && 
+			return bookingUpdateDTO.BookingId > 0 &&
+				   bookingUpdateDTO.ShowTimeId > 0 &&
+				   bookingUpdateDTO.BookingDetails != null &&
 				   bookingUpdateDTO.BookingDetails.Any();
 		}
 
 		private bool IsValidConcessionOrderData(ConcessionOrderCreateDTO concessionOrderCreateDTO)
 		{
-			return concessionOrderCreateDTO.BookingId > 0 && 
-				   concessionOrderCreateDTO.ConcessionOrderDetails != null && 
+			return concessionOrderCreateDTO.BookingId > 0 &&
+				   concessionOrderCreateDTO.ConcessionOrderDetails != null &&
 				   concessionOrderCreateDTO.ConcessionOrderDetails.Any();
 		}
 
@@ -765,7 +765,7 @@ namespace Web.Areas.Customer.Controllers
 
 			if (bookingCreateResponse == null || !bookingCreateResponse.IsSuccess)
 			{
-				_logger.LogError("Failed to create booking: {Error}", 
+				_logger.LogError("Failed to create booking: {Error}",
 					bookingCreateResponse?.ErrorMessages?.FirstOrDefault() ?? "Unknown error");
 				return null;
 			}

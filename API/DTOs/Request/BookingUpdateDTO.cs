@@ -11,7 +11,7 @@ namespace API.DTOs.Request
         [Required]
         public int ShowTimeId { get; set; }
 
-    [Required]
-    public List<BookingDetailItemDTO> BookingDetails { get; set; } = new();
+        [Required]
+        public List<BookingDetailItemDTO> BookingDetails { get; set; } = new();
     }
 }

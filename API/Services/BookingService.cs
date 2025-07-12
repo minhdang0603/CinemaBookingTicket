@@ -269,7 +269,7 @@ public class BookingService : IBookingService
 				var existingBooking = await _unitOfWork.BookingDetail.GetAsync(
 					bd => bd.SeatId == detail.SeatId &&
 						  bd.Booking.ShowTimeId == bookingUpdateDTO.ShowTimeId &&
-						  bd.Booking.Id != booking.Id && 
+						  bd.Booking.Id != booking.Id &&
 						  bd.Booking.BookingStatus != Constant.Booking_Status_Cancelled,
 					includeProperties: "Booking");
 
@@ -286,8 +286,8 @@ public class BookingService : IBookingService
 					SeatId = detail.SeatId,
 					SeatPrice = detail.SeatPrice,
 					SeatName = detail.SeatName,
-                    CreatedAt = DateTime.UtcNow,
-                    LastUpdatedAt = DateTime.UtcNow
+					CreatedAt = DateTime.UtcNow,
+					LastUpdatedAt = DateTime.UtcNow
 				};
 
 				await _unitOfWork.BookingDetail.CreateAsync(bookingDetail);

@@ -95,26 +95,26 @@ public class PaymentService : IPaymentService
         }
 
         // Create base response
-        var response = CreateBaseVNPayResponse(payment, vnpayTranId, amount, vnp_ResponseCode, 
+        var response = CreateBaseVNPayResponse(payment, vnpayTranId, amount, vnp_ResponseCode,
                                              vnp_TransactionStatus, payDate);
 
         // Determine if payment is successful
         bool isPaymentSuccessful = vnp_ResponseCode == "00" && vnp_TransactionStatus == "00";
-        
+
         // Update payment status based on result
-        string paymentStatus = isPaymentSuccessful 
-            ? Constant.Payment_Status_Completed 
+        string paymentStatus = isPaymentSuccessful
+            ? Constant.Payment_Status_Completed
             : Constant.Payment_Status_Failed;
-            
+
         // Update booking status based on payment result
-        string bookingStatus = isPaymentSuccessful 
-            ? Constant.Booking_Status_Confirmed 
+        string bookingStatus = isPaymentSuccessful
+            ? Constant.Booking_Status_Confirmed
             : Constant.Booking_Status_Cancelled;
 
         // Update payment and associated entities
         await UpdatePaymentDetails(payment, paymentStatus, vnpayTranId, isPaymentSuccessful);
         await UpdateBookingDetailsForResponse(payment, bookingStatus, response);
-        
+
         // Complete response with appropriate messages and redirect URL
         CompleteVNPayResponse(response, isPaymentSuccessful, vnp_ResponseCode, paymentId);
 
@@ -124,16 +124,16 @@ public class PaymentService : IPaymentService
     private void CompleteVNPayResponse(VNPayResponseDTO response, bool isPaymentSuccessful, string responseCode, int paymentId)
     {
         response.Success = isPaymentSuccessful;
-        
-        response.Message = isPaymentSuccessful 
-            ? "Payment successful! Your booking is confirmed." 
+
+        response.Message = isPaymentSuccessful
+            ? "Payment successful! Your booking is confirmed."
             : GetVNPayResponseMessage(responseCode);
-            
+
         string resultPath = isPaymentSuccessful ? "success" : "failed";
         response.RedirectUrl = $"{_frontendUrl.TrimEnd('/')}/payment/{resultPath}/{paymentId}";
     }
 
-    private VNPayResponseDTO CreateBaseVNPayResponse(Payment payment, string transactionId, string amount, 
+    private VNPayResponseDTO CreateBaseVNPayResponse(Payment payment, string transactionId, string amount,
                                                     string responseCode, string transactionStatus, string payDate)
     {
         return new VNPayResponseDTO
@@ -152,12 +152,12 @@ public class PaymentService : IPaymentService
         payment.PaymentStatus = status;
         payment.TransactionId = transactionId;
         payment.LastUpdatedAt = DateTime.Now;
-        
+
         if (isPaymentSuccessful)
         {
             payment.PaymentDate = DateTime.Now;
         }
-        
+
         await _unitOfWork.Payment.UpdateAsync(payment);
     }
 
@@ -278,7 +278,7 @@ public class PaymentService : IPaymentService
 
         var concessionOrders = await _unitOfWork.ConcessionOrder.GetAllAsync(co => co.BookingId == bookingId && co.IsActive);
         decimal totalAmount = booking.TotalAmount;
-        
+
         if (concessionOrders != null && concessionOrders.Any())
         {
             totalAmount += concessionOrders.Sum(co => co.TotalAmount);

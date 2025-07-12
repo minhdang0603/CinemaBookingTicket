@@ -76,7 +76,7 @@ public class BookingController : ControllerBase
             .WithSuccess(true)
             .Build());
     }
-    
+
     [HttpPut("{bookingId:int}")]
     [Authorize]
     public async Task<ActionResult<APIResponse<BookingDTO>>> UpdateBookingAsync(int bookingId, [FromBody] BookingUpdateDTO bookingUpdateDTO)
