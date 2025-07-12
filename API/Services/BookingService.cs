@@ -223,6 +223,93 @@ public class BookingService : IBookingService
 	}
 
 	// Method to cleanup expired bookings automatically
+	public async Task<BookingDTO> UpdateBookingAsync(BookingUpdateDTO bookingUpdateDTO)
+	{
+		try
+		{
+			// Lấy thông tin người dùng hiện tại
+			var userId = _httpContextAccessor.HttpContext?.User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+						  ?? throw new AppException(ErrorCodes.UnauthorizedAccess());
+
+			// Kiểm tra booking có tồn tại không và thuộc về người dùng hiện tại
+			var booking = await _unitOfWork.Booking.GetAsync(
+				b => b.Id == bookingUpdateDTO.BookingId && b.IsActive == true,
+				includeProperties: "ApplicationUser,BookingDetails,ShowTime.Movie,ShowTime.Screen.Theater");
+
+			if (booking == null)
+			{
+				throw new AppException(ErrorCodes.EntityNotFound("Booking", bookingUpdateDTO.BookingId));
+			}
+
+			if (booking.ApplicationUser.Id != userId && !_httpContextAccessor.HttpContext.User.IsInRole(Constant.Role_Admin))
+			{
+				throw new AppException(ErrorCodes.UnauthorizedAccess());
+			}
+
+			// Xóa các booking details hiện có
+			foreach (var bookingDetail in booking.BookingDetails.ToList())
+			{
+				await _unitOfWork.BookingDetail.RemoveAsync(bookingDetail);
+			}
+
+			// Tổng giá trị của booking
+			decimal totalAmount = 0;
+
+			// Thêm booking details mới
+			foreach (var detail in bookingUpdateDTO.BookingDetails)
+			{
+				// Kiểm tra ghế tồn tại
+				var seat = await _unitOfWork.Seat.GetAsync(s => s.Id == detail.SeatId);
+				if (seat == null)
+				{
+					throw new AppException(ErrorCodes.SeatIsNotAvailable());
+				}
+
+				// Kiểm tra ghế chưa được đặt cho suất chiếu này (loại trừ booking hiện tại)
+				var existingBooking = await _unitOfWork.BookingDetail.GetAsync(
+					bd => bd.SeatId == detail.SeatId &&
+						  bd.Booking.ShowTimeId == bookingUpdateDTO.ShowTimeId &&
+						  bd.Booking.Id != booking.Id && 
+						  bd.Booking.BookingStatus != Constant.Booking_Status_Cancelled,
+					includeProperties: "Booking");
+
+				if (existingBooking != null)
+				{
+					_logger.LogError($"Seat {seat.SeatRow}{seat.SeatNumber} is already booked");
+					throw new AppException(ErrorCodes.SeatIsNotAvailable());
+				}
+
+				// Thêm chi tiết đặt chỗ mới
+				var bookingDetail = new BookingDetail
+				{
+					BookingId = booking.Id,
+					SeatId = detail.SeatId,
+					SeatPrice = detail.SeatPrice,
+					SeatName = detail.SeatName,
+                    CreatedAt = DateTime.UtcNow,
+                    LastUpdatedAt = DateTime.UtcNow
+				};
+
+				await _unitOfWork.BookingDetail.CreateAsync(bookingDetail);
+				totalAmount += detail.SeatPrice;
+			}
+
+			// Cập nhật thông tin booking
+			booking.TotalAmount = totalAmount;
+			booking.LastUpdatedAt = DateTime.UtcNow;
+
+			await _unitOfWork.Booking.UpdateAsync(booking);
+			await _unitOfWork.SaveAsync();
+
+			return _mapper.Map<BookingDTO>(booking);
+		}
+		catch (Exception ex)
+		{
+			_logger.LogError(ex, $"Error updating booking {bookingUpdateDTO.BookingId}");
+			throw;
+		}
+	}
+
 	public async Task<int> CleanupExpiredBookingsAsync(int expiryMinutes)
 	{
 		try

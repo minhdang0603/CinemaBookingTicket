@@ -77,5 +77,16 @@ namespace Web.Services
                 Token = token
             });
         }
+
+        public Task<T> UpdateBookingAsync<T>(BookingUpdateDTO bookingUpdateDTO, string token)
+        {
+            return SendAsync<T>(new Models.APIRequest()
+            {
+                ApiType = Constant.ApiType.PUT,
+                Data = bookingUpdateDTO,
+                Url = _baseUrl + "/api/Booking/" + bookingUpdateDTO.BookingId,
+                Token = token
+            });
+        }
     }
 }

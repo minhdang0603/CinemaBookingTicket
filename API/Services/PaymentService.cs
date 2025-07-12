@@ -21,7 +21,6 @@ public class PaymentService : IPaymentService
     private readonly string _vnpayTmnCode;
     private readonly string _vnpayHashSecret;
     private readonly string _vnpayUrl;
-    private readonly string _vnpayIpnUrl;
     private readonly string _vnpayReturnUrl;
     private readonly string _frontendUrl;
 
@@ -35,7 +34,6 @@ public class PaymentService : IPaymentService
         _vnpayTmnCode = _configuration["VNPay:TmnCode"] ?? "";
         _vnpayHashSecret = _configuration["VNPay:HashSecret"] ?? "";
         _vnpayUrl = _configuration["VNPay:Url"] ?? "";
-        _vnpayIpnUrl = _configuration["VNPay:IpnUrl"] ?? "";
         _vnpayReturnUrl = _configuration["VNPay:ReturnUrl"] ?? "";
         _frontendUrl = _configuration["Frontend:BaseUrl"] ?? "http://localhost:5082";
     }
@@ -59,77 +57,6 @@ public class PaymentService : IPaymentService
         return paymentUrl;
     }
 
-    public async Task<VNPayIPNResponseDTO> ProcessVNPayIPNAsync(IQueryCollection queryParams)
-    {
-        var responseData = new SortedList<string, string>();
-
-        foreach (var queryParam in queryParams)
-        {
-            responseData.Add(queryParam.Key, queryParam.Value.ToString());
-        }
-
-        bool isValidSignature = VNPayHelper.ValidateResponse(
-            responseData,
-            _vnpayHashSecret
-        );
-
-        if (isValidSignature)
-        {
-            string vnp_TxnRef = queryParams["vnp_TxnRef"].ToString();
-            string vnp_ResponseCode = queryParams["vnp_ResponseCode"].ToString();
-            string vnp_TransactionStatus = queryParams["vnp_TransactionStatus"].ToString();
-            string vnpayTranId = queryParams["vnp_TransactionNo"].ToString();
-
-            // vnp_TxnRef là payment_id từ hệ thống của chúng ta
-            int paymentId = int.Parse(vnp_TxnRef);
-
-            if (vnp_ResponseCode == "00" && vnp_TransactionStatus == "00")
-            {
-                // Payment successful - update database
-                await UpdatePaymentStatusAsync(paymentId, Constant.Payment_Status_Completed, vnpayTranId);
-
-                // Optionally, you can also update the booking status to confirmed here
-                var payment = await _unitOfWork.Payment.GetAsync(p => p.Id == paymentId);
-                if (payment != null)
-                {
-                    var booking = await _unitOfWork.Booking.GetAsync(b => b.Id == payment.BookingId);
-                    if (booking == null || !payment.BookingId.HasValue)
-                    {
-                        throw new AppException(ErrorCodes.EntityNotFound("Booking", payment.BookingId ?? 0));
-                    }
-
-                    booking.BookingStatus = Constant.Booking_Status_Confirmed;
-                    booking.LastUpdatedAt = DateTime.Now;
-                    await _unitOfWork.Booking.UpdateAsync(booking);
-                    await _unitOfWork.SaveAsync();
-
-                    return new VNPayIPNResponseDTO
-                    {
-                        RspCode = "00",
-                        Message = "Confirm Success"
-                    };
-                }
-                else
-                {
-                    throw new AppException(ErrorCodes.EntityNotFound("Payment", paymentId));
-                }
-            }
-            else
-            {
-                return new VNPayIPNResponseDTO
-                {
-                    RspCode = "97",
-                    Message = "Invalid Signature"
-                };
-            }
-        }
-
-        return new VNPayIPNResponseDTO
-        {
-            RspCode = "97",
-            Message = "Invalid Signature"
-        };
-    }
     public async Task<VNPayResponseDTO> ProcessVNPayReturnAsync(Dictionary<string, string> queryParams)
     {
         var responseData = new SortedList<string, string>();
@@ -167,99 +94,132 @@ public class PaymentService : IPaymentService
             throw new AppException(ErrorCodes.EntityNotFound("Payment", paymentId));
         }
 
-        // Chuẩn bị response
-        var response = new VNPayResponseDTO
-        {
-            OrderId = payment.BookingId?.ToString() ?? "0",
-            TransactionId = vnpayTranId,
-            Amount = decimal.Parse(amount) / 100,
-            ResponseCode = vnp_ResponseCode,
-            TransactionStatus = vnp_TransactionStatus,
-            TransactionDate = DateTime.ParseExact(payDate, "yyyyMMddHHmmss", null),
-        };
+        // Create base response
+        var response = CreateBaseVNPayResponse(payment, vnpayTranId, amount, vnp_ResponseCode, 
+                                             vnp_TransactionStatus, payDate);
 
-        // Xử lý kết quả thanh toán
-        if (vnp_ResponseCode == "00" && vnp_TransactionStatus == "00")
-        {
-            // Cập nhật trạng thái thanh toán thành công
-            payment.PaymentStatus = Constant.Payment_Status_Completed;
-            payment.TransactionId = vnpayTranId;
-            payment.PaymentDate = DateTime.Now;
-            payment.LastUpdatedAt = DateTime.Now;
+        // Determine if payment is successful
+        bool isPaymentSuccessful = vnp_ResponseCode == "00" && vnp_TransactionStatus == "00";
+        
+        // Update payment status based on result
+        string paymentStatus = isPaymentSuccessful 
+            ? Constant.Payment_Status_Completed 
+            : Constant.Payment_Status_Failed;
+            
+        // Update booking status based on payment result
+        string bookingStatus = isPaymentSuccessful 
+            ? Constant.Booking_Status_Confirmed 
+            : Constant.Booking_Status_Cancelled;
 
-            // Cập nhật booking nếu có
-            if (payment.BookingId.HasValue)
-            {
-                var booking = await _unitOfWork.Booking.GetAsync(
-                    b => b.Id == payment.BookingId && b.IsActive,
-                    includeProperties: "ShowTime,ShowTime.Movie,ApplicationUser,BookingDetails");
-
-                if (booking != null)
-                {
-                    // Cập nhật trạng thái booking
-                    booking.BookingStatus = Constant.Booking_Status_Confirmed;
-                    booking.LastUpdatedAt = DateTime.Now;
-
-                    // Lưu thông tin booking vào response
-                    response.BookingCode = booking.BookingCode;
-                    response.CustomerName = booking.ApplicationUser?.UserName ?? string.Empty;
-                    response.SeatNames = booking.BookingDetails?.Select(bd => bd.SeatName).ToList() ?? new List<string>();
-
-                    // Lấy thông tin showtime
-                    if (booking.ShowTime != null)
-                    {
-                        response.MovieTitle = booking.ShowTime.Movie?.Title ?? string.Empty;
-                        response.TheaterName = booking.ShowTime.Screen?.Theater?.Name ?? string.Empty;
-                        response.ScreenName = booking.ShowTime.Screen?.Name ?? string.Empty;
-                        response.ShowDate = booking.ShowTime.ShowDate.ToDateTime(TimeOnly.MinValue);
-                        response.ShowTime = booking.ShowTime.StartTime;
-                    }
-
-                    // Cập nhật booking trong DB
-                    await _unitOfWork.Booking.UpdateAsync(booking);
-
-                    // Lấy thông tin đầy đủ của booking cho response
-                    response.Booking = _mapper.Map<BookingDTO>(booking);
-                }
-
-                // Cập nhật trạng thái ConcessionOrder liên quan (nếu có)
-                var concessionOrders = await _unitOfWork.ConcessionOrder.GetAllAsync(
-                    co => co.BookingId == payment.BookingId && co.IsActive);
-
-                foreach (var order in concessionOrders)
-                {
-                    order.OrderStatus = Constant.Booking_Status_Confirmed; // Sử dụng cùng trạng thái với Booking
-                    order.LastUpdatedAt = DateTime.Now;
-                    await _unitOfWork.ConcessionOrder.UpdateAsync(order);
-                }
-            }
-
-            // Cập nhật payment trong DB
-            await _unitOfWork.Payment.UpdateAsync(payment);
-            await _unitOfWork.SaveAsync();
-
-            // Hoàn thành response thành công
-            response.Success = true;
-            response.Message = "Payment successful! Your booking is confirmed.";
-            response.RedirectUrl = $"{_frontendUrl.TrimEnd('/')}/payment/success/{paymentId}";
-        }
-        else
-        {
-            // Xử lý thanh toán thất bại
-            payment.PaymentStatus = Constant.Payment_Status_Failed;
-            payment.TransactionId = vnpayTranId;
-            payment.LastUpdatedAt = DateTime.Now;
-
-            await _unitOfWork.Payment.UpdateAsync(payment);
-            await _unitOfWork.SaveAsync();
-
-            // Hoàn thành response thất bại
-            response.Success = false;
-            response.Message = GetVNPayResponseMessage(vnp_ResponseCode);
-            response.RedirectUrl = $"{_frontendUrl.TrimEnd('/')}/payment/failed/{paymentId}";
-        }
+        // Update payment and associated entities
+        await UpdatePaymentDetails(payment, paymentStatus, vnpayTranId, isPaymentSuccessful);
+        await UpdateBookingDetailsForResponse(payment, bookingStatus, response);
+        
+        // Complete response with appropriate messages and redirect URL
+        CompleteVNPayResponse(response, isPaymentSuccessful, vnp_ResponseCode, paymentId);
 
         return response;
+    }
+
+    private void CompleteVNPayResponse(VNPayResponseDTO response, bool isPaymentSuccessful, string responseCode, int paymentId)
+    {
+        response.Success = isPaymentSuccessful;
+        
+        response.Message = isPaymentSuccessful 
+            ? "Payment successful! Your booking is confirmed." 
+            : GetVNPayResponseMessage(responseCode);
+            
+        string resultPath = isPaymentSuccessful ? "success" : "failed";
+        response.RedirectUrl = $"{_frontendUrl.TrimEnd('/')}/payment/{resultPath}/{paymentId}";
+    }
+
+    private VNPayResponseDTO CreateBaseVNPayResponse(Payment payment, string transactionId, string amount, 
+                                                    string responseCode, string transactionStatus, string payDate)
+    {
+        return new VNPayResponseDTO
+        {
+            OrderId = payment.BookingId?.ToString() ?? "0",
+            TransactionId = transactionId,
+            Amount = decimal.Parse(amount) / 100,
+            ResponseCode = responseCode,
+            TransactionStatus = transactionStatus,
+            TransactionDate = DateTime.ParseExact(payDate, "yyyyMMddHHmmss", null),
+        };
+    }
+
+    private async Task UpdatePaymentDetails(Payment payment, string status, string transactionId, bool isPaymentSuccessful)
+    {
+        payment.PaymentStatus = status;
+        payment.TransactionId = transactionId;
+        payment.LastUpdatedAt = DateTime.Now;
+        
+        if (isPaymentSuccessful)
+        {
+            payment.PaymentDate = DateTime.Now;
+        }
+        
+        await _unitOfWork.Payment.UpdateAsync(payment);
+    }
+
+    private async Task UpdateBookingDetailsForResponse(Payment payment, string bookingStatus, VNPayResponseDTO response)
+    {
+        if (!payment.BookingId.HasValue)
+        {
+            return;
+        }
+
+        var booking = await _unitOfWork.Booking.GetAsync(
+            b => b.Id == payment.BookingId && b.IsActive,
+            includeProperties: "ShowTime,ShowTime.Movie,ApplicationUser,BookingDetails");
+
+        if (booking == null)
+        {
+            return;
+        }
+
+        // Update booking status
+        booking.BookingStatus = bookingStatus;
+        booking.LastUpdatedAt = DateTime.Now;
+
+        // Populate response with booking details
+        UpdateResponseWithBookingDetails(response, booking);
+
+        // Update booking in database
+        await _unitOfWork.Booking.UpdateAsync(booking);
+        response.Booking = _mapper.Map<BookingDTO>(booking);
+
+        // Update related concession orders
+        await UpdateConcessionOrders(payment.BookingId.Value, bookingStatus);
+    }
+
+    private void UpdateResponseWithBookingDetails(VNPayResponseDTO response, Booking booking)
+    {
+        response.BookingCode = booking.BookingCode;
+        response.CustomerName = booking.ApplicationUser?.UserName ?? string.Empty;
+        response.SeatNames = booking.BookingDetails?.Select(bd => bd.SeatName).ToList() ?? new List<string>();
+
+        // Add showtime details if available
+        if (booking.ShowTime != null)
+        {
+            response.MovieTitle = booking.ShowTime.Movie?.Title ?? string.Empty;
+            response.TheaterName = booking.ShowTime.Screen?.Theater?.Name ?? string.Empty;
+            response.ScreenName = booking.ShowTime.Screen?.Name ?? string.Empty;
+            response.ShowDate = booking.ShowTime.ShowDate.ToDateTime(TimeOnly.MinValue);
+            response.ShowTime = booking.ShowTime.StartTime;
+        }
+    }
+
+    private async Task UpdateConcessionOrders(int bookingId, string status)
+    {
+        var concessionOrders = await _unitOfWork.ConcessionOrder.GetAllAsync(
+            co => co.BookingId == bookingId && co.IsActive);
+
+        foreach (var order in concessionOrders)
+        {
+            order.OrderStatus = status;
+            order.LastUpdatedAt = DateTime.Now;
+            await _unitOfWork.ConcessionOrder.UpdateAsync(order);
+        }
     }
 
     private string GetVNPayResponseMessage(string responseCode)
@@ -309,7 +269,6 @@ public class PaymentService : IPaymentService
 
     public async Task<PaymentDTO> CreatePaymentAsync(int bookingId)
     {
-
         var booking = await _unitOfWork.Booking.GetAsync(b => b.Id == bookingId);
 
         if (booking == null)
@@ -318,11 +277,17 @@ public class PaymentService : IPaymentService
         }
 
         var concessionOrders = await _unitOfWork.ConcessionOrder.GetAllAsync(co => co.BookingId == bookingId && co.IsActive);
+        decimal totalAmount = booking.TotalAmount;
+        
+        if (concessionOrders != null && concessionOrders.Any())
+        {
+            totalAmount += concessionOrders.Sum(co => co.TotalAmount);
+        }
 
-		var payment = new Payment
+        var payment = new Payment
         {
             BookingId = bookingId,
-            Amount = concessionOrders == null ? booking.TotalAmount : booking.TotalAmount + concessionOrders.Sum(co => co.TotalAmount),
+            Amount = totalAmount,
             PaymentDate = DateTime.Now,
             PaymentStatus = Constant.Payment_Status_Pending,
             CreatedAt = DateTime.Now,

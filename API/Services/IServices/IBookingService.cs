@@ -12,5 +12,6 @@ public interface IBookingService
     Task DeleteBookingAsync(int bookingId);
     Task CancelBookingAsync(int bookingId);
     Task<BookingDTO> CreateBookingAsync(BookingCreateDTO bookingCreateDTO);
+    Task<BookingDTO> UpdateBookingAsync(BookingUpdateDTO bookingUpdateDTO);
     Task<int> CleanupExpiredBookingsAsync(int expiryMinutes);
 }

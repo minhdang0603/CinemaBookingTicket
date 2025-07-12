@@ -244,6 +244,22 @@
             // Calculate total including combos
             if (typeof calculateTotalAmount === 'function') {
                 const total = calculateTotalAmount();
+                
+                // Format the total amount
+                const formattedTotal = total.toLocaleString('vi-VN');
+                
+                // Update total amount display
+                document.querySelectorAll('#total-amount').forEach(el => {
+                    if (el) el.textContent = formattedTotal;
+                });
+                
+                // Update mobile total if it exists
+                const mobileTotalEl = document.getElementById('mobile-total');
+                if (mobileTotalEl) {
+                    mobileTotalEl.textContent = formattedTotal;
+                }
+                
+                console.log("Updated UI with total:", total);
             }
         }
     </script>

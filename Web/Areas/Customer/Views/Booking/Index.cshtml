@@ -138,6 +138,15 @@
     </div>
 </div>
 
+<!-- Hidden fields for existing booking data -->
+@if (ViewBag.ExistingBookingId != null)
+{
+    <input type="hidden" id="existing-booking-id" value="@ViewBag.ExistingBookingId" />
+    <input type="hidden" id="existing-booked-seats" value="@ViewBag.ExistingBookedSeats" />
+    <input type="hidden" id="existing-booked-seat-names" value="@ViewBag.ExistingBookedSeatNames" />
+    <input type="hidden" id="existing-booking-amount" value="@ViewBag.ExistingBookingAmount" />
+}
+
 @section Scripts {
     <script src="~/js/customer/booking/movie-booking.js" asp-append-version="true"></script>
     <script>
@@ -150,73 +159,19 @@
                 initializeSeats();
             }
 
-            // Handle continue button click for both desktop and mobile
-            const continueAction = function (e) {
-                e.preventDefault();
+            // Add showtime-id to DOM for movie-booking.js to use
+            const showtimeIdEl = document.createElement('input');
+            showtimeIdEl.type = 'hidden';
+            showtimeIdEl.id = 'showtime-id';
+            showtimeIdEl.value = '@Model.ShowtimeId';
+            document.body.appendChild(showtimeIdEl);
+            
+            // Logging để kiểm tra việc khởi tạo
+            console.log("Index.cshtml script initialized");
+            console.log("Using external movie-booking.js functions");
 
-                if (selectedSeats && selectedSeats.length > 0) {
-                    // Hiển thị loading spinner
-                    Swal.fire({
-                        title: 'Đang xử lý...',
-                        text: 'Vui lòng đợi trong giây lát',
-                        allowOutsideClick: false,
-                        didOpen: () => {
-                            Swal.showLoading();
-                        }
-                    });
-
-                    // Chuẩn bị dữ liệu booking theo BookingCreateDTO
-                    const bookingData = {
-                        showTimeId: @Model.ShowtimeId,
-                        bookingDetails: selectedSeats.map(s => ({
-                            seatId: parseInt(s.id),
-                            seatPrice: s.price,
-                            seatName: s.code
-                        }))
-                    };
-
-                    // Gọi API để tạo booking trong database
-                    fetch('@Url.Action("CreateBooking", "Booking")', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
-                        },
-                        body: JSON.stringify(bookingData)
-                    })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.success) {
-                                window.location.href = data.redirect || '@Url.Action("Concession", "Booking")';
-                            } else {
-                                // Hiển thị lỗi nếu có
-                                Swal.fire({
-                                    icon: 'error',
-                                    title: 'Lỗi',
-                                    text: data.message || 'Đã xảy ra lỗi khi đặt chỗ. Vui lòng thử lại.'
-                                });
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Error:', error);
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Lỗi',
-                                text: 'Đã xảy ra lỗi khi đặt chỗ. Vui lòng thử lại.'
-                            });
-                        });
-                } else {
-                    Swal.fire({
-                        icon: 'warning',
-                        title: 'Chưa chọn ghế',
-                        text: 'Vui lòng chọn ít nhất một ghế để tiếp tục'
-                    });
-                }
-            };
-
-            // Apply click handler to both buttons
-            document.getElementById('continue-btn').addEventListener('click', continueAction);
-            document.getElementById('mobile-continue-btn').addEventListener('click', continueAction);
+            // Các nút tiếp tục sẽ được xử lý trong movie-booking.js
+            // Không cần thêm sự kiện click ở đây để tránh gọi API nhiều lần
         });
     </script>
 }

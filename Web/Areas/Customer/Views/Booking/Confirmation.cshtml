@@ -21,7 +21,7 @@
                     <div class="modal-header">
                         <h4>@(ViewBag.PaymentStatus == "success" ? "Thanh toán thành công!" : "Thanh toán thất bại!")
                         </h4>
-                        <a href="@Url.Action("Index", "Home")" class="close-btn">
+                        <a href="@Url.Action("Index", "Home", new { area = "Public" })" class="close-btn">
                             <i class="fas fa-times"></i>
                         </a>
                     </div>
@@ -130,7 +130,7 @@
                                     Thử lại
                                 </a>
                                 <a href="@Url.Action("Index", "Home", new { area = "Public" })"
-                                    class="btn btn-custom btn-secondary ms-2">
+                                    class="btn btn-custom btn-secondary mt-2">
                                     <i class="fas fa-home me-2"></i>
                                     Về trang chủ
                                 </a>
