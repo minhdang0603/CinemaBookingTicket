@@ -12,13 +12,15 @@ namespace Web.Areas.Public.Controllers
     {
         private readonly IMovieService _movieService;
         private readonly IShowtimeService _showtimeService;
+        private readonly IProvinceService _provinceService;
         private readonly ILogger<MovieController> _logger;
 
-        public MovieController(IMovieService movieService, ILogger<MovieController> logger, IShowtimeService showtimeService)
+        public MovieController(IMovieService movieService, ILogger<MovieController> logger, IShowtimeService showtimeService, IProvinceService provinceService)
         {
             _movieService = movieService;
             _logger = logger;
             _showtimeService = showtimeService;
+            _provinceService = provinceService;
         }
 
         [HttpGet]
@@ -68,9 +70,7 @@ namespace Web.Areas.Public.Controllers
                     // Lọc chỉ lấy showtimes trong 5 ngày tới
                     var maxDate = today.AddDays(4);
                     allShowtimes = allShowtimes.Where(st => st.ShowDate >= today && st.ShowDate <= maxDate).ToList();
-                }
-
-                // Lấy showtimes đã filter
+                }                // Lấy showtimes đã filter
                 var showtimeResponse = await _showtimeService.GetShowTimesByMovieIdAsync<APIResponse>(id, filterDate, provinceId);
                 var showtimes = new List<ShowTimeLiteDTO>();
                 if (showtimeResponse != null && showtimeResponse.IsSuccess)
@@ -83,12 +83,22 @@ namespace Web.Areas.Public.Controllers
                     showtimes = showtimes.Where(st => st.ShowDate >= today && st.ShowDate <= maxDate).ToList();
                 }
 
+                // Lấy tất cả provinces từ database (không chỉ từ showtimes)
+                var allProvincesResponse = await _provinceService.GetAllProvincesAsync<APIResponse>();
+                var allProvinces = new List<ProvinceDTO>();
+                if (allProvincesResponse != null && allProvincesResponse.IsSuccess)
+                {
+                    allProvinces = JsonConvert.DeserializeObject<List<ProvinceDTO>>(
+                        Convert.ToString(allProvincesResponse.Result) ?? string.Empty) ?? new List<ProvinceDTO>();
+                }
+
                 // Create view model with movie data from API
                 var viewModel = new MovieDetailViewModel
                 {
                     Movie = movie,
                     ShowTimes = showtimes,
                     AllShowTimes = allShowtimes, // để lấy provinces và dates
+                    AllProvinces = allProvinces, // tất cả provinces từ database
                     SelectedDate = filterDate,
                     SelectedProvinceId = provinceId
                 };

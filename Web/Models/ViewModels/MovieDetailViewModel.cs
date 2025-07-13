@@ -19,26 +19,22 @@ namespace Web.Models.ViewModels
         public MovieDTO Movie { get; set; } = new MovieDTO();
         public List<ShowTimeLiteDTO> ShowTimes { get; set; } = new List<ShowTimeLiteDTO>();
         public List<ShowTimeLiteDTO> AllShowTimes { get; set; } = new List<ShowTimeLiteDTO>(); // For filter options
+        public List<ProvinceDTO> AllProvinces { get; set; } = new List<ProvinceDTO>(); // All provinces from database
         public DateOnly? SelectedDate { get; set; }
         public int? SelectedProvinceId { get; set; }
         public bool HasShowtimes => ShowTimes?.Any() == true;
 
         /// <summary>
-        /// Gets provinces from all showtimes (theaters' provinces)
+        /// Gets all provinces from database for filter dropdown
         /// </summary>
         public IEnumerable<ProvinceDTO> AvailableProvinces
         {
             get
             {
-                if (AllShowTimes == null)
+                if (AllProvinces == null)
                     return Enumerable.Empty<ProvinceDTO>();
 
-                return AllShowTimes
-                    .Where(st => st.Screen?.Theater?.Province != null)
-                    .Select(st => st.Screen!.Theater!.Province!)
-                    .GroupBy(p => p.Id)
-                    .Select(g => g.First())
-                    .OrderBy(p => p.Name);
+                return AllProvinces.OrderBy(p => p.Name);
             }
         }
 
@@ -91,6 +87,20 @@ namespace Web.Models.ViewModels
                     })
                     .OrderBy(g => g.Theater.Name);
             }
+        }
+
+        /// <summary>
+        /// Check if a showtime should be disabled (past time for today)
+        /// </summary>
+        /// <param name="showtime">The showtime to check</param>
+        /// <returns>True if the showtime should be disabled</returns>
+        public bool IsShowtimeDisabled(ShowTimeLiteDTO showtime)
+        {
+            if (showtime.ShowDate != DateOnly.FromDateTime(DateTime.Today))
+                return false; // Only disable for today
+
+            var currentTime = TimeOnly.FromDateTime(DateTime.Now);
+            return showtime.StartTime <= currentTime;
         }
     }
 }
