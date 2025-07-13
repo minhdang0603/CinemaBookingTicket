@@ -362,6 +362,21 @@ namespace API.Services
 
 			return result;
 		}
-
+		public async Task<List<ShowTimeDTO>> GetShowTimesByMovieIdAsync(int movieId, DateOnly? date = null, int? provinceId = null)
+		{
+			if (movieId <= 0)
+			{
+				_logger.LogError($"Invalid movie ID: {movieId}");
+				throw new ArgumentException("Invalid movie ID", nameof(movieId));
+			}
+			var showTimes = await _unitOfWork.ShowTime.GetShowTimesByMovieIdAsync(movieId, date, provinceId);
+			if (showTimes == null || !showTimes.Any())
+			{
+				_logger.LogWarning($"No showtimes found for Movie ID {movieId}.");
+				return new List<ShowTimeDTO>();
+			}
+			_logger.LogInformation($"Retrieved {showTimes.Count} showtimes for Movie ID {movieId}.");
+			return _mapper.Map<List<ShowTimeDTO>>(showTimes);
+		}
 	}
 }

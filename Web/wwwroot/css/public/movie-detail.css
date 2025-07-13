@@ -391,6 +391,27 @@ select option {
     box-shadow: 0 5px 15px rgba(255,107,107,0.4);
 }
 
+.showtime-slot.disabled {
+    background: linear-gradient(45deg, #6c757d, #adb5bd);
+    cursor: not-allowed;
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.showtime-slot.disabled:hover {
+    background: linear-gradient(45deg, #6c757d, #adb5bd);
+    transform: none;
+    box-shadow: none;
+}
+
+.showtime-slot.disabled .time {
+    color: #dee2e6;
+}
+
+.showtime-slot.disabled .date {
+    color: #dee2e6;
+}
+
 a {
     all: unset;
     cursor: pointer; 

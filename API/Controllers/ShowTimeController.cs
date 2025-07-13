@@ -212,5 +212,37 @@ namespace API.Controllers
                 .WithResult(seatStatus)
                 .Build());
         }
+        [HttpGet("movie/{movieId:int}")]
+        public async Task<ActionResult<APIResponse<List<ShowTimeDTO>>>> GetShowTimesByMovieId(
+            [FromRoute] int movieId,
+            [FromQuery] DateOnly? date = null,
+            [FromQuery] int? provinceId = null)
+        {
+            if (movieId <= 0)
+            {
+                return BadRequest(APIResponse<List<ShowTimeDTO>>.Builder()
+                    .WithStatusCode(HttpStatusCode.BadRequest)
+                    .WithSuccess(false)
+                    .WithErrorMessages(new List<string> { "Invalid movie ID." })
+                    .Build());
+            }
+
+            var showTimes = await _showTimeService.GetShowTimesByMovieIdAsync(movieId, date, provinceId);
+
+            if (showTimes == null || !showTimes.Any())
+            {
+                return NotFound(APIResponse<List<ShowTimeDTO>>.Builder()
+                    .WithStatusCode(HttpStatusCode.NotFound)
+                    .WithSuccess(false)
+                    .WithErrorMessages(new List<string> { "No showtimes found for the specified movie." })
+                    .Build());
+            }
+
+            return Ok(APIResponse<List<ShowTimeDTO>>.Builder()
+                .WithStatusCode(HttpStatusCode.OK)
+                .WithSuccess(true)
+                .WithResult(showTimes)
+                .Build());
+        }
     }
 }

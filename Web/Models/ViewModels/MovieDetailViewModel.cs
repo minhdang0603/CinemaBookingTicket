@@ -18,7 +18,46 @@ namespace Web.Models.ViewModels
     {
         public MovieDTO Movie { get; set; } = new MovieDTO();
         public List<ShowTimeLiteDTO> ShowTimes { get; set; } = new List<ShowTimeLiteDTO>();
+        public List<ShowTimeLiteDTO> AllShowTimes { get; set; } = new List<ShowTimeLiteDTO>(); // For filter options
+        public List<ProvinceDTO> AllProvinces { get; set; } = new List<ProvinceDTO>(); // All provinces from database
+        public DateOnly? SelectedDate { get; set; }
+        public int? SelectedProvinceId { get; set; }
         public bool HasShowtimes => ShowTimes?.Any() == true;
+
+        /// <summary>
+        /// Gets all provinces from database for filter dropdown
+        /// </summary>
+        public IEnumerable<ProvinceDTO> AvailableProvinces
+        {
+            get
+            {
+                if (AllProvinces == null)
+                    return Enumerable.Empty<ProvinceDTO>();
+
+                return AllProvinces.OrderBy(p => p.Name);
+            }
+        }
+
+        /// <summary>
+        /// Gets available dates from all showtimes for date filter (next 5 days only)
+        /// </summary>
+        public IEnumerable<DateOnly> AvailableDates
+        {
+            get
+            {
+                if (AllShowTimes == null)
+                    return Enumerable.Empty<DateOnly>();
+
+                var today = DateOnly.FromDateTime(DateTime.Today);
+                var maxDate = today.AddDays(4); // 5 ngày kể từ hôm nay (0-4 days)
+
+                return AllShowTimes
+                    .Select(st => st.ShowDate)
+                    .Where(date => date >= today && date <= maxDate)
+                    .Distinct()
+                    .OrderBy(d => d);
+            }
+        }
 
         /// <summary>
         /// Groups showtimes by theater, then by screen
@@ -48,6 +87,20 @@ namespace Web.Models.ViewModels
                     })
                     .OrderBy(g => g.Theater.Name);
             }
+        }
+
+        /// <summary>
+        /// Check if a showtime should be disabled (past time for today)
+        /// </summary>
+        /// <param name="showtime">The showtime to check</param>
+        /// <returns>True if the showtime should be disabled</returns>
+        public bool IsShowtimeDisabled(ShowTimeLiteDTO showtime)
+        {
+            if (showtime.ShowDate != DateOnly.FromDateTime(DateTime.Today))
+                return false; // Only disable for today
+
+            var currentTime = TimeOnly.FromDateTime(DateTime.Now);
+            return showtime.StartTime <= currentTime;
         }
     }
 }

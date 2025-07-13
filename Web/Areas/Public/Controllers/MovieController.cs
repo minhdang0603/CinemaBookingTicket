@@ -11,16 +11,20 @@ namespace Web.Areas.Public.Controllers
     public class MovieController : Controller
     {
         private readonly IMovieService _movieService;
+        private readonly IShowtimeService _showtimeService;
+        private readonly IProvinceService _provinceService;
         private readonly ILogger<MovieController> _logger;
 
-        public MovieController(IMovieService movieService, ILogger<MovieController> logger)
+        public MovieController(IMovieService movieService, ILogger<MovieController> logger, IShowtimeService showtimeService, IProvinceService provinceService)
         {
             _movieService = movieService;
             _logger = logger;
+            _showtimeService = showtimeService;
+            _provinceService = provinceService;
         }
 
         [HttpGet]
-        public async Task<IActionResult> Details(int id)
+        public async Task<IActionResult> Details(int id, DateOnly? date = null, int? provinceId = null)
         {
             if (id <= 0)
             {
@@ -51,20 +55,52 @@ namespace Web.Areas.Public.Controllers
                     return RedirectToAction("Index", "Home");
                 }
 
-                // Lấy showtimes từ API mới
-                var showtimeResponse = await _movieService.GetShowtimesByMovieIdAsync<APIResponse>(id);
+                // Mặc định hiển thị lịch chiếu hôm nay nếu không có filter date
+                var today = DateOnly.FromDateTime(DateTime.Today);
+                var filterDate = date ?? today;
+
+                // Lấy tất cả showtimes để có thông tin provinces và dates
+                var allShowtimesResponse = await _showtimeService.GetShowTimesByMovieIdAsync<APIResponse>(id);
+                var allShowtimes = new List<ShowTimeLiteDTO>();
+                if (allShowtimesResponse != null && allShowtimesResponse.IsSuccess)
+                {
+                    allShowtimes = JsonConvert.DeserializeObject<List<ShowTimeLiteDTO>>(
+                        Convert.ToString(allShowtimesResponse.Result) ?? string.Empty) ?? new List<ShowTimeLiteDTO>();
+
+                    // Lọc chỉ lấy showtimes trong 5 ngày tới
+                    var maxDate = today.AddDays(4);
+                    allShowtimes = allShowtimes.Where(st => st.ShowDate >= today && st.ShowDate <= maxDate).ToList();
+                }                // Lấy showtimes đã filter
+                var showtimeResponse = await _showtimeService.GetShowTimesByMovieIdAsync<APIResponse>(id, filterDate, provinceId);
                 var showtimes = new List<ShowTimeLiteDTO>();
                 if (showtimeResponse != null && showtimeResponse.IsSuccess)
                 {
                     showtimes = JsonConvert.DeserializeObject<List<ShowTimeLiteDTO>>(
                         Convert.ToString(showtimeResponse.Result) ?? string.Empty) ?? new List<ShowTimeLiteDTO>();
+
+                    // Lọc chỉ lấy showtimes trong 5 ngày tới
+                    var maxDate = today.AddDays(4);
+                    showtimes = showtimes.Where(st => st.ShowDate >= today && st.ShowDate <= maxDate).ToList();
+                }
+
+                // Lấy tất cả provinces từ database (không chỉ từ showtimes)
+                var allProvincesResponse = await _provinceService.GetAllProvincesAsync<APIResponse>();
+                var allProvinces = new List<ProvinceDTO>();
+                if (allProvincesResponse != null && allProvincesResponse.IsSuccess)
+                {
+                    allProvinces = JsonConvert.DeserializeObject<List<ProvinceDTO>>(
+                        Convert.ToString(allProvincesResponse.Result) ?? string.Empty) ?? new List<ProvinceDTO>();
                 }
 
                 // Create view model with movie data from API
                 var viewModel = new MovieDetailViewModel
                 {
                     Movie = movie,
-                    ShowTimes = showtimes
+                    ShowTimes = showtimes,
+                    AllShowTimes = allShowtimes, // để lấy provinces và dates
+                    AllProvinces = allProvinces, // tất cả provinces từ database
+                    SelectedDate = filterDate,
+                    SelectedProvinceId = provinceId
                 };
 
                 return View(viewModel);

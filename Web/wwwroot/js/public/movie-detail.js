@@ -14,6 +14,21 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
+    // Auto-submit form when filter selections change
+    const provinceFilter = document.querySelector('select[name="provinceId"]');
+    const dateFilter = document.querySelector('select[name="date"]');
+    const filterForm = document.querySelector('form');
+
+    if (provinceFilter && dateFilter && filterForm) {
+        provinceFilter.addEventListener('change', function() {
+            filterForm.submit();
+        });
+
+        dateFilter.addEventListener('change', function() {
+            filterForm.submit();
+        });
+    }
+
     // Parallax effect for floating elements
     window.addEventListener('scroll', () => {
         const scrolled = window.pageYOffset;
