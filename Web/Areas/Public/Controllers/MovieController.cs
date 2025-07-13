@@ -54,7 +54,8 @@ namespace Web.Areas.Public.Controllers
                 }
 
                 // Mặc định hiển thị lịch chiếu hôm nay nếu không có filter date
-                var filterDate = date ?? DateOnly.FromDateTime(DateTime.Today);
+                var today = DateOnly.FromDateTime(DateTime.Today);
+                var filterDate = date ?? today;
 
                 // Lấy tất cả showtimes để có thông tin provinces và dates
                 var allShowtimesResponse = await _showtimeService.GetShowTimesByMovieIdAsync<APIResponse>(id);
@@ -63,6 +64,10 @@ namespace Web.Areas.Public.Controllers
                 {
                     allShowtimes = JsonConvert.DeserializeObject<List<ShowTimeLiteDTO>>(
                         Convert.ToString(allShowtimesResponse.Result) ?? string.Empty) ?? new List<ShowTimeLiteDTO>();
+
+                    // Lọc chỉ lấy showtimes trong 5 ngày tới
+                    var maxDate = today.AddDays(4);
+                    allShowtimes = allShowtimes.Where(st => st.ShowDate >= today && st.ShowDate <= maxDate).ToList();
                 }
 
                 // Lấy showtimes đã filter
@@ -72,6 +77,10 @@ namespace Web.Areas.Public.Controllers
                 {
                     showtimes = JsonConvert.DeserializeObject<List<ShowTimeLiteDTO>>(
                         Convert.ToString(showtimeResponse.Result) ?? string.Empty) ?? new List<ShowTimeLiteDTO>();
+
+                    // Lọc chỉ lấy showtimes trong 5 ngày tới
+                    var maxDate = today.AddDays(4);
+                    showtimes = showtimes.Where(st => st.ShowDate >= today && st.ShowDate <= maxDate).ToList();
                 }
 
                 // Create view model with movie data from API

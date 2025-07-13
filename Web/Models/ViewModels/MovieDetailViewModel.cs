@@ -43,7 +43,7 @@ namespace Web.Models.ViewModels
         }
 
         /// <summary>
-        /// Gets available dates from all showtimes for date filter
+        /// Gets available dates from all showtimes for date filter (next 5 days only)
         /// </summary>
         public IEnumerable<DateOnly> AvailableDates
         {
@@ -52,8 +52,12 @@ namespace Web.Models.ViewModels
                 if (AllShowTimes == null)
                     return Enumerable.Empty<DateOnly>();
 
+                var today = DateOnly.FromDateTime(DateTime.Today);
+                var maxDate = today.AddDays(4); // 5 ngày kể từ hôm nay (0-4 days)
+
                 return AllShowTimes
                     .Select(st => st.ShowDate)
+                    .Where(date => date >= today && date <= maxDate)
                     .Distinct()
                     .OrderBy(d => d);
             }
