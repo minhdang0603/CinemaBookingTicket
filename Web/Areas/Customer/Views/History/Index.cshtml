@@ -1,423 +1,146 @@
-﻿<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lịch Sử Vé Đã Mua</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <style>
-        :root {
-            --primary-color: #1a1a1a;
-            --secondary-color: #2d2d2d;
-            --accent-color: #3a3a3a;
-            --text-light: #ffffff;
-            --text-muted: #9ca3af;
-            --card-bg: #2d2d2d;
-            --hover-color: #dc2626;
-            --border-color: #404040;
-            --success-color: #059669;
-            --warning-color: #f59e0b;
-        }
+﻿@model List<BookingHistoryViewModel>
+@{
+    ViewData["Title"] = "Lịch Sử Vé Đã Mua";
+}
 
-        body {
-            background-color: var(--primary-color);
-            min-height: 100vh;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            color: var(--text-light);
-        }
+@section Styles {
+    <link rel="stylesheet" href="~/css/customer/history/history.css" asp-append-version="true" />
+}
 
-        .hero-section {
-            background-color: var(--secondary-color);
-            padding: 3rem 0;
-            margin-bottom: 2rem;
-            position: relative;
-            border-bottom: 1px solid var(--border-color);
-        }
+@Html.AntiForgeryToken()
 
-        .hero-title {
-            font-size: 2.5rem;
-            font-weight: 700;
-            margin-bottom: 1rem;
-            color: var(--text-light);
-        }
-
-        .text-red {
-            color: var(--hover-color) !important;
-        }
-
-        .hero-subtitle {
-            font-size: 1.2rem;
-            opacity: 0.9;
-            margin-bottom: 0;
-        }
-
-        .main-content {
-            background: var(--secondary-color);
-            border-radius: 8px;
-            padding: 1.5rem;
-            border: 1px solid var(--border-color);
-        }
-
-        .ticket-card {
-            background: var(--accent-color);
-            border-radius: 8px;
-            overflow: hidden;
-            margin-bottom: 1.5rem;
-            border: 1px solid var(--border-color);
-            transition: all 0.3s ease;
-        }
-
-        .ticket-card:hover {
-            border-color: var(--hover-color);
-            box-shadow: 0 4px 12px rgba(220, 38, 38, 0.2);
-        }
-
-        .ticket-header {
-            background: var(--secondary-color);
-            padding: 1rem 1.5rem;
-            border-bottom: 1px solid var(--border-color);
-            display: flex;
-            justify-content: between;
-            align-items: center;
-        }
-
-        .ticket-body {
-            padding: 1.5rem;
-        }
-
-        .movie-poster-small {
-            width: 80px;
-            height: 120px;
-            object-fit: cover;
-            border-radius: 6px;
-            border: 1px solid var(--border-color);
-        }
-
-        .ticket-info h5 {
-            color: var(--text-light);
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-        }
-
-        .ticket-details {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-            margin-top: 1rem;
-        }
-
-        .detail-item {
-            display: flex;
-            align-items: center;
-            color: var(--text-muted);
-        }
-
-        .detail-item i {
-            width: 20px;
-            margin-right: 0.5rem;
-            color: var(--hover-color);
-        }
-
-        .status-badge {
-            padding: 0.3rem 0.8rem;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 600;
-        }
-
-        .status-watched {
-            background: rgba(5, 150, 105, 0.2);
-            color: var(--success-color);
-            border: 1px solid var(--success-color);
-        }
-
-        .status-upcoming {
-            background: rgba(245, 158, 11, 0.2);
-            color: var(--warning-color);
-            border: 1px solid var(--warning-color);
-        }
-
-        .status-cancelled {
-            background: rgba(220, 38, 38, 0.2);
-            color: var(--hover-color);
-            border: 1px solid var(--hover-color);
-        }
-
-        .ticket-actions {
-            display: flex;
-            gap: 0.5rem;
-            margin-top: 1rem;
-        }
-
-        .btn-action {
-            padding: 0.4rem 1rem;
-            border-radius: 6px;
-            border: 1px solid var(--border-color);
-            background: var(--accent-color);
-            color: var(--text-light);
-            text-decoration: none;
-            font-size: 0.85rem;
-            transition: all 0.3s ease;
-        }
-
-        .btn-action:hover {
-            background: var(--hover-color);
-            border-color: var(--hover-color);
-            color: white;
-        }
-
-        .btn-primary-action {
-            background: var(--hover-color);
-            border-color: var(--hover-color);
-        }
-
-        .btn-primary-action:hover {
-            background: #b91c1c;
-            border-color: #b91c1c;
-        }
-
-        .price-highlight {
-            font-size: 1.2rem;
-            font-weight: 700;
-            color: var(--success-color);
-        }
-
-    </style>
-</head>
-<body>
-    <!-- Hero Section -->
-    <section class="hero-section">
-        <div class="container">
-            <div class="hero-content text-center">
-                <h1 class="hero-title">
-                    <i class="fas fa-ticket-alt me-3 text-red"></i>
-                    Lịch Sử Vé Đã Mua
-                </h1>
-                <p class="hero-subtitle">
-                    Quản lý và theo dõi tất cả các vé phim bạn đã đặt mua
-                </p>
-            </div>
-        </div>
-    </section>
-
+<!-- Hero Section -->
+<section class="hero-section">
     <div class="container">
-        <!-- Main Content -->
-        <div class="main-content">
-            <!-- Results Info -->
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <div class="text-muted">
-                    <i class="fas fa-ticket-alt me-2"></i>
-                    Hiển thị 2 vé đã mua
-                </div>
-                <div class="text-muted">
-                    <i class="fas fa-sort me-2"></i>
-                    Sắp xếp theo ngày mua
-                </div>
-            </div>
-
-                    <div class="ticket-card">
-                        <div class="ticket-header">
-                            <div class="d-flex justify-content-between align-items-center w-100">
-                                <div>
-                                    <span class="text-muted me-3">
-                                        <i class="fas fa-calendar me-1"></i>
-                                        Đặt vé: 15/06/2025
-                                    </span>
-                                    <span class="text-muted">
-                                        <i class="fas fa-hashtag me-1"></i>
-                                        #TK240615001
-                                    </span>
-                                </div>
-                                <span class="status-badge status-watched">
-                                    <i class="fas fa-check-circle me-1"></i>
-                                    Đã xem
-                                </span>
-                            </div>
-                        </div>
-                        <div class="ticket-body">
-                            <div class="row">
-                                <div class="col-md-2">
-                                    <img src="https://cdn.moveek.com/storage/media/cache/short/684701a026f4b224948393.jpg" 
-                                         alt="Út Lan: Oán Linh Giữ Của" 
-                                         class="movie-poster-small">
-                                </div>
-                                <div class="col-md-10">
-                                    <div class="ticket-info">
-                                        <h5>Út Lan: Oán Linh Giữ Của</h5>
-                                        <div class="ticket-details">
-                                            <div class="detail-item">
-                                                <i class="fas fa-building"></i>
-                                                <span>CGV Vincom Landmark 81</span>
-                                            </div>
-                                            <div class="detail-item">
-                                                <i class="fas fa-door-open"></i>
-                                                <span>Phòng 3 - Standard</span>
-                                            </div>
-                                            <div class="detail-item">
-                                                <i class="fas fa-clock"></i>
-                                                <span>20:30 - 16/06/2025</span>
-                                            </div>
-                                            <div class="detail-item">
-                                                <i class="fas fa-couch"></i>
-                                                <span>Ghế: G7, G8</span>
-                                            </div>
-                                            <div class="detail-item">
-                                                <i class="fas fa-users"></i>
-                                                <span>2 vé</span>
-                                            </div>
-                                            <div class="detail-item">
-                                                <i class="fas fa-money-bill"></i>
-                                                <span class="price-highlight">180.000đ</span>
-                                            </div>
-                                        </div>
-                                        <div class="ticket-actions">
-                                            <a href="#" class="btn-action">
-                                                <i class="fas fa-download me-1"></i>
-                                                Tải vé
-                                            </a>
-                                            <a href="#" class="btn-action">
-                                                <i class="fas fa-star me-1"></i>
-                                                Đánh giá
-                                            </a>
-                                            <a href="#" class="btn-action">
-                                                <i class="fas fa-eye me-1"></i>
-                                                Xem lại
-                                            </a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="ticket-card">
-                        <div class="ticket-header">
-                            <div class="d-flex justify-content-between align-items-center w-100">
-                                <div>
-                                    <span class="text-muted me-3">
-                                        <i class="fas fa-calendar me-1"></i>
-                                        Đặt vé: 28/06/2025
-                                    </span>
-                                    <span class="text-muted">
-                                        <i class="fas fa-hashtag me-1"></i>
-                                        #TK240628002
-                                    </span>
-                                </div>
-                                <span class="status-badge status-upcoming">
-                                    <i class="fas fa-clock me-1"></i>
-                                    Sắp tới
-                                </span>
-                            </div>
-                        </div>
-                        <div class="ticket-body">
-                            <div class="row">
-                                <div class="col-md-2">
-                                    <img src="https://cdn.moveek.com/storage/media/cache/short/68183ba4c70b2014190582.jpg" 
-                                         alt="Bí Kíp Luyện Rồng live action" 
-                                         class="movie-poster-small">
-                                </div>
-                                <div class="col-md-10">
-                                    <div class="ticket-info">
-                                        <h5>Bí Kíp Luyện Rồng live action</h5>
-                                        <div class="ticket-details">
-                                            <div class="detail-item">
-                                                <i class="fas fa-building"></i>
-                                                <span>Lotte Cinema Diamond Plaza</span>
-                                            </div>
-                                            <div class="detail-item">
-                                                <i class="fas fa-door-open"></i>
-                                                <span>Phòng 5 - Premium</span>
-                                            </div>
-                                            <div class="detail-item">
-                                                <i class="fas fa-clock"></i>
-                                                <span>19:00 - 30/06/2025</span>
-                                            </div>
-                                            <div class="detail-item">
-                                                <i class="fas fa-couch"></i>
-                                                <span>Ghế: F5, F6, F7</span>
-                                            </div>
-                                            <div class="detail-item">
-                                                <i class="fas fa-users"></i>
-                                                <span>3 vé</span>
-                                            </div>
-                                            <div class="detail-item">
-                                                <i class="fas fa-money-bill"></i>
-                                                <span class="price-highlight">315.000đ</span>
-                                            </div>
-                                        </div>
-                                        <div class="ticket-actions">
-                                            <a href="#" class="btn-action btn-primary-action">
-                                                <i class="fas fa-qrcode me-1"></i>
-                                                Hiện vé
-                                            </a>
-                                            <a href="#" class="btn-action">
-                                                <i class="fas fa-route me-1"></i>
-                                                Chỉ đường
-                                            </a>
-                                            <a href="#" class="btn-action">
-                                                <i class="fas fa-calendar-plus me-1"></i>
-                                                Thêm lịch
-                                            </a>
-                                            <a href="#" class="btn-action">
-                                                <i class="fas fa-times me-1"></i>
-                                                Hủy vé
-                                            </a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="text-center py-5" style="display: none;" id="empty-state">
-                        <i class="fas fa-ticket-alt" style="font-size: 4rem; color: var(--text-muted); margin-bottom: 1rem;"></i>
-                        <h5 class="text-muted">Chưa có vé nào</h5>
-                        <p class="text-muted">Bạn chưa đặt mua vé phim nào. Hãy khám phá các phim đang chiếu!</p>
-                        <a href="#" class="btn btn-primary" style="background: var(--hover-color); border-color: var(--hover-color);">
-                            <i class="fas fa-film me-2"></i>
-                            Đặt vé ngay
-                        </a>
-                    </div>
-                </div>
-            </div>
+        <div class="hero-content text-center">
+            <h1 class="hero-title">
+                <i class="fas fa-ticket-alt me-3 text-red"></i>
+                Lịch Sử Vé Đã Mua
+            </h1>
+            <p class="hero-subtitle">
+                Quản lý và theo dõi tất cả các vé phim bạn đã đặt mua
+            </p>
         </div>
+    </div>
+</section>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
-    
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const actionButtons = document.querySelectorAll('.btn-action');
-            actionButtons.forEach(button => {
-                button.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    const action = this.textContent.trim();
-                    console.log('Action clicked:', action);
-                    
-                    if (action.includes('Hiện vé')) {
-                        alert('Đang hiển thị mã QR vé...');
-                    } else if (action.includes('Hủy vé')) {
-                        if (confirm('Bạn có chắc chắn muốn hủy vé này?')) {
-                            console.log('Ticket cancelled');
-                        }
-                    } else if (action.includes('Tải vé')) {
-                        console.log('Downloading ticket...');
-                    }
-                });
-            });
+<div class="container">
+    <!-- Main Content -->
+    <div class="history-content">
 
-            // Hover effects for tickets
-            const ticketCards = document.querySelectorAll('.ticket-card');
-            ticketCards.forEach(card => {
-                card.addEventListener('mouseenter', function() {
-                    this.style.transform = 'translateY(-2px)';
-                });
-                
-                card.addEventListener('mouseleave', function() {
-                    this.style.transform = 'translateY(0)';
-                });
-            });
-        });
-    </script>
-</body>
-</html>
+        @if (Model != null && Model.Any())
+        {
+            @foreach (var booking in Model)
+            {
+                <div class="ticket-card">
+                    <div class="ticket-header">
+                        <div class="d-flex justify-content-between align-items-center w-100">
+                            <div>
+                                <span class="text-muted me-3">
+                                    <i class="fas fa-calendar-alt me-2"></i>Ngày đặt: @booking.BookingDate.ToString("dd/MM/yyyy HH:mm")
+                                </span>
+                                <span class="text-muted">
+                                    <i class="fas fa-hashtag me-2"></i>Mã đặt vé: #@booking.BookingCode
+                                </span>
+                            </div>
+                            @{
+                                string statusClass = "status-upcoming";
+                                string statusText = "Sắp tới";
+                                string statusIcon = "clock";
+                                
+                                if (booking.Status == "Completed" && booking.ShowtimeDate < DateTime.Now)
+                                {
+                                    statusClass = "status-watched";
+                                    statusText = "Đã xem";
+                                    statusIcon = "check-circle";
+                                }
+                                else if (booking.Status == "Cancelled")
+                                {
+                                    statusClass = "status-cancelled";
+                                    statusText = "Đã hủy";
+                                    statusIcon = "times-circle";
+                                }
+                            }
+                            <span class="status-badge @statusClass">
+                                <i class="fas fa-@statusIcon me-1"></i>
+                                @statusText
+                            </span>
+                        </div>
+                    </div>
+                    <div class="ticket-body">
+                        <div class="row">
+                            <div class="col-md-2">
+                                <img src="@booking.MoviePosterUrl" alt="@booking.MovieTitle" class="movie-poster-small img-fluid" />
+                            </div>
+                            <div class="col-md-10">
+                                <div class="ticket-info">
+                                    <h5>@booking.MovieTitle</h5>
+                                    <div class="ticket-details">
+                                        <div class="detail-item">
+                                            <i class="fas fa-map-marker-alt"></i>
+                                            <span>@booking.TheaterName</span>
+                                        </div>
+                                        <div class="detail-item">
+                                            <i class="fas fa-film"></i>
+                                            <span>Phòng @booking.ScreenName</span>
+                                        </div>
+                                        <div class="detail-item">
+                                            <i class="fas fa-clock"></i>
+                                            <span>@booking.ShowtimeTime.ToString("HH:mm") - @booking.ShowtimeDate.ToString("dd/MM/yyyy")</span>
+                                        </div>
+                                        <div class="detail-item">
+                                            <i class="fas fa-chair"></i>
+                                            <span>@booking.SeatNames</span>
+                                        </div>
+                                        <div class="detail-item">
+                                            <i class="fas fa-money-bill"></i>
+                                            <span class="price-highlight">@booking.TotalAmount.ToString("N0") ₫</span>
+                                        </div>
+                                    </div>
+                                    <div class="ticket-actions">
+                                        @if (booking.Status != "Cancelled" && booking.ShowtimeDate > DateTime.Now)
+                                        {
+                                            <a href="#" class="btn-action">
+                                                <i class="fas fa-qrcode me-1"></i> Hiện vé
+                                            </a>
+                                            <a href="#" class="btn-action">
+                                                <i class="fas fa-download me-1"></i> Tải vé
+                                            </a>
+                                            <a href="#" class="btn-action btn-cancel" data-booking-id="@booking.Id">
+                                                <i class="fas fa-times-circle me-1"></i> Hủy vé
+                                            </a>
+                                        }
+                                        else if (booking.Status != "Cancelled" && booking.ShowtimeDate < DateTime.Now)
+                                        {
+                                            <span class="badge bg-success">Đã xem phim</span>
+                                        }
+                                        else if (booking.Status == "Cancelled")
+                                        {
+                                            <span class="badge bg-danger">Đã hủy</span>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="text-center" id="empty-state">
+                <i class="fas fa-ticket-alt"></i>
+                <h5 class="text-muted">Chưa có vé nào</h5>
+                <p class="text-muted">Bạn chưa đặt mua vé phim nào. Hãy khám phá các phim đang chiếu!</p>
+                <a asp-area="Public" asp-controller="Movie" asp-action="Index" class="btn btn-primary">
+                    <i class="fas fa-film me-2"></i>
+                    Đặt vé ngay
+                </a>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/customer/history/history.js" asp-append-version="true"></script>
+}
