@@ -155,7 +155,7 @@ public class BookingService : IBookingService
 		return bookingDTO;
 	}
 
-	public async Task<List<BookingDTO>> GetMyBookingsAsync()
+	public async Task<List<MyBookingDTO>> GetMyBookingsAsync()
 	{
 		// Get current user ID from claims
 		var userId = _httpContextAccessor.HttpContext?.User.FindFirst(ClaimTypes.NameIdentifier)?.Value
@@ -164,9 +164,9 @@ public class BookingService : IBookingService
 		// Get bookings for the current user
 		var bookings = await _unitOfWork.Booking.GetAllAsync(
 			b => b.ApplicationUser.Id == userId,
-			includeProperties: "BookingDetails,ShowTime,ApplicationUser");
+			includeProperties: "BookingDetails,ShowTime,ShowTime.Movie,ShowTime.Screen.Theater,ApplicationUser");
 
-		var bookingDTOs = _mapper.Map<List<BookingDTO>>(bookings);
+		var bookingDTOs = _mapper.Map<List<MyBookingDTO>>(bookings);
 		bookingDTOs.ForEach(b =>
 		{
 			b.BookingItems = _mapper.Map<List<BookingDetailDTO>>(b.BookingItems);

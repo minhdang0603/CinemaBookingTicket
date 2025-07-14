@@ -72,7 +72,15 @@ public class MappingConfig : Profile
 				DateTime.Now))
 			.ForMember(dest => dest.LastUpdatedAt, opt => opt.MapFrom(src =>
 				DateTime.Now));
-
+		CreateMap<Booking, MyBookingDTO>()
+			.ForMember(dest => dest.CustomerName, opt => opt.MapFrom(src =>
+				src.ApplicationUser != null ? src.ApplicationUser.Name : ""))
+			.ForMember(dest => dest.BookingStatus, opt => opt.MapFrom(src =>
+				src.BookingStatus))
+			.ForMember(dest => dest.ShowTime, opt => opt.MapFrom(src =>
+				src.ShowTime))
+			.ForMember(dest => dest.BookingItems, opt => opt.MapFrom(src =>
+				src.BookingDetails));
 		// ===================== BOOKING DETAIL MAPPING =====================
 		CreateMap<BookingDetailItemDTO, BookingDetail>()
 			.ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src =>
@@ -125,6 +133,15 @@ public class MappingConfig : Profile
 
 		// ===================== SHOWTIME MAPPING =====================
 		CreateMap<ShowTime, ShowTimeDTO>();
+		CreateMap<ShowTime, MyShowTimeDTO>()
+			.ForMember(dest => dest.MovieTitle, opt => opt.MapFrom(src =>
+				src.Movie != null ? src.Movie.Title : string.Empty))
+			.ForMember(dest => dest.TheaterName, opt => opt.MapFrom(src =>
+				src.Screen != null && src.Screen.Theater != null ? src.Screen.Theater.Name : string.Empty))
+			.ForMember(dest => dest.ScreenName, opt => opt.MapFrom(src =>
+				src.Screen != null ? src.Screen.Name : string.Empty))
+			.ForMember(dest => dest.MoviePosterUrl, opt => opt.MapFrom(src =>
+				src.Movie != null ? src.Movie.PosterUrl : string.Empty));
 
 		CreateMap<ShowTime, ShowTimeLiteDTO>()
 			.ForMember(dest => dest.Screen, opt => opt.MapFrom(src =>

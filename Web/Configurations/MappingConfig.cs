@@ -29,7 +29,6 @@ namespace Web.Configurations
 
             CreateMap<TheaterDetailDTO, TheaterUpdateDTO>()
                 .ForMember(dest => dest.ProvinceId, opt => opt.MapFrom(src => src.Province.Id));
-
         }
     }
 }
