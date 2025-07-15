@@ -1,4 +1,5 @@
-﻿<!DOCTYPE html>
+﻿@using Utility
+<!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="utf-8" />
@@ -42,26 +43,32 @@
                         <span class="icon">🎬</span>Tìm bộ phim
                     </a>
                     <ul class="dropdown-menu">
-                        <li><a asp-area="" asp-controller="Movie" asp-action="MovieList">Phim đang chiếu</a></li>
-                        <li><a asp-area="" asp-controller="Movie" asp-action="MovieList">Phim sắp chiếu</a></li>
+                        <li>
+                            <a asp-area="" asp-controller="Movie" asp-action="MovieList">Phim đang chiếu</a>
+                        </li>
+                        <li>
+                            <a asp-area="" asp-controller="Movie" asp-action="ComingSoon">Phim sắp chiếu</a>
+                        </li>
 
                     </ul>
                 </li>
-                <li class="dropdown">
-
-                    <a href="#" class="dropdown-toggle" onclick="toggleDropdown(event)">
-                        <span class="icon">🎫</span>Quản lí rạp
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li><a asp-area="Admin" asp-controller="Genre" asp-action="Index">Genre</a></li>
-                        <li><a asp-area="Admin" asp-controller="Movie" asp-action="Index">Movie</a></li>
-                        <li><a asp-area="Admin" asp-controller="Showtime" asp-action="Index">Showtime</a></li>
-                        <li><a asp-area="Admin" asp-controller="Screen" asp-action="Index">Screen</a></li>
-                        <li><a asp-area="Admin" asp-controller="Concession" asp-action="Index">Concession</a></li>
-                        <li><a asp-area="Admin" asp-controller="Theater" asp-action="Index">Theater</a></li>
-                        <li><a asp-area="Admin" asp-controller="Province" asp-action="Index">Province</a></li>
-                    </ul>
-                </li>
+                @if (User.IsInRole(Constant.Role_Admin))
+                {
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" onclick="toggleDropdown(event)">
+                            <span class="icon">🎫</span>Quản lí rạp
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a asp-area="Admin" asp-controller="Genre" asp-action="Index">Genre</a></li>
+                            <li><a asp-area="Admin" asp-controller="Movie" asp-action="Index">Movie</a></li>
+                            <li><a asp-area="Admin" asp-controller="Showtime" asp-action="Index">Showtime</a></li>
+                            <li><a asp-area="Admin" asp-controller="Screen" asp-action="Index">Screen</a></li>
+                            <li><a asp-area="Admin" asp-controller="Concession" asp-action="Index">Concession</a></li>
+                            <li><a asp-area="Admin" asp-controller="Theater" asp-action="Index">Theater</a></li>
+                            <li><a asp-area="Admin" asp-controller="Province" asp-action="Index">Province</a></li>
+                        </ul>
+                    </li>
+                }
             </ul>
         </nav>
 
