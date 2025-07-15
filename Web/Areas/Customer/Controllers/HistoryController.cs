@@ -53,7 +53,7 @@ namespace Web.Areas.Customer.Controllers
                     BookingDate = b.BookingDate,
                     Status = b.BookingStatus,
                     MovieTitle = b.ShowTime.MovieTitle,
-                    MoviePosterUrl = b.ShowTime.MoviePosterUrl,
+                    //MoviePosterUrl = b.ShowTime.MoviePosterUrl,
                     TheaterName = b.ShowTime.TheaterName,
                     ScreenName = b.ShowTime.ScreenName,
                     ShowtimeDate = DateTime.Parse(b.ShowTime.ShowDate.ToString()),

@@ -5,6 +5,8 @@ using Web.Models;
 using Web.Models.DTOs.Response;
 using Web.Models.ViewModels;
 using Web.Services.IServices;
+using Utility;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace Web.Areas.Public.Controllers
 {
@@ -14,14 +16,16 @@ namespace Web.Areas.Public.Controllers
         private readonly IMovieService _movieService;
         private readonly IShowtimeService _showtimeService;
         private readonly IProvinceService _provinceService;
-        private readonly ILogger<MovieController> _logger;
+        private readonly IGenreService _genreService;
+		private readonly ILogger<MovieController> _logger;
 
-        public MovieController(IMovieService movieService, ILogger<MovieController> logger, IShowtimeService showtimeService, IProvinceService provinceService)
+        public MovieController(IMovieService movieService, ILogger<MovieController> logger, IShowtimeService showtimeService, IProvinceService provinceService, IGenreService genreService)
         {
             _movieService = movieService;
             _logger = logger;
             _showtimeService = showtimeService;
             _provinceService = provinceService;
+            _genreService = genreService;
         }
 
         [HttpGet]
