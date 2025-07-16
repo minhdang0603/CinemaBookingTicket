@@ -61,7 +61,7 @@ namespace Web.Services
         {
             return SendAsync<object>(new APIRequest
             {
-                ApiType = Constant.ApiType.POST,
+                ApiType = Constant.ApiType.PUT,
                 Url = $"{_baseUrl}/api/booking/{bookingId}/cancel",
                 Token = token ?? string.Empty
             });
