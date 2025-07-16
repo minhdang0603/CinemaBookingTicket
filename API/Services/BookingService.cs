@@ -339,6 +339,33 @@ public class BookingService : IBookingService
 			{
 				try
 				{
+					// Find and delete all concession orders associated with the booking
+					var concessionOrders = await _unitOfWork.ConcessionOrder.GetAllAsync(
+						co => co.BookingId == booking.Id,
+						includeProperties: "ConcessionOrderDetails");
+
+					foreach (var concessionOrder in concessionOrders)
+					{
+						// Delete all concession order details first
+						foreach (var detail in concessionOrder.ConcessionOrderDetails.ToList())
+						{
+							await _unitOfWork.ConcessionOrderDetail.RemoveAsync(detail);
+							_logger.LogInformation("Deleted concession order detail for order ID: {ConcessionOrderId}", concessionOrder.Id);
+						}
+
+						// Delete the concession order
+						await _unitOfWork.ConcessionOrder.RemoveAsync(concessionOrder);
+						_logger.LogInformation("Deleted concession order ID: {ConcessionOrderId} for booking ID: {BookingId}",
+							concessionOrder.Id, booking.Id);
+					}
+
+					// Delete booking details if they exist
+					var bookingDetails = await _unitOfWork.BookingDetail.GetAllAsync(bd => bd.BookingId == booking.Id);
+					foreach (var detail in bookingDetails)
+					{
+						await _unitOfWork.BookingDetail.RemoveAsync(detail);
+					}
+
 					// Remove the booking
 					await _unitOfWork.Booking.RemoveAsync(booking);
 					deletedCount++;

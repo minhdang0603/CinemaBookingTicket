@@ -14,7 +14,7 @@ using Web.Services.IServices;
 namespace Web.Areas.Customer.Controllers
 {
     [Area("Customer")]
-    [Authorize(Roles = "Customer")]
+    [Authorize]
     public class HistoryController : Controller
     {
         private readonly IBookingService _bookingService;

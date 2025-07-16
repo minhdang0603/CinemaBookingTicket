@@ -211,19 +211,19 @@
 /* Responsive breakpoints - sửa lại cho nhất quán */
 @media (min-width: 1200px) {
     .movie-grid {
-        grid-template-columns: repeat(4, 1fr);
+        grid-template-columns: repeat(3, 1fr);
     }
 }
 
 @media (min-width: 992px) and (max-width: 1199px) {
     .movie-grid {
-        grid-template-columns: repeat(3, 1fr);
+        grid-template-columns: repeat(2, 1fr);
     }
 }
 
 @media (min-width: 768px) and (max-width: 991px) {
     .movie-grid {
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: repeat(1, 1fr);
     }
 }
 
@@ -265,7 +265,7 @@
 .movie-grid .movie-poster {
     position: relative;
     overflow: hidden;
-    aspect-ratio: 2/3;
+    aspect-ratio: 3/4;
     width: 100%;
     flex-shrink: 0; /* Không cho phép co lại */
 }
@@ -334,7 +334,7 @@
 .movie-grid .movie-actions-bottom .btn {
     font-size: 0.875rem;
     padding: 0.5rem;
-    width: 100%;
+    width: 94%;
 }
 
 /* Movie Card Hover Effects */

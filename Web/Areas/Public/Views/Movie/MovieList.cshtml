@@ -148,7 +148,7 @@
                 <!-- Reset Filters Button -->
                 <div class="mt-4">
                     <a href="@(isComingSoon? Url.Action("ComingSoon", "Movie") : Url.Action("MovieList", "Movie"))"
-                        class="btn btn-outline-light btn-sm w-100">
+                        class="btn btn-outline-light btn-sm">
                         <i class="fas fa-undo me-2"></i>
                         Đặt lại bộ lọc
                     </a>
@@ -187,7 +187,7 @@
                         {
                             <div class="movie-card">
                                 <div class="movie-poster">
-                                    <img src="@(!string.IsNullOrEmpty(movie.PosterUrl) ? movie.PosterUrl : "/images/no-image.jpg")"
+                                    <img src="@movie.PosterUrl"
                                         alt="@movie.Title" onerror="this.src='/images/no-image.jpg'">
                                     <div class="movie-actions">
                                         <button class="action-btn" data-movie-id="@movie.Id" title="Thêm vào yêu thích">
@@ -244,16 +244,16 @@
                                     <div class="movie-actions-bottom mt-2">
                                         @if (isComingSoon)
                                         {
-                                            <a href="@Url.Action("Index", "Movie", new { id = movie.Id })"
-                                                class="btn btn-outline-primary btn-sm w-100">
+                                            <a href="@Url.Action("Details", "Movie", new { id = movie.Id })"
+                                                class="btn btn-outline-primary btn-sm">
                                                 <i class="fas fa-clock me-1"></i>
                                                 Sắp chiếu
                                             </a>
                                         }
                                         else
                                         {
-                                            <a href="@Url.Action("Index", "Movie", new { id = movie.Id })"
-                                                class="btn btn-primary btn-sm w-100">
+                                            <a href="@Url.Action("Details", "Movie", new { id = movie.Id })"
+                                                class="btn btn-primary btn-sm">
                                                 <i class="fas fa-ticket-alt me-1"></i>
                                                 Đặt vé
                                             </a>
