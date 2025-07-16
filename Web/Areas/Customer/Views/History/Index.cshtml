@@ -1,4 +1,5 @@
 ﻿@model List<BookingHistoryViewModel>
+@using Utility
 @{
     ViewData["Title"] = "Lịch Sử Vé Đã Mua";
 }
@@ -45,19 +46,21 @@
                             </div>
                             @{
                                 string statusClass = "status-upcoming";
-                                string statusText = "Sắp tới";
+                                string statusText = booking.Status;
                                 string statusIcon = "clock";
                                 
-                                if (booking.Status == "Completed" && booking.ShowtimeDate < DateTime.Now)
+                                // Kết hợp ngày và giờ chiếu để so sánh chính xác
+                                var showtimeDateTime = new DateTime(booking.ShowtimeDate.Year, booking.ShowtimeDate.Month, booking.ShowtimeDate.Day, 
+                                                                   booking.ShowtimeTime.Hour, booking.ShowtimeTime.Minute, booking.ShowtimeTime.Second);
+                                
+                                if (booking.Status != Constant.Booking_Status_Cancelled && showtimeDateTime < DateTime.Now)
                                 {
                                     statusClass = "status-watched";
-                                    statusText = "Đã xem";
                                     statusIcon = "check-circle";
                                 }
-                                else if (booking.Status == "Cancelled")
+                                else if (booking.Status == Constant.Booking_Status_Cancelled)
                                 {
                                     statusClass = "status-cancelled";
-                                    statusText = "Đã hủy";
                                     statusIcon = "times-circle";
                                 }
                             }
@@ -98,17 +101,22 @@
                                         </div>
                                     </div>
                                     <div class="ticket-actions">
-                                        @if (booking.Status != "Cancelled" && booking.ShowtimeDate > DateTime.Now)
+                                        @{
+                                            // Kết hợp ngày và giờ chiếu để so sánh chính xác
+                                            var actionShowtimeDateTime = new DateTime(booking.ShowtimeDate.Year, booking.ShowtimeDate.Month, booking.ShowtimeDate.Day, 
+                                                                                     booking.ShowtimeTime.Hour, booking.ShowtimeTime.Minute, booking.ShowtimeTime.Second);
+                                        }
+                                        @if (booking.Status != Constant.Booking_Status_Cancelled && actionShowtimeDateTime > DateTime.Now)
                                         {
                                             <a href="#" class="btn-action btn-cancel" data-booking-id="@booking.Id">
                                                 <i class="fas fa-times-circle me-1"></i> Hủy vé
                                             </a>
                                         }
-                                        else if (booking.Status != "Cancelled" && booking.ShowtimeDate < DateTime.Now)
+                                        else if (booking.Status != Constant.Booking_Status_Cancelled && actionShowtimeDateTime < DateTime.Now)
                                         {
                                             <span class="badge bg-success">Đã xem phim</span>
                                         }
-                                        else if (booking.Status == "Cancelled")
+                                        else if (booking.Status == Constant.Booking_Status_Cancelled)
                                         {
                                             <span class="badge bg-danger">Đã hủy</span>
                                         }
