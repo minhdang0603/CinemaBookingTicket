@@ -18,14 +18,16 @@ public class BookingService : IBookingService
 	private readonly IHttpContextAccessor _httpContextAccessor;
 	private readonly ILogger<BookingService> _logger;
 	private readonly UserManager<ApplicationUser> _userManager;
+	private readonly IConcessionOrderService _concessionOrderService;
 
-	public BookingService(IUnitOfWork unitOfWork, IMapper mapper, IHttpContextAccessor httpContextAccessor, ILogger<BookingService> logger, UserManager<ApplicationUser> userManager)
+	public BookingService(IUnitOfWork unitOfWork, IMapper mapper, IHttpContextAccessor httpContextAccessor, ILogger<BookingService> logger, UserManager<ApplicationUser> userManager, IConcessionOrderService concessionOrderService)
 	{
 		_unitOfWork = unitOfWork;
 		_mapper = mapper;
 		_httpContextAccessor = httpContextAccessor;
 		_logger = logger;
 		_userManager = userManager;
+		_concessionOrderService = concessionOrderService;
 	}
 
 	public async Task CancelBookingAsync(int bookingId)
@@ -155,22 +157,24 @@ public class BookingService : IBookingService
 		return bookingDTO;
 	}
 
-	public async Task<List<BookingDTO>> GetMyBookingsAsync()
+	public async Task<List<MyBookingDTO>> GetMyBookingsAsync()
 	{
-		// Get current user ID from claims
 		var userId = _httpContextAccessor.HttpContext?.User.FindFirst(ClaimTypes.NameIdentifier)?.Value
 					  ?? throw new AppException(ErrorCodes.UnauthorizedAccess());
-
-		// Get bookings for the current user
 		var bookings = await _unitOfWork.Booking.GetAllAsync(
-			b => b.ApplicationUser.Id == userId,
-			includeProperties: "BookingDetails,ShowTime,ApplicationUser");
-
-		var bookingDTOs = _mapper.Map<List<BookingDTO>>(bookings);
-		bookingDTOs.ForEach(b =>
+			b => b.ApplicationUser.Id == userId && b.IsActive,
+			includeProperties: "BookingDetails,ShowTime,ShowTime.Movie,ShowTime.Screen.Theater,ApplicationUser");
+		// total amount include concession orders
+		var bookingDTOs = _mapper.Map<List<MyBookingDTO>>(bookings);
+		foreach (var booking in bookingDTOs)
 		{
-			b.BookingItems = _mapper.Map<List<BookingDetailDTO>>(b.BookingItems);
-		});
+			booking.BookingItems = _mapper.Map<List<BookingDetailDTO>>(booking.BookingItems);
+			booking.ShowTime = _mapper.Map<MyShowTimeDTO>(booking.ShowTime);
+
+			// Get concession orders for this booking
+			var concessionOrders = await _concessionOrderService.GetConcessionOrdersByBookingIdAsync(booking.Id);
+			booking.TotalAmount += concessionOrders.Sum(co => co.TotalAmount);
+		}
 		return bookingDTOs;
 	}
 

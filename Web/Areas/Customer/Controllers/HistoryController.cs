@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using API.DTOs.Response;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using System;
@@ -37,7 +38,7 @@ namespace Web.Areas.Customer.Controllers
                 return View(new List<BookingHistoryViewModel>());
             }
 
-            var bookings = JsonConvert.DeserializeObject<List<BookingDTO>>(
+            var bookings = JsonConvert.DeserializeObject<List<MyBookingDTO>>(
                 Convert.ToString(response.Result) ?? "[]");
 
             if (bookings == null || !bookings.Any())
