@@ -54,7 +54,7 @@ namespace Web.Areas.Customer.Controllers
                     BookingDate = b.BookingDate,
                     Status = b.BookingStatus,
                     MovieTitle = b.ShowTime.MovieTitle,
-                    //MoviePosterUrl = b.ShowTime.MoviePosterUrl,
+                    MoviePosterUrl = b.ShowTime.MoviePosterUrl,
                     TheaterName = b.ShowTime.TheaterName,
                     ScreenName = b.ShowTime.ScreenName,
                     ShowtimeDate = DateTime.Parse(b.ShowTime.ShowDate.ToString()),
@@ -70,23 +70,27 @@ namespace Web.Areas.Customer.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> CancelBooking(int bookingId)
         {
             var token = HttpContext.Session.GetString(Constant.SessionToken);
             if (string.IsNullOrEmpty(token))
             {
-                return Json(new { success = false, message = "Bạn cần đăng nhập để thực hiện thao tác này" });
+                TempData["ErrorMessage"] = "Bạn cần đăng nhập để thực hiện thao tác này";
+                return RedirectToAction("Index");
             }
 
             try
             {
                 await _bookingService.CancelBookingAsync(bookingId, token);
-                return Json(new { success = true, message = "Vé đã được hủy thành công" });
+                TempData["SuccessMessage"] = "Vé đã được hủy thành công";
             }
             catch (Exception ex)
             {
-                return Json(new { success = false, message = $"Không thể hủy vé. Chi tiết: {ex.Message}" });
+                TempData["ErrorMessage"] = $"Không thể hủy vé. Chi tiết: {ex.Message}";
             }
+
+            return RedirectToAction("Index");
         }
     }
 }

@@ -1,23 +1,34 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // Handle action buttons
-    const actionButtons = document.querySelectorAll('.btn-action');
-    actionButtons.forEach(button => {
+    // Handle cancel booking
+    const cancelButtons = document.querySelectorAll('.btn-cancel');
+    cancelButtons.forEach(button => {
         button.addEventListener('click', function(e) {
             e.preventDefault();
-            const action = this.textContent.trim();
-            console.log('Action clicked:', action);
-            
-            if (action.includes('Hiện vé')) {
-                alert('Đang hiển thị mã QR vé...');
-            } else if (action.includes('Hủy vé')) {
-                if (confirm('Bạn có chắc chắn muốn hủy vé này?')) {
-                    console.log('Ticket cancelled');
+            const bookingId = this.getAttribute('data-booking-id');
+
+
+            if (confirm('Bạn có chắc chắn muốn hủy vé này?')) {
+                // Simple form submission to controller
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '/Customer/History/CancelBooking';
+                
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'bookingId';
+                input.value = bookingId;
+                
+                const token = document.querySelector('input[name="__RequestVerificationToken"]');
+                if (token) {
+                    form.appendChild(token.cloneNode());
                 }
-            } else if (action.includes('Tải vé')) {
-                console.log('Downloading ticket...');
+                
+                form.appendChild(input);
+                document.body.appendChild(form);
+                form.submit();
             }
         });
     });
 
-    // Hover effects for tickets - removed as we're using CSS transitions
+
 });

@@ -36,16 +36,31 @@ public class BookingService : IBookingService
 		var userId = _httpContextAccessor.HttpContext?.User.FindFirst(ClaimTypes.NameIdentifier)?.Value
 					  ?? throw new AppException(ErrorCodes.UnauthorizedAccess());
 
-		// Get booking by ID
-		var booking = await _unitOfWork.Booking.GetAsync(b => b.Id == bookingId && b.ApplicationUser.Id == userId);
+		// Get booking by ID with ApplicationUser included
+		var booking = await _unitOfWork.Booking.GetAsync(
+			b => b.Id == bookingId && b.IsActive == true,
+			includeProperties: "ApplicationUser");
 
-		if (booking == null || booking.ApplicationUser.Id != userId)
+		if (booking == null)
 		{
 			throw new AppException(ErrorCodes.EntityNotFound("Booking", bookingId));
 		}
 
+		// Check ownership
+		if (booking.ApplicationUser?.Id != userId)
+		{
+			throw new AppException(ErrorCodes.UnauthorizedAccess());
+		}
+
+		// Check if already cancelled
+		if (booking.BookingStatus == Constant.Booking_Status_Cancelled)
+		{
+			throw new AppException(new Error("Vé này đã được hủy trước đó", System.Net.HttpStatusCode.BadRequest));
+		}
+
+		// Cancel the booking
 		booking.BookingStatus = Constant.Booking_Status_Cancelled;
-		booking.IsActive = false;
+
 		booking.LastUpdatedAt = DateTime.UtcNow;
 
 		// Update booking
@@ -53,6 +68,8 @@ public class BookingService : IBookingService
 
 		// Commit transaction
 		await _unitOfWork.SaveAsync();
+
+		_logger.LogInformation("Booking {BookingId} has been cancelled by user {UserId}", bookingId, userId);
 	}
 
 	//public async Task<string> CreateBookingWithPaymentAsync(BookingCreateDTO bookingCreateDTO)
