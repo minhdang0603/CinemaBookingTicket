@@ -63,6 +63,20 @@ public class BookingService : IBookingService
 
 		booking.LastUpdatedAt = DateTime.UtcNow;
 
+		// Cancel all related concession orders
+		var concessionOrders = await _unitOfWork.ConcessionOrder.GetAllAsync(
+			co => co.BookingId == bookingId && co.IsActive == true);
+
+		foreach (var concessionOrder in concessionOrders)
+		{
+			concessionOrder.OrderStatus = Constant.Booking_Status_Cancelled;
+			concessionOrder.LastUpdatedAt = DateTime.UtcNow;
+			await _unitOfWork.ConcessionOrder.UpdateAsync(concessionOrder);
+
+			_logger.LogInformation("ConcessionOrder {ConcessionOrderId} has been cancelled for booking {BookingId}",
+				concessionOrder.Id, bookingId);
+		}
+
 		// Update booking
 		await _unitOfWork.Booking.UpdateAsync(booking);
 
