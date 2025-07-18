@@ -38,20 +38,20 @@ namespace API.Controllers
 			return Ok(APIResponse<List<MovieDTO>>.Builder().WithResult(movies).WithStatusCode(HttpStatusCode.OK).Build());
 		}
 
-		[HttpGet("get-all-movies-with-pagination")]
-		public async Task<ActionResult<APIResponse<List<MovieDTO>>>> GetAllMoviesWithPaginationAsync(int pageNumber, int pageSize, bool? isActive = true)
-		{
-			var movies = await _movieService.GetAllMoviesWithPaginationAsync(pageNumber, pageSize, isActive);
-			if (movies.Count == 0)
-			{
-				return NotFound(APIResponse<List<MovieDTO>>.Builder()
-					.WithErrorMessages(new List<string> { "No movies found" })
-					.WithStatusCode(HttpStatusCode.NotFound)
-					.WithSuccess(false)
-					.Build());
-			}
-			return Ok(APIResponse<List<MovieDTO>>.Builder().WithResult(movies).WithStatusCode(HttpStatusCode.OK).Build());
-		}
+        [HttpGet("get-all-movies-with-pagination")]
+        public async Task<ActionResult<APIResponse<List<MovieDTO>>>> GetAllMoviesWithPaginationAsync([FromQuery] int pageNumber, [FromQuery] int pageSize, [FromQuery] string status, bool? isActive = true)
+        {
+            var movies = await _movieService.GetAllMoviesWithPaginationAsync(pageNumber, pageSize, status, isActive);
+            if (movies.Count == 0)
+            {
+                return NotFound(APIResponse<List<MovieDTO>>.Builder()
+                    .WithErrorMessages(new List<string> { "No movies found" })
+                    .WithStatusCode(HttpStatusCode.NotFound)
+                    .WithSuccess(false)
+                    .Build());
+            }
+            return Ok(APIResponse<List<MovieDTO>>.Builder().WithResult(movies).WithStatusCode(HttpStatusCode.OK).Build());
+        }
 
 
 		[HttpPost("create")]

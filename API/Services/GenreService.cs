@@ -121,5 +121,24 @@ namespace API.Services
             _logger.LogInformation($"Genre {genre.Name} updated successfully with ID {genre.Id}");
             return _mapper.Map<GenreDTO>(genre);
         }
+        public async Task<List<GenreDTO>> GetFiveTopGenresAsync()
+        {
+            // Lấy tất cả MovieGenre entries với genre và movie đều active
+            var movieGenres = await _unitOfWork.MovieGenre.GetAllAsync(
+                includeProperties: "Genre,Movie",
+                filter: mg => mg.Genre.IsActive == true && mg.Movie.IsActive == true);
+
+            // Group by Genre, đếm số lượng movies, sắp xếp và lấy top 5
+            var topGenres = movieGenres
+                .GroupBy(mg => mg.Genre)
+                .Select(g => new { Genre = g.Key, Count = g.Count() })
+                .OrderByDescending(g => g.Count)
+                .Take(5)
+                .Select(g => g.Genre)
+                .ToList();
+
+            _logger.LogInformation($"Found {topGenres.Count} top genres");
+            return _mapper.Map<List<GenreDTO>>(topGenres);
+        }
     }
 }

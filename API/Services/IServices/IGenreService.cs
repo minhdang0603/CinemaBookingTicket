@@ -12,5 +12,6 @@ namespace API.Services.IServices
         Task<GenreDTO> CreateGenreAsync(GenreCreateDTO genreCreateDTO);
         Task<GenreDTO> UpdateGenreAsync(int id, GenreUpdateDTO genreUpdateDTO);
         Task<GenreDTO> DeleteGenreAsync(int id);
+        Task<List<GenreDTO>> GetFiveTopGenresAsync();
     }
 }

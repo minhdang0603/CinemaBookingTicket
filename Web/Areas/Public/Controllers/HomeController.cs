@@ -2,8 +2,10 @@
 using Newtonsoft.Json;
 using Web.Models;
 using Web.Models.DTOs.Response;
-using Web.Models.ViewModels;
 using Web.Services.IServices;
+using Web.Models.DTOs.Request;
+using Web.Models.ViewModels;
+using Utility;
 
 namespace Web.Areas.Public.Controllers
 {
@@ -21,79 +23,32 @@ namespace Web.Areas.Public.Controllers
 
         public async Task<IActionResult> Index()
         {
-            _logger.LogInformation("HomeController Index method called");
-            var viewModel = new HomeIndexViewModel();
-
-            // Tạm thời dùng static data để test view
-            viewModel.FeaturedMovies = GetSampleMovies();
-
-            _logger.LogInformation("Using sample data with {Count} movies", viewModel.FeaturedMovies.Count);
-            _logger.LogInformation("Debug info: {Info}", viewModel.GetDebugInfo());
-
-            return View(viewModel);
-        }
-
-        private List<MovieDTO> GetSampleMovies()
-        {
-            return new List<MovieDTO>
+            try
             {
-                new MovieDTO
+                var featuredMovies = await GetFeaturedMoviesAsync();
+
+                // Debug log
+                _logger.LogInformation("Index method - Featured movies count: {Count}", featuredMovies.Count);
+
+                var viewModel = new HomeIndexViewModel
                 {
-                    Id = 1,
-                    Title = "Avengers: Endgame",
-                    Director = "Anthony Russo, Joe Russo",
-                    Cast = "Robert Downey Jr., Chris Evans, Mark Ruffalo, Chris Hemsworth",
-                    Description = "Cuộc chiến cuối cùng của các siêu anh hùng Marvel",
-                    Duration = 181,
-                    Status = "NowShowing",
-                    ReleaseDate = new DateOnly(2024, 6, 15),
-                    AgeRating = "PG-13",
-                    PosterUrl = "https://m.media-amazon.com/images/M/MV5BMTc5MDE2ODcwNV5BMl5BanBnXkFtZTgwMzI2NzQ2NzM@._V1_.jpg",
-                    TrailerUrl = "https://www.youtube.com/watch?v=TcMBFSGVi1c",
-                    Genres = new List<GenreDTO>
-                    {
-                        new GenreDTO { Id = 1, Name = "Hành động", Description = "Phim hành động kịch tính" },
-                        new GenreDTO { Id = 2, Name = "Khoa học viễn tưởng", Description = "Phim khoa học viễn tưởng" }
-                    }
-                },
-                new MovieDTO
-                {
-                    Id = 2,
-                    Title = "Spider-Man: No Way Home",
-                    Director = "Jon Watts",
-                    Cast = "Tom Holland, Zendaya, Benedict Cumberbatch",
-                    Description = "Peter Parker phải đối mặt với các phản diện từ đa vũ trụ",
-                    Duration = 148,
-                    Status = "NowShowing",
-                    ReleaseDate = new DateOnly(2024, 7, 1),
-                    AgeRating = "PG-13",
-                    PosterUrl = "https://m.media-amazon.com/images/M/MV5BZWMyYzFjYTYtNTRjYi00OGExLWE2YzgtOGRmYjAxZTU3NzBiXkEyXkFqcGdeQXVyMzQ0MzA0NTM@._V1_.jpg",
-                    TrailerUrl = "https://www.youtube.com/watch?v=JfVOs4VSpmA",
-                    Genres = new List<GenreDTO>
-                    {
-                        new GenreDTO { Id = 1, Name = "Hành động", Description = "Phim hành động kịch tính" },
-                        new GenreDTO { Id = 2, Name = "Khoa học viễn tưởng", Description = "Phim khoa học viễn tưởng" }
-                    }
-                },
-                new MovieDTO
-                {
-                    Id = 3,
-                    Title = "The Lion King",
-                    Director = "Jon Favreau",
-                    Cast = "Donald Glover, Beyoncé, James Earl Jones",
-                    Description = "Câu chuyện về chú sư tử Simba và hành trình trở thành vua",
-                    Duration = 118,
-                    Status = "NowShowing",
-                    ReleaseDate = new DateOnly(2024, 8, 10),
-                    AgeRating = "G",
-                    PosterUrl = "https://m.media-amazon.com/images/M/MV5BMjIwMjE1Nzc4NV5BMl5BanBnXkFtZTgwNDg4OTA1NzM@._V1_.jpg",
-                    TrailerUrl = "https://www.youtube.com/watch?v=7TavVZMewpY",
-                    Genres = new List<GenreDTO>
-                    {
-                        new GenreDTO { Id = 6, Name = "Hoạt hình", Description = "Phim hoạt hình cho mọi lứa tuổi" }
-                    }
-                }
-            };
+                    FeaturedMovies = featuredMovies
+                };
+                ViewBag.Movies = viewModel.FeaturedMovies;
+
+                // Debug ViewBag
+                _logger.LogInformation("ViewBag.Movies count: {Count}",
+                    ((List<MovieDTO>)ViewBag.Movies)?.Count ?? 0);
+
+                return View(viewModel);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error loading home page data");
+                var model = new HomeIndexViewModel();
+                ViewBag.Movies = model.FeaturedMovies;
+                return View(model);
+            }
         }
 
         [HttpGet]
@@ -111,67 +66,130 @@ namespace Web.Areas.Public.Controllers
             }
         }
 
-        // Debug endpoint
+        // DEBUG ENDPOINT - Thêm method này để debug
         [HttpGet]
-        public IActionResult Debug()
+        public async Task<IActionResult> DebugApi()
         {
-            var movies = GetSampleMovies();
-            return Json(new
+            try
             {
-                count = movies.Count,
-                movies = movies.Select(m => new {
-                    m.Id,
-                    m.Title,
-                    m.Duration,
-                    m.Status,
-                    m.AgeRating,
-                    genreCount = m.Genres?.Count ?? 0,
-                    genres = m.Genres?.Select(g => g.Name).ToArray(),
-                    posterUrl = m.PosterUrl
-                })
-            });
+                _logger.LogInformation("=== DEBUG API START ===");
+
+                var movieResponse = await _movieService.GetMoviesForHomeAsync<APIResponse>();
+
+                var debugInfo = new
+                {
+                    ApiResponseNull = movieResponse == null,
+                    IsSuccess = movieResponse?.IsSuccess ?? false,
+                    HasResult = movieResponse?.Result != null,
+                    ResultType = movieResponse?.Result?.GetType().Name,
+                    RawResult = movieResponse?.Result?.ToString(),
+                    ErrorMessages = movieResponse?.ErrorMessages,
+                    ErrorCount = movieResponse?.ErrorMessages?.Count ?? 0
+                };
+
+                _logger.LogInformation("Debug Info: {@DebugInfo}", debugInfo);
+
+                return Json(debugInfo);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Debug API error");
+                return Json(new
+                {
+                    Success = false,
+                    Error = ex.Message,
+                    StackTrace = ex.StackTrace
+                });
+            }
         }
 
         private async Task<List<MovieDTO>> GetFeaturedMoviesAsync()
         {
             try
             {
-                _logger.LogInformation("Starting to get featured movies from API");
+                _logger.LogInformation("=== GetFeaturedMoviesAsync START ===");
 
-                var movieResponse = await _movieService.GetAllMoviesAsync<APIResponse>();
+                var movieResponse = await _movieService.GetMoviesForHomeAsync<APIResponse>();
 
-                if (movieResponse == null || !movieResponse.IsSuccess)
+                _logger.LogInformation("API Call completed. Response null: {IsNull}", movieResponse == null);
+
+                if (movieResponse == null)
                 {
-                    _logger.LogError("Failed to load movies from API: {Error}",
-                        movieResponse?.ErrorMessages?.FirstOrDefault() ?? "Unknown error");
+                    _logger.LogError("movieResponse is null");
                     return new List<MovieDTO>();
                 }
 
-                _logger.LogInformation("API response received successfully");
+                _logger.LogInformation("API Response IsSuccess: {IsSuccess}", movieResponse.IsSuccess);
 
-                var allMovies = JsonConvert.DeserializeObject<List<MovieDTO>>(
-                    Convert.ToString(movieResponse.Result));
-
-                if (allMovies == null || !allMovies.Any())
+                if (!movieResponse.IsSuccess)
                 {
-                    _logger.LogWarning("No movies found from API response");
+                    _logger.LogError("API call failed. Errors: {Errors}",
+                        string.Join(", ", movieResponse.ErrorMessages ?? new List<string>()));
                     return new List<MovieDTO>();
                 }
 
-                _logger.LogInformation("Found {Count} movies from API", allMovies.Count);
+                var responseData = Convert.ToString(movieResponse.Result);
+                _logger.LogInformation("Response data length: {Length}", responseData?.Length ?? 0);
+                _logger.LogInformation("Response data preview: {Preview}",
+                    responseData?.Substring(0, Math.Min(500, responseData.Length )));
 
-                var featuredMovies = allMovies
-                    .Where(m => m.Status == "NowShowing") 
-                    .OrderByDescending(m => m.ReleaseDate) 
-                    .Take(12) 
-                    .ToList();
+                if (string.IsNullOrEmpty(responseData))
+                {
+                    _logger.LogWarning("Empty response data from GetMoviesForHome API");
+                    return new List<MovieDTO>();
+                }
 
-                _logger.LogInformation("Filtered to {Count} featured movies", featuredMovies.Count);
-                return featuredMovies;
+                try
+                {
+                    var homeMoviesData = JsonConvert.DeserializeObject<HomeMoviesDTO>(responseData);
+
+                    if (homeMoviesData == null)
+                    {
+                        _logger.LogWarning("HomeMoviesData is null after deserialization");
+                        return new List<MovieDTO>();
+                    }
+
+                    _logger.LogInformation("Deserialization successful!");
+                    _logger.LogInformation("NowShowing count: {Count}", homeMoviesData.NowShowing?.Count ?? 0);
+                    _logger.LogInformation("ComingSoon count: {Count}", homeMoviesData.ComingSoon?.Count ?? 0);
+
+                    var nowShowingMovies = homeMoviesData.NowShowing ?? new List<MovieDTO>();
+
+                    if (nowShowingMovies.Any())
+                    {
+                        var firstMovie = nowShowingMovies.First();
+                        _logger.LogInformation("First movie sample: ID={Id}, Title={Title}, Status={Status}",
+                            firstMovie.Id, firstMovie.Title, firstMovie.Status);
+                    }
+                    else
+                    {
+                        _logger.LogWarning("NowShowing list is empty");
+                    }
+
+                    _logger.LogInformation("Returning {Count} movies", nowShowingMovies.Count);
+                    return nowShowingMovies;
+                }
+                catch (JsonException jsonEx)
+                {
+                    _logger.LogError(jsonEx, "JSON Deserialization failed. Response: {Response}", responseData);
+
+                    try
+                    {
+                        var directMovies = JsonConvert.DeserializeObject<List<MovieDTO>>(responseData);
+                        _logger.LogInformation("Direct List<MovieDTO> deserialization successful: {Count} movies",
+                            directMovies?.Count ?? 0);
+                        return directMovies ?? new List<MovieDTO>();
+                    }
+                    catch (Exception directEx)
+                    {
+                        _logger.LogError(directEx, "Direct deserialization also failed");
+                        return new List<MovieDTO>();
+                    }
+                }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Exception occurred while getting featured movies");
+                _logger.LogError(ex, "Exception in GetFeaturedMoviesAsync");
                 return new List<MovieDTO>();
             }
         }
@@ -189,11 +207,11 @@ namespace Web.Areas.Public.Controllers
                 }
 
                 var allMovies = JsonConvert.DeserializeObject<List<MovieDTO>>(
-                    Convert.ToString(movieResponse.Result));
+                    Convert.ToString(movieResponse.Result) ?? "[]");
 
                 var moviesByGenre = allMovies?
                     .Where(m => m.Genres != null && m.Genres.Any(g => g.Id == genreId))
-                    .Where(m => m.Status == "NowShowing")
+                    .Where(m => m.Status == Constant.Movie_Status_NowShowing)
                     .OrderByDescending(m => m.ReleaseDate)
                     .Take(12)
                     .ToList() ?? new List<MovieDTO>();
@@ -207,7 +225,6 @@ namespace Web.Areas.Public.Controllers
             }
         }
 
-        // Error handling
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {

@@ -90,10 +90,10 @@ public class BookingController : ControllerBase
 
     [HttpGet("my-bookings")]
     [Authorize]
-    public async Task<ActionResult<APIResponse<List<BookingDTO>>>> GetMyBookingsAsync()
+    public async Task<ActionResult<APIResponse<List<MyBookingDTO>>>> GetMyBookingsAsync()
     {
         var bookings = await _bookingService.GetMyBookingsAsync();
-        return Ok(APIResponse<List<BookingDTO>>.Builder()
+        return Ok(APIResponse<List<MyBookingDTO>>.Builder()
             .WithResult(bookings)
             .WithSuccess(true)
             .Build());

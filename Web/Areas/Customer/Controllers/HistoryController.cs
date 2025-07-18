@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using API.DTOs.Response;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using System;
@@ -13,7 +14,7 @@ using Web.Services.IServices;
 namespace Web.Areas.Customer.Controllers
 {
     [Area("Customer")]
-    [Authorize(Roles = "Customer")]
+    [Authorize]
     public class HistoryController : Controller
     {
         private readonly IBookingService _bookingService;
@@ -37,7 +38,7 @@ namespace Web.Areas.Customer.Controllers
                 return View(new List<BookingHistoryViewModel>());
             }
 
-            var bookings = JsonConvert.DeserializeObject<List<BookingDTO>>(
+            var bookings = JsonConvert.DeserializeObject<List<MyBookingDTO>>(
                 Convert.ToString(response.Result) ?? "[]");
 
             if (bookings == null || !bookings.Any())
@@ -54,6 +55,7 @@ namespace Web.Areas.Customer.Controllers
                     Status = b.BookingStatus,
                     MovieTitle = b.ShowTime.MovieTitle,
                    // MoviePosterUrl = b.ShowTime.MoviePosterUrl,
+                    //MoviePosterUrl = b.ShowTime.MoviePosterUrl,
                     TheaterName = b.ShowTime.TheaterName,
                     ScreenName = b.ShowTime.ScreenName,
                     ShowtimeDate = DateTime.Parse(b.ShowTime.ShowDate.ToString()),

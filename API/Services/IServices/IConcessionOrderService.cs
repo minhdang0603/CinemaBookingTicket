@@ -10,4 +10,5 @@ public interface IConcessionOrderService
     Task<List<ConcessionOrderDTO>> GetAllConcessionOrdersAsync();
     Task<List<ConcessionOrderDTO>> GetConcessionOrdersByBookingIdAsync(int bookingId);
     Task DeleteConcessionOrderAsync(int concessionOrderId);
+
 }

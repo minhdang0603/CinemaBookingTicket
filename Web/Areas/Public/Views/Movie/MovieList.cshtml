@@ -1,5 +1,17 @@
-﻿@{
-    ViewData["Title"] = "Phim Đang Chiếu";
+﻿@model IEnumerable<Web.Models.DTOs.Response.MovieDTO>
+@{
+    ViewData["Title"] = ViewBag.PageTitle ?? "Danh Sách Phim";
+    var currentPage = ViewBag.CurrentPage ?? 1;
+    var totalPages = ViewBag.TotalPages ?? 1;
+    var totalCount = ViewBag.TotalCount ?? 0;
+    var pageSize = ViewBag.PageSize ?? 8;
+    var startItem = (currentPage - 1) * pageSize + 1;
+    var endItem = Math.Min(currentPage * pageSize, totalCount);
+    var isComingSoon = ViewBag.IsComingSoon ?? false;
+    var movieStatus = ViewBag.MovieStatus ?? "";
+    var pageTitle = ViewBag.PageTitle ?? "Danh Sách Phim";
+    var currentGenreId = ViewBag.CurrentGenreId;
+    var currentYear = ViewBag.CurrentYear;
 }
 
 @section Styles {
@@ -12,12 +24,36 @@
         <div class="hero-content text-center">
             <h1 class="hero-title">
                 <i class="fas fa-film me-3 text-red"></i>
-                Phim Đang Chiếu
+                @pageTitle
             </h1>
             <p class="hero-subtitle">
-                Danh sách các phim hiện đang chiếu rạp trên toàn quốc 29/06/2025.
-                Xem lịch chiếu phim, giá vé tiện lợi, đặt vé nhanh chỉ với 1 bước!
+                @if (isComingSoon)
+                {
+                    <text>Danh sách các phim sắp chiếu rạp trong thời gian tới. Đặt vé trước để không bỏ lỡ những bộ phim
+                        hay nhất!</text>
+                }
+                else
+                {
+                    <text>Danh sách các phim hiện đang chiếu rạp trên toàn quốc @DateTime.Now.ToString("dd/MM/yyyy"). Xem
+                        lịch chiếu phim, giá vé tiện lợi, đặt vé nhanh chỉ với 1 bước!</text>
+                }
             </p>
+
+            <!-- Tab Navigation -->
+            <div class="movie-tabs mt-4">
+                <div class="btn-group" role="group" aria-label="Movie tabs">
+                    <a href="@Url.Action("MovieList", "Movie")"
+                        class="btn @(!isComingSoon ? "btn-primary" : "btn-outline-primary")">
+                        <i class="fas fa-play me-2"></i>
+                        Phim Đang Chiếu
+                    </a>
+                    <a href="@Url.Action("ComingSoon", "Movie")"
+                        class="btn @(isComingSoon ? "btn-primary" : "btn-outline-primary")">
+                        <i class="fas fa-clock me-2"></i>
+                        Phim Sắp Chiếu
+                    </a>
+                </div>
+            </div>
         </div>
     </div>
 </section>
@@ -27,45 +63,95 @@
         <!-- Sidebar Filters -->
         <div class="col-lg-3 col-md-4">
             <div class="filter-sidebar">
-                <div class="mb-4">
-                    <h6 class="filter-title">
-                        <i class="fas fa-sort me-2"></i>
-                        Sắp xếp
-                    </h6>
-                    <div class="custom-dropdown">
-                        <span>Phổ biến</span>
-                    </div>
-                </div>
+                <!-- Filter Form -->
+                <form method="get"
+                    action="@(isComingSoon? Url.Action("ComingSoon", "Movie") : Url.Action("MovieList", "Movie"))"
+                    id="filterForm">
+                    <input type="hidden" name="pageNumber" value="1" />
+                    <input type="hidden" name="pageSize" value="@pageSize" />
 
-                <div class="mb-4">
-                    <h6 class="filter-title">
-                        <i class="fas fa-tags me-2"></i>
-                        Thể loại
-                    </h6>
-                    <div class="custom-dropdown">
-                        <span>Tất cả</span>
+                    <div class="mb-4">
+                        <h6 class="filter-title">
+                            <i class="fas fa-sort me-2"></i>
+                            Thể Loại Phim
+                        </h6>
+                        <select class="custom-dropdown" id="genreFilter" name="genreId" onchange="submitFilter()">
+                            <option value="">-- Chọn thể loại --</option>
+                            @if (ViewBag.Genres != null)
+                            {
+                                @foreach (var genre in ViewBag.Genres)
+                                {
+                                    <option value="@genre.Value"
+                                        selected="@(currentGenreId?.ToString() == genre.Value ? "selected" : null)">
+                                        @genre.Text
+                                    </option>
+                                }
+                            }
+                        </select>
                     </div>
-                </div>
 
-                <div class="mb-4">
-                    <h6 class="filter-title">
-                        <i class="fas fa-language me-2"></i>
-                        Ngôn ngữ
-                    </h6>
-                    <div class="custom-dropdown">
-                        <span>Tất cả</span>
+                    <div class="mb-4">
+                        <h6 class="filter-title">
+                            <i class="fas fa-tags me-2"></i>
+                            Năm Phát Hành
+                        </h6>
+                        <select class="custom-dropdown" id="yearFilter" name="year" onchange="submitFilter()">
+                            <option value="">-- Chọn năm --</option>
+                            @if (ViewBag.Years != null)
+                            {
+                                @foreach (var year in ViewBag.Years)
+                                {
+                                    <option value="@year.Value"
+                                        selected="@(currentYear?.ToString() == year.Value ? "selected" : null)">
+                                        @year.Text
+                                    </option>
+                                }
+                            }
+                        </select>
                     </div>
-                </div>
+                </form>
 
                 <div class="mt-4">
                     <h6 class="filter-title">Thể loại phổ biến</h6>
                     <div class="genre-badges">
-                        <span class="genre-badge">Hành động</span>
-                        <span class="genre-badge blue">Kinh dị</span>
-                        <span class="genre-badge purple">Hài</span>
-                        <span class="genre-badge pink">Tình cảm</span>
-                        <span class="genre-badge cyan">Gia đình</span>
+                        @if (ViewBag.TopGenres != null)
+                        {
+                            var topGenres = ViewBag.TopGenres as IEnumerable<SelectListItem>;
+                            if (topGenres != null)
+                            {
+                                foreach (var genre in topGenres)
+                                {
+                                    <span class="genre-badge @(currentGenreId?.ToString() == genre.Value ? "active" : "")"
+                                        onclick="selectGenre('@genre.Value')">@genre.Text</span>
+                                }
+                            }
+                        }
+                        else
+                        {
+                            @* Fallback nếu không load được top genres *@
+                            @if (ViewBag.Genres != null)
+                            {
+                                var genres = ViewBag.Genres as IEnumerable<SelectListItem>;
+                                if (genres != null)
+                                {
+                                    foreach (var genre in genres.Take(5))
+                                    {
+                                        <span class="genre-badge @(currentGenreId?.ToString() == genre.Value ? "active" : "")"
+                                            onclick="selectGenre('@genre.Value')">@genre.Text</span>
+                                    }
+                                }
+                            }
+                        }
                     </div>
+                </div>
+
+                <!-- Reset Filters Button -->
+                <div class="mt-4">
+                    <a href="@(isComingSoon? Url.Action("ComingSoon", "Movie") : Url.Action("MovieList", "Movie"))"
+                        class="btn btn-outline-light btn-sm">
+                        <i class="fas fa-undo me-2"></i>
+                        Đặt lại bộ lọc
+                    </a>
                 </div>
             </div>
         </div>
@@ -77,220 +163,289 @@
                 <div class="results-info">
                     <div class="text-muted">
                         <i class="fas fa-film me-2"></i>
-                        Hiển thị 1-6 trong tổng số 24 phim
+                        @if (totalCount > 0)
+                        {
+                            <text>Hiển thị @startItem-@endItem trong tổng số @totalCount phim</text>
+                        }
+                        else
+                        {
+                            <text>Không có phim nào được tìm thấy</text>
+                        }
                     </div>
-                    <div class="text-muted">
-                        Trang 1 / 4
-                    </div>
+                    @if (totalPages > 0)
+                    {
+                        <div class="text-muted">
+                            Trang @currentPage / @totalPages
+                        </div>
+                    }
                 </div>
 
-                <div class="movie-grid">
-                    <!-- Movie Card 1 -->
-                    <div class="movie-card">
-                        <div class="movie-poster">
-                            <img src="https://cdn.moveek.com/storage/media/cache/short/684701a026f4b224948393.jpg"
-                                alt="Út Lan: Oán Linh Giữ Của">
-                            <div class="movie-actions">
-                                <button class="action-btn">
-                                    <i class="far fa-heart"></i>
-                                </button>
-                                <button class="action-btn">
-                                    <i class="fas fa-star"></i>
-                                </button>
-                            </div>
-                        </div>
-                        <div class="movie-info">
-                            <h3 class="movie-title">Út Lan: Oán Linh Giữ Của</h3>
-                            <div class="movie-details">
-                                <span class="release-date">
-                                    <i class="fas fa-calendar-alt me-1"></i>
-                                    20/06
-                                </span>
-                                <div class="rating warning">
-                                    <i class="fas fa-thumbs-up"></i>
-                                    <span>67%</span>
+                <div class="movie-grid" id="movieGrid">
+                    @if (Model != null && Model.Any())
+                    {
+                        @foreach (var movie in Model)
+                        {
+                            <div class="movie-card">
+                                <div class="movie-poster">
+                                    <img src="@movie.PosterUrl"
+                                        alt="@movie.Title" onerror="this.src='/images/no-image.jpg'">
+                                    <div class="movie-actions">
+                                        <button class="action-btn" data-movie-id="@movie.Id" title="Thêm vào yêu thích">
+                                            <i class="far fa-heart"></i>
+                                        </button>
+                                        <button class="action-btn" data-movie-id="@movie.Id" title="Đánh giá">
+                                            <i class="fas fa-star"></i>
+                                        </button>
+                                    </div>
+                                    @* Đảm bảo badge luôn có position absolute để không ảnh hưởng đến layout *@
+                                    @if (isComingSoon)
+                                    {
+                                        <div class="coming-soon-badge">
+                                            <span>Sắp chiếu</span>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        @* Thêm div trống với cùng class để giữ consistency *@
+                                        <div class="coming-soon-badge" style="display: none;">
+                                            <span></span>
+                                        </div>
+                                    }
+                                </div>
+                                <div class="movie-info">
+                                    <h3 class="movie-title">
+                                        <a href="@Url.Action("Index", "Movie", new { id = movie.Id })"
+                                            class="text-decoration-none">
+                                            @movie.Title
+                                        </a>
+                                    </h3>
+                                    <div class="movie-details">
+                                        <span class="release-date">
+                                            <i class="fas fa-calendar-alt me-1"></i>
+                                            @if (isComingSoon)
+                                            {
+                                                @(movie.ReleaseDate.ToString("dd/MM/yyyy") ?? "N/A")
+                                            }
+                                            else
+                                            {
+                                                @(movie.ReleaseDate.ToString("dd/MM") ?? "N/A")
+                                            }
+                                        </span>
+                                    </div>
+                                    @if (!string.IsNullOrEmpty(movie.Duration.ToString()))
+                                    {
+                                        <div class="movie-duration">
+                                            <small class="text-muted">
+                                                <i class="fas fa-clock me-1"></i>
+                                                @movie.Duration phút
+                                            </small>
+                                        </div>
+                                    }
+                                    <div class="movie-actions-bottom mt-2">
+                                        @if (isComingSoon)
+                                        {
+                                            <a href="@Url.Action("Details", "Movie", new { id = movie.Id })"
+                                                class="btn btn-outline-primary btn-sm">
+                                                <i class="fas fa-clock me-1"></i>
+                                                Sắp chiếu
+                                            </a>
+                                        }
+                                        else
+                                        {
+                                            <a href="@Url.Action("Details", "Movie", new { id = movie.Id })"
+                                                class="btn btn-primary btn-sm">
+                                                <i class="fas fa-ticket-alt me-1"></i>
+                                                Đặt vé
+                                            </a>
+                                        }
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-
-                    <!-- Movie Card 2 -->
-                    <div class="movie-card">
-                        <div class="movie-poster">
-                            <img src="https://cdn.moveek.com/storage/media/cache/short/68183ba4c70b2014190582.jpg"
-                                alt="Bí Kíp Luyện Rồng live action">
-                            <div class="movie-actions">
-                                <button class="action-btn">
-                                    <i class="far fa-heart"></i>
-                                </button>
-                                <button class="action-btn">
-                                    <i class="fas fa-star"></i>
-                                </button>
+                        }
+                    }
+                    else
+                    {
+                        <div class="col-12">
+                            <div class="text-center py-5">
+                                <i class="fas fa-film fa-3x text-muted mb-3"></i>
+                                @if (isComingSoon)
+                                {
+                                    <h4 class="text-muted">Không có phim nào sắp chiếu</h4>
+                                    <p class="text-muted">Vui lòng thử lại sau hoặc xem phim đang chiếu.</p>
+                                }
+                                else
+                                {
+                                    <h4 class="text-muted">Không có phim nào đang chiếu</h4>
+                                    <p class="text-muted">Vui lòng thử lại sau hoặc điều chỉnh bộ lọc tìm kiếm.</p>
+                                }
                             </div>
                         </div>
-                        <div class="movie-info">
-                            <h3 class="movie-title">Bí Kíp Luyện Rồng live action</h3>
-                            <div class="movie-details">
-                                <span class="release-date">
-                                    <i class="fas fa-calendar-alt me-1"></i>
-                                    13/06
-                                </span>
-                                <div class="rating success">
-                                    <i class="fas fa-thumbs-up"></i>
-                                    <span>91%</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Movie Card 3 -->
-                    <div class="movie-card">
-                        <div class="movie-poster">
-                            <img src="https://cdn.moveek.com/storage/media/cache/short/6850df9493be9552985334.jpg"
-                                alt="Elio: Cậu Bé Đến Từ Trái Đất">
-                            <div class="movie-actions">
-                                <button class="action-btn">
-                                    <i class="far fa-heart"></i>
-                                </button>
-                                <button class="action-btn">
-                                    <i class="fas fa-star"></i>
-                                </button>
-                            </div>
-                        </div>
-                        <div class="movie-info">
-                            <h3 class="movie-title">Elio: Cậu Bé Đến Từ Trái Đất</h3>
-                            <div class="movie-details">
-                                <span class="release-date">
-                                    <i class="fas fa-calendar-alt me-1"></i>
-                                    27/06
-                                </span>
-                                <div class="rating muted">
-                                    <i class="fas fa-clock"></i>
-                                    <span>Sắp chiếu</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Movie Card 4 -->
-                    <div class="movie-card">
-                        <div class="movie-poster">
-                            <img src="https://cdn.moveek.com/storage/media/cache/short/685525219e1c4674575707.jpg"
-                                alt="MEGAN 2.0">
-                            <div class="movie-actions">
-                                <button class="action-btn">
-                                    <i class="far fa-heart"></i>
-                                </button>
-                                <button class="action-btn">
-                                    <i class="fas fa-star"></i>
-                                </button>
-                            </div>
-                        </div>
-                        <div class="movie-info">
-                            <h3 class="movie-title">MEGAN 2.0</h3>
-                            <div class="movie-details">
-                                <span class="release-date">
-                                    <i class="fas fa-calendar-alt me-1"></i>
-                                    27/06
-                                </span>
-                                <div class="rating muted">
-                                    <i class="fas fa-clock"></i>
-                                    <span>Sắp chiếu</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Movie Card 5 -->
-                    <div class="movie-card">
-                        <div class="movie-poster">
-                            <img src="https://cdn.moveek.com/storage/media/cache/short/683d2b09f1edd489878792.jpg"
-                                alt="Halabala: Rừng Ma Tế Xác">
-                            <div class="movie-actions">
-                                <button class="action-btn">
-                                    <i class="far fa-heart"></i>
-                                </button>
-                                <button class="action-btn">
-                                    <i class="fas fa-star"></i>
-                                </button>
-                            </div>
-                        </div>
-                        <div class="movie-info">
-                            <h3 class="movie-title">Halabala: Rừng Ma Tế Xác</h3>
-                            <div class="movie-details">
-                                <span class="release-date">
-                                    <i class="fas fa-calendar-alt me-1"></i>
-                                    27/06
-                                </span>
-                                <div class="rating muted">
-                                    <i class="fas fa-clock"></i>
-                                    <span>Sắp chiếu</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Movie Card 6 -->
-                    <div class="movie-card">
-                        <div class="movie-poster">
-                            <img src="https://cdn.moveek.com/storage/media/cache/short/68465d36113af867561247.jpg"
-                                alt="F1">
-                            <div class="movie-actions">
-                                <button class="action-btn">
-                                    <i class="far fa-heart"></i>
-                                </button>
-                                <button class="action-btn">
-                                    <i class="fas fa-star"></i>
-                                </button>
-                            </div>
-                        </div>
-                        <div class="movie-info">
-                            <h3 class="movie-title">F1</h3>
-                            <div class="movie-details">
-                                <span class="release-date">
-                                    <i class="fas fa-calendar-alt me-1"></i>
-                                    27/06
-                                </span>
-                                <div class="rating muted">
-                                    <i class="fas fa-clock"></i>
-                                    <span>Sắp chiếu</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    }
                 </div>
 
                 <!-- Pagination -->
-                <div class="pagination-wrapper">
-                    <nav aria-label="Page navigation">
-                        <ul class="pagination justify-content-center">
-                            <li class="page-item disabled">
-                                <a class="page-link" href="#" tabindex="-1" aria-disabled="true">
-                                    <i class="fas fa-chevron-left"></i>
-                                    <span class="d-none d-sm-inline ms-1">Trước</span>
-                                </a>
-                            </li>
-                            <li class="page-item active">
-                                <a class="page-link" href="#">1</a>
-                            </li>
-                            <li class="page-item">
-                                <a class="page-link" href="#">2</a>
-                            </li>
-                            <li class="page-item">
-                                <a class="page-link" href="#">3</a>
-                            </li>
-                            <li class="page-item">
-                                <a class="page-link" href="#">4</a>
-                            </li>
-                            <li class="page-item">
-                                <a class="page-link" href="#">
-                                    <span class="d-none d-sm-inline me-1">Sau</span>
-                                    <i class="fas fa-chevron-right"></i>
-                                </a>
-                            </li>
-                        </ul>
-                    </nav>
-                </div>
+                @if (totalPages > 1)
+                {
+                    <div class="pagination-wrapper">
+                        <nav aria-label="Page navigation">
+                            <ul class="pagination justify-content-center">
+                                <!-- Previous Button -->
+                                <li class="page-item @(currentPage <= 1 ? "disabled" : "")">
+                                    @{
+                                        var prevUrl = isComingSoon ?
+                                        Url.Action("ComingSoon", new
+                                        {
+                                            pageNumber = currentPage - 1,
+                                            pageSize = pageSize,
+                                            genreId = currentGenreId,
+                                            year = currentYear
+                                        }) :
+                                        Url.Action("MovieList", new
+                                        {
+                                            pageNumber = currentPage - 1,
+                                            pageSize = pageSize,
+                                            genreId
+                                        = currentGenreId,
+                                            year = currentYear
+                                        });
+                                    }
+                                    <a class="page-link" href="@(currentPage > 1 ? prevUrl : "#")"
+                                        tabindex="@(currentPage <= 1 ? "-1" : "")"
+                                        aria-disabled="@(currentPage <= 1 ? "true" : "false")">
+                                        <i class="fas fa-chevron-left"></i>
+                                        <span class="d-none d-sm-inline ms-1">Trước</span>
+                                    </a>
+                                </li>
+
+                                <!-- Page Numbers -->
+                                @{
+                                    var startPage = Math.Max(1, currentPage - 2);
+                                    var endPage = Math.Min(totalPages, currentPage + 2);
+
+                                    if (endPage - startPage < 4 && totalPages >= 5)
+                                    {
+                                        if (startPage == 1)
+                                        {
+                                            endPage = Math.Min(totalPages, 5);
+                                        }
+                                        else if (endPage == totalPages)
+                                        {
+                                            startPage = Math.Max(1, totalPages - 4);
+                                        }
+                                    }
+                                }
+
+                                @if (startPage > 1)
+                                {
+                                    var firstPageUrl = isComingSoon ?
+                                    Url.Action("ComingSoon", new
+                                    {
+                                        pageNumber = 1,
+                                        pageSize = pageSize,
+                                        genreId =
+                                    currentGenreId,
+                                        year = currentYear
+                                    }) :
+                                    Url.Action("MovieList", new
+                                    {
+                                        pageNumber = 1,
+                                        pageSize = pageSize,
+                                        genreId = currentGenreId,
+                                        year = currentYear
+                                    });
+                                    <li class="page-item">
+                                        <a class="page-link" href="@firstPageUrl">1</a>
+                                    </li>
+                                    @if (startPage > 2)
+                                    {
+                                        <li class="page-item disabled">
+                                            <span class="page-link">...</span>
+                                        </li>
+                                    }
+                                }
+
+                                @for (int i = startPage; i <= endPage; i++)
+                                {
+                                    var pageUrl = isComingSoon ?
+                                    Url.Action("ComingSoon", new
+                                    {
+                                        pageNumber = i,
+                                        pageSize = pageSize,
+                                        genreId =
+                                    currentGenreId,
+                                        year = currentYear
+                                    }) :
+                                    Url.Action("MovieList", new
+                                    {
+                                        pageNumber = i,
+                                        pageSize = pageSize,
+                                        genreId = currentGenreId,
+                                        year = currentYear
+                                    });
+                                    <li class="page-item @(i == currentPage ? "active" : "")">
+                                        <a class="page-link" href="@pageUrl">@i</a>
+                                    </li>
+                                }
+
+                                @if (endPage < totalPages)
+                                {
+                                    @if (endPage < totalPages - 1)
+                                    {
+                                        <li class="page-item disabled">
+                                            <span class="page-link">...</span>
+                                        </li>
+                                    }
+                                    var lastPageUrl = isComingSoon ?
+                                    Url.Action("ComingSoon", new
+                                    {
+                                        pageNumber = totalPages,
+                                        pageSize = pageSize,
+                                        genreId =
+                                    currentGenreId,
+                                        year = currentYear
+                                    }) :
+                                    Url.Action("MovieList", new
+                                    {
+                                        pageNumber = totalPages,
+                                        pageSize = pageSize,
+                                        genreId =
+                                    currentGenreId,
+                                        year = currentYear
+                                    });
+                                    <li class="page-item">
+                                        <a class="page-link" href="@lastPageUrl">@totalPages</a>
+                                    </li>
+                                }
+
+                                <!-- Next Button -->
+                                <li class="page-item @(currentPage >= totalPages ? "disabled" : "")">
+                                    @{
+                                        var nextUrl = isComingSoon ?
+                                        Url.Action("ComingSoon", new
+                                        {
+                                            pageNumber = currentPage + 1,
+                                            pageSize = pageSize,
+                                            genreId = currentGenreId,
+                                            year = currentYear
+                                        }) :
+                                        Url.Action("MovieList", new
+                                        {
+                                            pageNumber = currentPage + 1,
+                                            pageSize = pageSize,
+                                            genreId
+                                        = currentGenreId,
+                                            year = currentYear
+                                        });
+                                    }
+                                    <a class="page-link" href="@(currentPage<totalPages? nextUrl : "#")">
+                                        <span class="d-none d-sm-inline me-1">Sau</span>
+                                        <i class="fas fa-chevron-right"></i>
+                                    </a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                }
             </div>
         </div>
     </div>

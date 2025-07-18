@@ -170,5 +170,19 @@ namespace API.Controllers
 
             return Ok(APIResponse<List<GenreDTO>>.Builder().WithResult(genres).WithStatusCode(HttpStatusCode.OK).Build());
         }
+        [HttpGet("get-five-top-genres")]
+        public async Task<ActionResult<APIResponse<List<GenreDTO>>>> GetFiveTopGenresAsync()
+        {
+            var genres = await _genreService.GetFiveTopGenresAsync();
+            if (genres.Count == 0)
+            {
+                return NotFound(APIResponse<List<GenreDTO>>.Builder()
+                    .WithErrorMessages(new List<string> { "No top genres found" })
+                    .WithStatusCode(HttpStatusCode.NotFound)
+                    .WithSuccess(false)
+                    .Build());
+            }
+            return Ok(APIResponse<List<GenreDTO>>.Builder().WithResult(genres).WithStatusCode(HttpStatusCode.OK).Build());
+        }
     }
 }
