@@ -11,6 +11,6 @@ namespace Web.Services.IServices
 		Task<T> GetMyBookingsAsync<T>(string? token = null);
 		Task<T> GetBookingByIdAsync<T>(int bookingId, string? token = null);
 		Task<T> GetAllBookingsAsync<T>(string? token = null);
-		Task CancelBookingAsync(int bookingId, string? token = null);
+		Task<T> CancelBookingAsync<T>(int bookingId, string? token = null);
 	}
 }

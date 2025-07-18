@@ -374,7 +374,7 @@ namespace Web.Areas.Customer.Controllers
 			try
 			{
 				string token = GetUserToken();
-				await _bookingService.CancelBookingAsync(bookingId.Value, token);
+				await _bookingService.CancelBookingAsync<APIResponse>(bookingId.Value, token);
 
 				ClearBookingSession();
 

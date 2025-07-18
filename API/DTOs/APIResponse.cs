@@ -41,6 +41,17 @@ namespace API.DTOs
                 return this;
             }
 
+            public APIResponseBuilder<TBuilder> WithMessage(string message)
+            {
+                if (_response.ErrorMessages == null)
+                {
+                    _response.ErrorMessages = new List<string>();
+                }
+
+                _response.ErrorMessages.Add(message);
+                return this;
+            }
+
             public APIResponseBuilder<TBuilder> WithResult(TBuilder result)
             {
                 _response.Result = result;

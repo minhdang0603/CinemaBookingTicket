@@ -159,6 +159,7 @@ public class PaymentService : IPaymentService
         }
 
         await _unitOfWork.Payment.UpdateAsync(payment);
+        await _unitOfWork.SaveAsync();
     }
 
     private async Task UpdateBookingDetailsForResponse(Payment payment, string bookingStatus, VNPayResponseDTO response)
@@ -186,6 +187,7 @@ public class PaymentService : IPaymentService
 
         // Update booking in database
         await _unitOfWork.Booking.UpdateAsync(booking);
+        await _unitOfWork.SaveAsync();
         response.Booking = _mapper.Map<BookingDTO>(booking);
 
         // Update related concession orders
@@ -310,5 +312,67 @@ public class PaymentService : IPaymentService
         }
 
         return _mapper.Map<PaymentDTO>(payment);
+    }
+
+    public async Task<VNPayRefundResponseDTO> Refund(VNPayRefundRequestDTO request)
+    {
+        try
+        {
+            // Lấy thông tin payment
+            var payment = await _unitOfWork.Payment.GetAsync(p => p.Id == request.PaymentId, includeProperties: "Booking");
+
+            if (payment == null)
+            {
+                throw new AppException(ErrorCodes.EntityNotFound("Payment", request.PaymentId));
+            }
+
+            if (payment.PaymentStatus != Constant.Payment_Status_Completed)
+            {
+                return new VNPayRefundResponseDTO
+                {
+                    Success = false,
+                    VnPayResponseCode = "99",
+                    Message = "Chỉ có thể hoàn tiền cho các giao dịch đã hoàn thành",
+                    PaymentId = request.PaymentId,
+                    BookingId = payment.BookingId ?? 0
+                };
+            }
+
+            // Tạo refund transaction VNPay - Trong môi trường thực tế sẽ gọi API của VNPay
+            // Ở đây chúng ta sẽ giả lập phản hồi thành công từ VNPay
+
+            // Cập nhật trạng thái payment
+            payment.PaymentStatus = Constant.Payment_Status_Refunded;
+            payment.LastUpdatedAt = DateTime.Now;
+            await _unitOfWork.Payment.UpdateAsync(payment);
+
+            // Thêm thông tin refund vào CSDL nếu cần
+            // ...
+
+            // Lưu các thay đổi
+            await _unitOfWork.SaveAsync();
+
+            return new VNPayRefundResponseDTO
+            {
+                Success = true,
+                VnPayResponseCode = "00",
+                Message = "Hoàn tiền thành công",
+                PaymentId = request.PaymentId,
+                BookingId = payment.BookingId ?? 0,
+                RefundAmount = request.Amount,
+                RefundDate = DateTime.Now,
+                TransactionId = $"RF{DateTime.Now.Ticks}" // Giả lập transaction ID
+            };
+        }
+        catch (Exception ex)
+        {
+            return new VNPayRefundResponseDTO
+            {
+                Success = false,
+                VnPayResponseCode = "99",
+                Message = $"Lỗi hoàn tiền: {ex.Message}",
+                PaymentId = request.PaymentId
+            };
+        }
     }
 }

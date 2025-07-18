@@ -32,10 +32,12 @@ namespace Utility
         public const string Payment_Status_Pending = "pending";
         public const string Payment_Status_Completed = "completed";
         public const string Payment_Status_Failed = "failed";
+        public const string Payment_Status_Refunded = "refunded";
 
         public const string Booking_Status_Pending = "pending";
         public const string Booking_Status_Confirmed = "confirmed";
         public const string Booking_Status_Cancelled = "cancelled";
+        public const string Booking_Status_Refunded = "refunded";
 
         public const string Seat_Type_Standard = "Standard";
         public const string Seat_Type_Premium = "Premium";

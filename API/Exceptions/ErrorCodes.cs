@@ -41,6 +41,10 @@ namespace API.Exceptions
         // Seat errors
         public static Error SeatIsNotAvailable() => new($"Some seats are not available for booking. Please try another!", HttpStatusCode.BadRequest);
 
+        // Booking errors
+        public static Error BookingAlreadyCancelled() => new("This booking has already been cancelled or refunded.", HttpStatusCode.BadRequest);
+        public static Error BookingCancellationNotAllowed(string message = "Booking can only be cancelled at least one day before the showtime.") => new(message, HttpStatusCode.BadRequest);
+
         // General errors
         public static Error InternalServerError(string message = "An unexpected error occurred. Please try again later.") => new(message, HttpStatusCode.InternalServerError);
     }

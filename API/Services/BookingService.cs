@@ -19,8 +19,9 @@ public class BookingService : IBookingService
 	private readonly ILogger<BookingService> _logger;
 	private readonly UserManager<ApplicationUser> _userManager;
 	private readonly IConcessionOrderService _concessionOrderService;
+	private readonly IPaymentService _paymentService;
 
-	public BookingService(IUnitOfWork unitOfWork, IMapper mapper, IHttpContextAccessor httpContextAccessor, ILogger<BookingService> logger, UserManager<ApplicationUser> userManager, IConcessionOrderService concessionOrderService)
+	public BookingService(IUnitOfWork unitOfWork, IMapper mapper, IHttpContextAccessor httpContextAccessor, ILogger<BookingService> logger, UserManager<ApplicationUser> userManager, IConcessionOrderService concessionOrderService, IPaymentService paymentService)
 	{
 		_unitOfWork = unitOfWork;
 		_mapper = mapper;
@@ -28,6 +29,7 @@ public class BookingService : IBookingService
 		_logger = logger;
 		_userManager = userManager;
 		_concessionOrderService = concessionOrderService;
+		_paymentService = paymentService;
 	}
 
 	public async Task CancelBookingAsync(int bookingId)
@@ -36,45 +38,104 @@ public class BookingService : IBookingService
 		var userId = _httpContextAccessor.HttpContext?.User.FindFirst(ClaimTypes.NameIdentifier)?.Value
 					  ?? throw new AppException(ErrorCodes.UnauthorizedAccess());
 
-		// Get booking by ID
-		var booking = await _unitOfWork.Booking.GetAsync(b => b.Id == bookingId && b.ApplicationUser.Id == userId);
+		// Get booking by ID with all necessary related data
+		var booking = await _unitOfWork.Booking.GetAsync(
+			b => b.Id == bookingId,
+			includeProperties: "ApplicationUser,ShowTime,Payment");
 
-		if (booking == null || booking.ApplicationUser.Id != userId)
+		if (booking == null)
 		{
 			throw new AppException(ErrorCodes.EntityNotFound("Booking", bookingId));
 		}
 
-		booking.BookingStatus = Constant.Booking_Status_Cancelled;
-		booking.IsActive = false;
-		booking.LastUpdatedAt = DateTime.UtcNow;
+		// Check if user is authorized to cancel this booking
+		if (booking.ApplicationUser.Id != userId && !_httpContextAccessor.HttpContext.User.IsInRole(Constant.Role_Admin))
+		{
+			throw new AppException(ErrorCodes.UnauthorizedAccess());
+		}
 
-		// Update booking
+		// Check if booking is already cancelled
+		if (booking.BookingStatus == Constant.Booking_Status_Cancelled || booking.BookingStatus == Constant.Booking_Status_Refunded)
+		{
+			throw new AppException(ErrorCodes.BookingAlreadyCancelled());
+		}
+
+		// User can only cancel booking 1 day before the show date
+		var showTime = booking.ShowTime.ShowDate.ToDateTime(booking.ShowTime.StartTime);
+		if (showTime.AddDays(-1) < DateTime.Now)
+		{
+			throw new AppException(ErrorCodes.BookingCancellationNotAllowed($"Vé chỉ có thể hủy trước {showTime.AddDays(-1).ToString("dd/MM/yyyy HH:mm")}"));
+		}
+
+		// Cancel all associated concession orders
+		var concessionOrders = await _unitOfWork.ConcessionOrder.GetAllAsync(co => co.BookingId == bookingId && co.IsActive);
+		foreach (var order in concessionOrders)
+		{
+			order.IsActive = false;
+			order.OrderStatus = Constant.Booking_Status_Cancelled;
+			order.LastUpdatedAt = DateTime.UtcNow;
+			await _unitOfWork.ConcessionOrder.UpdateAsync(order);
+		}
+
+		// Update booking status
+		booking.BookingStatus = Constant.Booking_Status_Cancelled;
+		// Giữ nguyên IsActive = true để đảm bảo booking vẫn hiển thị trong lịch sử
+		// booking.IsActive = false; // Bỏ dòng này để giữ booking hiển thị trong lịch sử
+		booking.LastUpdatedAt = DateTime.UtcNow;
 		await _unitOfWork.Booking.UpdateAsync(booking);
 
-		// Commit transaction
+		// Use direct Payment navigation property instead of querying separately
+		if (booking.Payment != null && booking.Payment.PaymentStatus == Constant.Payment_Status_Completed)
+		{
+			try
+			{
+				var refundRequest = new VNPayRefundRequestDTO
+				{
+					PaymentId = booking.Payment.Id,
+					Amount = booking.Payment.Amount,
+					OrderInfo = $"Hoàn tiền cho vé {booking.BookingCode}",
+					TransactionDate = booking.Payment.PaymentDate,
+					CreateBy = userId
+				};
+
+				var refundResult = await _paymentService.Refund(refundRequest);
+
+				if (refundResult.Success)
+				{
+					// Vẫn giữ booking status là cancelled, chỉ cập nhật payment status là refunded
+					booking.BookingStatus = Constant.Booking_Status_Cancelled;
+					// Cập nhật trạng thái của Payment
+					booking.Payment.PaymentStatus = Constant.Payment_Status_Refunded;
+					booking.Payment.RefundAmount = booking.Payment.Amount;
+					booking.Payment.RefundDate = DateTime.Now;
+					booking.Payment.LastUpdatedAt = DateTime.Now;
+
+					await _unitOfWork.Booking.UpdateAsync(booking);
+					await _unitOfWork.Payment.UpdateAsync(booking.Payment);
+					_logger.LogInformation("Booking {BookingId} has been cancelled and refunded successfully", bookingId);
+				}
+				else
+				{
+					_logger.LogWarning("Booking {BookingId} has been cancelled but refund failed: {Message}",
+						bookingId, refundResult.Message);
+				}
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "Error processing refund for booking {BookingId}", bookingId);
+			}
+		}
+		else if (booking.Payment != null)
+		{
+			// Nếu payment không ở trạng thái completed, chỉ cập nhật status
+			booking.Payment.PaymentStatus = Constant.Payment_Status_Failed;
+			booking.Payment.LastUpdatedAt = DateTime.Now;
+			await _unitOfWork.Payment.UpdateAsync(booking.Payment);
+		}
+
+		// Commit all changes
 		await _unitOfWork.SaveAsync();
 	}
-
-	//public async Task<string> CreateBookingWithPaymentAsync(BookingCreateDTO bookingCreateDTO)
-	//{
-
-	//    // 1. Tạo booking (code hiện tại của bạn)
-	//    var booking = await CreateBookingAsync(bookingCreateDTO);
-
-	//    VNPayRequestDTO request = new VNPayRequestDTO
-	//    {
-	//        BookingId = booking.Id,
-	//        Amount = booking.TotalAmount,
-	//        OrderInfo = $"Booking for ShowTime {booking.ShowTimeId} - User {booking.ApplicationUser.Name}",
-	//        ClientIpAddress = "127.0.0.1"
-	//    };
-
-	//    // 2. Tạo payment và lấy URL redirect
-	//    var paymentUrl = await _paymentService.CreateVNPayPaymentUrl(request);
-
-	//    return paymentUrl; // Trả về URL cho controller
-
-	//}
 
 	public async Task DeleteBookingAsync(int bookingId)
 	{

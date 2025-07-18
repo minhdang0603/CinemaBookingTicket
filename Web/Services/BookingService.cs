@@ -57,11 +57,11 @@ namespace Web.Services
             });
         }
 
-        public Task CancelBookingAsync(int bookingId, string? token = null)
+        public Task<T> CancelBookingAsync<T>(int bookingId, string? token = null)
         {
-            return SendAsync<object>(new APIRequest
+            return SendAsync<T>(new APIRequest
             {
-                ApiType = Constant.ApiType.POST,
+                ApiType = Constant.ApiType.PUT,
                 Url = $"{_baseUrl}/api/booking/{bookingId}/cancel",
                 Token = token ?? string.Empty
             });

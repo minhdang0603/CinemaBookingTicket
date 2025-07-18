@@ -9,6 +9,7 @@ public interface IPaymentService
     // VNPay methods
     Task<string> CreateVNPayPaymentUrl(VNPayRequestDTO request);
     Task<VNPayResponseDTO> ProcessVNPayReturnAsync(Dictionary<string, string> queryParams);
+    Task<VNPayRefundResponseDTO> Refund(VNPayRefundRequestDTO request);
 
     // Common methods
     Task<PaymentDTO> GetPaymentsByBookingIdAsync(int bookingId);

@@ -46,22 +46,26 @@
                             </div>
                             @{
                                 string statusClass = "status-upcoming";
-                                string statusText = booking.Status;
+                                string statusText = booking.Status == Constant.Booking_Status_Confirmed ? "Đã xác nhận" : "Đang xử lý";
                                 string statusIcon = "clock";
                                 
                                 // Kết hợp ngày và giờ chiếu để so sánh chính xác
                                 var showtimeDateTime = new DateTime(booking.ShowtimeDate.Year, booking.ShowtimeDate.Month, booking.ShowtimeDate.Day, 
                                                                    booking.ShowtimeTime.Hour, booking.ShowtimeTime.Minute, booking.ShowtimeTime.Second);
                                 
-                                if (booking.Status != Constant.Booking_Status_Cancelled && showtimeDateTime < DateTime.Now)
-                                {
-                                    statusClass = "status-watched";
-                                    statusIcon = "check-circle";
-                                }
-                                else if (booking.Status == Constant.Booking_Status_Cancelled)
+                                // Nếu vé đã bị hủy, luôn hiển thị trạng thái đã hủy
+                                if (booking.Status == Constant.Booking_Status_Cancelled || booking.Status == Constant.Booking_Status_Refunded)
                                 {
                                     statusClass = "status-cancelled";
                                     statusIcon = "times-circle";
+                                    statusText = "Đã hủy vé";
+                                }
+                                // Nếu không bị hủy và phim đã chiếu, hiển thị đã chiếu
+                                else if (showtimeDateTime < DateTime.Now)
+                                {
+                                    statusClass = "status-watched";
+                                    statusIcon = "check-circle";
+                                    statusText = "Đã chiếu";
                                 }
                             }
                             <span class="status-badge @statusClass">
@@ -106,17 +110,21 @@
                                             var actionShowtimeDateTime = new DateTime(booking.ShowtimeDate.Year, booking.ShowtimeDate.Month, booking.ShowtimeDate.Day, 
                                                                                      booking.ShowtimeTime.Hour, booking.ShowtimeTime.Minute, booking.ShowtimeTime.Second);
                                         }
-                                        @if (booking.Status != Constant.Booking_Status_Cancelled && actionShowtimeDateTime > DateTime.Now)
+                                        @if (booking.Status != Constant.Booking_Status_Cancelled && booking.Status != Constant.Booking_Status_Refunded && actionShowtimeDateTime > DateTime.Now && actionShowtimeDateTime.AddDays(-1) > DateTime.Now)
                                         {
                                             <a href="#" class="btn-action btn-cancel" data-booking-id="@booking.Id">
                                                 <i class="fas fa-times-circle me-1"></i> Hủy vé
                                             </a>
                                         }
-                                        else if (booking.Status != Constant.Booking_Status_Cancelled && actionShowtimeDateTime < DateTime.Now)
+                                        else if (booking.Status != Constant.Booking_Status_Cancelled && booking.Status != Constant.Booking_Status_Refunded && actionShowtimeDateTime > DateTime.Now)
                                         {
-                                            <span class="badge bg-success">Đã xem phim</span>
+                                            <span class="badge bg-warning text-dark">Không thể hủy (dưới 24h)</span>
                                         }
-                                        else if (booking.Status == Constant.Booking_Status_Cancelled)
+                                        else if (booking.Status != Constant.Booking_Status_Cancelled && booking.Status != Constant.Booking_Status_Refunded && actionShowtimeDateTime < DateTime.Now)
+                                        {
+                                            <span class="badge bg-success">Đã chiếu</span>
+                                        }
+                                        else if (booking.Status == Constant.Booking_Status_Cancelled || booking.Status == Constant.Booking_Status_Refunded)
                                         {
                                             <span class="badge bg-danger">Đã hủy</span>
                                         }

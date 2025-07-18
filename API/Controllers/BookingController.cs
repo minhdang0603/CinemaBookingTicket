@@ -74,6 +74,8 @@ public class BookingController : ControllerBase
         await _bookingService.CancelBookingAsync(bookingId);
         return Ok(APIResponse<object>.Builder()
             .WithSuccess(true)
+            .WithMessage("Vé đã được hủy thành công. Nếu vé đã thanh toán, yêu cầu hoàn tiền sẽ được xử lý trong thời gian sớm nhất.")
+            .WithStatusCode(HttpStatusCode.OK)
             .Build());
     }
 
