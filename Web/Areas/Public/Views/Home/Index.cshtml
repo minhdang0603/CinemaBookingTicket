@@ -1,5 +1,4 @@
-﻿@model Web.Models.ViewModels.HomeIndexViewModel
-@{
+﻿@{
     ViewData["Title"] = "Trang chủ";
 }
 
@@ -12,6 +11,7 @@
     <div class="movie-carousel">
         <h3 class="movie-section-heading">Phim mới đang chiếu</h3>
         <div class="carousel-container" id="movieCarousel">
+            @* Hiển thị loading state ban đầu *@
             <div class="loading-state" id="loadingState">
                 <div class="text-center">
                     <div class="spinner-border" role="status">
@@ -21,16 +21,17 @@
                 </div>
             </div>
 
-            @if (Model.HasMovies)
+            @* Dữ liệu phim sẽ được load từ Controller hoặc AJAX *@
+            @if (ViewBag.Movies != null && ((List<Web.Models.DTOs.Response.MovieDTO>)ViewBag.Movies).Any())
             {
-                @foreach (var movie in Model.FeaturedMovies)
+                @foreach (var movie in (List<Web.Models.DTOs.Response.MovieDTO>)ViewBag.Movies)
                 {
                     <div class="movie-card" onclick="viewMovieDetail(@movie.Id)">
                         <div class="movie-poster">
                             @if (!string.IsNullOrEmpty(movie.PosterUrl))
                             {
                                 <img src="@movie.PosterUrl" alt="@movie.Title"
-                                    onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" />
+                                     onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" />
                                 <div class="poster-fallback" style="display:none;">
                                     <i class="fas fa-film"></i>
                                     <span>@movie.Title</span>
@@ -56,6 +57,7 @@
                                     <span class="text-muted">Chưa phân loại</span>
                                 }
                             </div>
+                            
                             <div class="movie-duration">
                                 <i class="fas fa-clock"></i> @movie.Duration phút
                             </div>
@@ -71,6 +73,7 @@
             }
             else
             {
+                <!-- Fallback content nếu không có data từ API -->
                 <div class="no-movies-message" id="noMoviesMessage" style="display:none;">
                     <div class="text-center p-4">
                         <i class="fas fa-film fa-3x text-muted mb-3"></i>
@@ -81,7 +84,9 @@
             }
         </div>
 
+        <!-- Carousel Navigation Dots -->
         <div class="carousel-dots" id="carouselDots">
+            <!-- Dots sẽ được tạo động bởi JavaScript -->
         </div>
     </div>
 </section>
@@ -111,20 +116,24 @@
 @section Scripts {
     <script>
         $(document).ready(function () {
-            const hasMoviesFromServer = @Json.Serialize(Model.HasMovies);
+            // Kiểm tra nếu không có movies từ server, load qua AJAX
+            const hasMoviesFromServer = @Json.Serialize(ViewBag.Movies != null && ((List<Web.Models.DTOs.Response.MovieDTO>)ViewBag.Movies).Any());
 
             if (!hasMoviesFromServer) {
                 loadFeaturedMovies();
             } else {
+                // Nếu đã có data từ server, init carousel luôn
                 initializeCarousel();
                 updateStarRatings();
             }
         });
 
         function loadFeaturedMovies() {
+            // Show loading state
             $('#loadingState').show();
             $('#noMoviesMessage').hide();
 
+            // AJAX call to load featured movies
             $.get('@Url.Action("GetFeaturedMovies", "Home")', function (data) {
                 $('#loadingState').hide();
 
@@ -144,6 +153,7 @@
         function updateMovieCarousel(movies) {
             const carousel = $('#movieCarousel');
 
+            // Clear existing content except loading/error messages
             carousel.find('.movie-card').remove();
 
             movies.forEach(movie => {
@@ -162,35 +172,35 @@
 
             const posterHtml = movie.posterUrl
                 ? `<img src="${movie.posterUrl}" alt="${movie.title}"
-                                   onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" />
-                               <div class="poster-fallback" style="display:none;">
-                                   <i class="fas fa-film"></i>
-                                   <span>${movie.title}</span>
-                               </div>`
+                               onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" />
+                           <div class="poster-fallback" style="display:none;">
+                               <i class="fas fa-film"></i>
+                               <span>${movie.title}</span>
+                           </div>`
                 : `<div class="poster-fallback">
-                                   <i class="fas fa-film"></i>
-                                   <span>${movie.title}</span>
-                               </div>`;
+                               <i class="fas fa-film"></i>
+                               <span>${movie.title}</span>
+                           </div>`;
 
             return $(`
-                            <div class="movie-card" onclick="viewMovieDetail(${movie.id})">
-                                <div class="movie-poster">
-                                    ${posterHtml}
-                                </div>
-                                <div class="movie-info">
-                                    <div class="movie-title">${movie.title}</div>
-                                    <div class="movie-genre">${genresText}</div>
-                                    <div class="movie-rating">
-                                        <span class="rating-stars" data-rating="${movie.rating}">★★★★☆</span>
-                                        <span>${movie.rating}/10</span>
-                                    </div>
-                                    <div class="movie-duration">
-                                        <i class="fas fa-clock"></i> ${movie.duration} phút
-                                    </div>
-                                    <button class="book-btn" onclick="bookMovie(${movie.id}, event)">Đặt vé</button>
-                                </div>
+                        <div class="movie-card" onclick="viewMovieDetail(${movie.id})">
+                            <div class="movie-poster">
+                                ${posterHtml}
                             </div>
-                        `);
+                            <div class="movie-info">
+                                <div class="movie-title">${movie.title}</div>
+                                <div class="movie-genre">${genresText}</div>
+                                <div class="movie-rating">
+                                    <span class="rating-stars" data-rating="${movie.rating}">★★★★☆</span>
+                                    <span>${movie.rating}/10</span>
+                                </div>
+                                <div class="movie-duration">
+                                    <i class="fas fa-clock"></i> ${movie.duration} phút
+                                </div>
+                                <button class="book-btn" onclick="bookMovie(${movie.id}, event)">Đặt vé</button>
+                            </div>
+                        </div>
+                    `);
         }
 
         function updateStarRatings() {
@@ -225,6 +235,7 @@
         function initializeCarousel() {
             const dots = $('.dot');
             if (dots.length === 0) {
+                // Tạo dots nếu chưa có
                 const movieCards = $('.movie-card').length;
                 updateCarouselDots(movieCards);
             }
@@ -257,7 +268,26 @@
         }
 
         function viewMovieDetail(movieId) {
-            window.location.href = '@Url.Action("Details", "Movie", new { area = "Public" })/' + movieId;
+            window.location.href = '/Public/Movie/Details/' + movieId;
         }
+
+        function bookMovie(movieId, event) {
+            event.stopPropagation();
+
+        @if (User.Identity.IsAuthenticated)
+        {
+            <text>
+                    window.location.href = '@Url.Action("Book", "Booking", new { area = "Public" })/' + movieId;
+            </text>
+        }
+        else
+        {
+            <text>
+                                if (confirm('Bạn cần đăng nhập để đặt vé. Chuyển đến trang đăng nhập?')) {
+                    window.location.href = '@Url.Action("Login", "Account", new { area = "Public" })';
+                }
+            </text>
+        }
+                }
     </script>
 }

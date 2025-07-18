@@ -78,12 +78,10 @@ namespace Web.Areas.Public.Controllers
                     showtimes = JsonConvert.DeserializeObject<List<ShowTimeLiteDTO>>(
                         Convert.ToString(showtimeResponse.Result) ?? string.Empty) ?? new List<ShowTimeLiteDTO>();
 
-                    // Lọc chỉ lấy showtimes trong 5 ngày tới
                     var maxDate = today.AddDays(4);
                     showtimes = showtimes.Where(st => st.ShowDate >= today && st.ShowDate <= maxDate).ToList();
                 }
 
-                // Lấy tất cả provinces từ database (không chỉ từ showtimes)
                 var allProvincesResponse = await _provinceService.GetAllProvincesAsync<APIResponse>();
                 var allProvinces = new List<ProvinceDTO>();
                 if (allProvincesResponse != null && allProvincesResponse.IsSuccess)
@@ -92,13 +90,12 @@ namespace Web.Areas.Public.Controllers
                         Convert.ToString(allProvincesResponse.Result) ?? string.Empty) ?? new List<ProvinceDTO>();
                 }
 
-                // Create view model with movie data from API
                 var viewModel = new MovieDetailViewModel
                 {
                     Movie = movie,
                     ShowTimes = showtimes,
-                    AllShowTimes = allShowtimes, // để lấy provinces và dates
-                    AllProvinces = allProvinces, // tất cả provinces từ database
+                    AllShowTimes = allShowtimes, 
+                    AllProvinces = allProvinces, 
                     SelectedDate = filterDate,
                     SelectedProvinceId = provinceId
                 };

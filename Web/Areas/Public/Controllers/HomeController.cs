@@ -2,10 +2,8 @@
 using Newtonsoft.Json;
 using Web.Models;
 using Web.Models.DTOs.Response;
-using Web.Services.IServices;
-using Web.Models.DTOs.Request;
 using Web.Models.ViewModels;
-using Utility;
+using Web.Services.IServices;
 
 namespace Web.Areas.Public.Controllers
 {
@@ -23,27 +21,81 @@ namespace Web.Areas.Public.Controllers
 
         public async Task<IActionResult> Index()
         {
-            try
-            {
-                // Load featured movies for the home page
-                var featuredMovies = await GetFeaturedMoviesAsync();
-                var model = new HomeIndexViewModel
-                {
-                    FeaturedMovies = featuredMovies
-                };
+            _logger.LogInformation("HomeController Index method called");
+            var viewModel = new HomeIndexViewModel();
 
-                return View(model);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error loading home page data");
-                // Return empty model if error occurs
-                var model = new HomeIndexViewModel();
-                return View(model);
-            }
+            // Tạm thời dùng static data để test view
+            viewModel.FeaturedMovies = GetSampleMovies();
+
+            _logger.LogInformation("Using sample data with {Count} movies", viewModel.FeaturedMovies.Count);
+            _logger.LogInformation("Debug info: {Info}", viewModel.GetDebugInfo());
+
+            return View(viewModel);
         }
 
-        // API endpoint để load movies cho AJAX call
+        private List<MovieDTO> GetSampleMovies()
+        {
+            return new List<MovieDTO>
+            {
+                new MovieDTO
+                {
+                    Id = 1,
+                    Title = "Avengers: Endgame",
+                    Director = "Anthony Russo, Joe Russo",
+                    Cast = "Robert Downey Jr., Chris Evans, Mark Ruffalo, Chris Hemsworth",
+                    Description = "Cuộc chiến cuối cùng của các siêu anh hùng Marvel",
+                    Duration = 181,
+                    Status = "NowShowing",
+                    ReleaseDate = new DateOnly(2024, 6, 15),
+                    AgeRating = "PG-13",
+                    PosterUrl = "https://m.media-amazon.com/images/M/MV5BMTc5MDE2ODcwNV5BMl5BanBnXkFtZTgwMzI2NzQ2NzM@._V1_.jpg",
+                    TrailerUrl = "https://www.youtube.com/watch?v=TcMBFSGVi1c",
+                    Genres = new List<GenreDTO>
+                    {
+                        new GenreDTO { Id = 1, Name = "Hành động", Description = "Phim hành động kịch tính" },
+                        new GenreDTO { Id = 2, Name = "Khoa học viễn tưởng", Description = "Phim khoa học viễn tưởng" }
+                    }
+                },
+                new MovieDTO
+                {
+                    Id = 2,
+                    Title = "Spider-Man: No Way Home",
+                    Director = "Jon Watts",
+                    Cast = "Tom Holland, Zendaya, Benedict Cumberbatch",
+                    Description = "Peter Parker phải đối mặt với các phản diện từ đa vũ trụ",
+                    Duration = 148,
+                    Status = "NowShowing",
+                    ReleaseDate = new DateOnly(2024, 7, 1),
+                    AgeRating = "PG-13",
+                    PosterUrl = "https://m.media-amazon.com/images/M/MV5BZWMyYzFjYTYtNTRjYi00OGExLWE2YzgtOGRmYjAxZTU3NzBiXkEyXkFqcGdeQXVyMzQ0MzA0NTM@._V1_.jpg",
+                    TrailerUrl = "https://www.youtube.com/watch?v=JfVOs4VSpmA",
+                    Genres = new List<GenreDTO>
+                    {
+                        new GenreDTO { Id = 1, Name = "Hành động", Description = "Phim hành động kịch tính" },
+                        new GenreDTO { Id = 2, Name = "Khoa học viễn tưởng", Description = "Phim khoa học viễn tưởng" }
+                    }
+                },
+                new MovieDTO
+                {
+                    Id = 3,
+                    Title = "The Lion King",
+                    Director = "Jon Favreau",
+                    Cast = "Donald Glover, Beyoncé, James Earl Jones",
+                    Description = "Câu chuyện về chú sư tử Simba và hành trình trở thành vua",
+                    Duration = 118,
+                    Status = "NowShowing",
+                    ReleaseDate = new DateOnly(2024, 8, 10),
+                    AgeRating = "G",
+                    PosterUrl = "https://m.media-amazon.com/images/M/MV5BMjIwMjE1Nzc4NV5BMl5BanBnXkFtZTgwNDg4OTA1NzM@._V1_.jpg",
+                    TrailerUrl = "https://www.youtube.com/watch?v=7TavVZMewpY",
+                    Genres = new List<GenreDTO>
+                    {
+                        new GenreDTO { Id = 6, Name = "Hoạt hình", Description = "Phim hoạt hình cho mọi lứa tuổi" }
+                    }
+                }
+            };
+        }
+
         [HttpGet]
         public async Task<IActionResult> GetFeaturedMovies()
         {
@@ -59,49 +111,71 @@ namespace Web.Areas.Public.Controllers
             }
         }
 
+        // Debug endpoint
+        [HttpGet]
+        public IActionResult Debug()
+        {
+            var movies = GetSampleMovies();
+            return Json(new
+            {
+                count = movies.Count,
+                movies = movies.Select(m => new {
+                    m.Id,
+                    m.Title,
+                    m.Duration,
+                    m.Status,
+                    m.AgeRating,
+                    genreCount = m.Genres?.Count ?? 0,
+                    genres = m.Genres?.Select(g => g.Name).ToArray(),
+                    posterUrl = m.PosterUrl
+                })
+            });
+        }
+
         private async Task<List<MovieDTO>> GetFeaturedMoviesAsync()
         {
             try
             {
-                // Gọi API endpoint mới để lấy phim cho trang chủ
-                var movieResponse = await _movieService.GetMoviesForHomeAsync<APIResponse>();
+                _logger.LogInformation("Starting to get featured movies from API");
+
+                var movieResponse = await _movieService.GetAllMoviesAsync<APIResponse>();
 
                 if (movieResponse == null || !movieResponse.IsSuccess)
                 {
-                    _logger.LogError("Failed to load movies for home from API: {Error}",
-                        movieResponse?.ErrorMessages?.FirstOrDefault());
+                    _logger.LogError("Failed to load movies from API: {Error}",
+                        movieResponse?.ErrorMessages?.FirstOrDefault() ?? "Unknown error");
                     return new List<MovieDTO>();
                 }
 
-                // Deserialize response thành home movies model
-                var responseData = Convert.ToString(movieResponse.Result);
-                if (string.IsNullOrEmpty(responseData))
+                _logger.LogInformation("API response received successfully");
+
+                var allMovies = JsonConvert.DeserializeObject<List<MovieDTO>>(
+                    Convert.ToString(movieResponse.Result));
+
+                if (allMovies == null || !allMovies.Any())
                 {
-                    _logger.LogWarning("Empty response data from GetMoviesForHome API");
+                    _logger.LogWarning("No movies found from API response");
                     return new List<MovieDTO>();
                 }
 
-                var homeMoviesData = JsonConvert.DeserializeObject<HomeMoviesDTO>(responseData);
-                if (homeMoviesData == null)
-                {
-                    _logger.LogWarning("Failed to deserialize home movies data");
-                    return new List<MovieDTO>();
-                }
+                _logger.LogInformation("Found {Count} movies from API", allMovies.Count);
 
-                // Lấy danh sách phim đang chiếu từ response
-                var nowShowingMovies = homeMoviesData.NowShowing ?? new List<MovieDTO>();
+                var featuredMovies = allMovies
+                    .Where(m => m.Status == "NowShowing") 
+                    .OrderByDescending(m => m.ReleaseDate) 
+                    .Take(12) 
+                    .ToList();
 
-                _logger.LogInformation("Successfully loaded {Count} featured movies for home", nowShowingMovies.Count);
-                return nowShowingMovies;
+                _logger.LogInformation("Filtered to {Count} featured movies", featuredMovies.Count);
+                return featuredMovies;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Exception occurred while getting featured movies for home");
+                _logger.LogError(ex, "Exception occurred while getting featured movies");
                 return new List<MovieDTO>();
             }
         }
 
-        // Phương thức để lấy phim theo thể loại (nếu cần)
         [HttpGet]
         public async Task<IActionResult> GetMoviesByGenre(int genreId)
         {
@@ -115,11 +189,11 @@ namespace Web.Areas.Public.Controllers
                 }
 
                 var allMovies = JsonConvert.DeserializeObject<List<MovieDTO>>(
-                    Convert.ToString(movieResponse.Result) ?? "[]");
+                    Convert.ToString(movieResponse.Result));
 
                 var moviesByGenre = allMovies?
                     .Where(m => m.Genres != null && m.Genres.Any(g => g.Id == genreId))
-                    .Where(m => m.Status == Constant.Movie_Status_NowShowing)
+                    .Where(m => m.Status == "NowShowing")
                     .OrderByDescending(m => m.ReleaseDate)
                     .Take(12)
                     .ToList() ?? new List<MovieDTO>();
