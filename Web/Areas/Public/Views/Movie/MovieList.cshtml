@@ -29,13 +29,17 @@
             <p class="hero-subtitle">
                 @if (isComingSoon)
                 {
-                    <text>Danh sách các phim sắp chiếu rạp trong thời gian tới. Đặt vé trước để không bỏ lỡ những bộ phim
-                        hay nhất!</text>
+                    <text>
+                        Danh sách các phim sắp chiếu rạp trong thời gian tới. Đặt vé trước để không bỏ lỡ những bộ phim
+                        hay nhất!
+                    </text>
                 }
                 else
                 {
-                    <text>Danh sách các phim hiện đang chiếu rạp trên toàn quốc @DateTime.Now.ToString("dd/MM/yyyy"). Xem
-                        lịch chiếu phim, giá vé tiện lợi, đặt vé nhanh chỉ với 1 bước!</text>
+                    <text>
+                        Danh sách các phim hiện đang chiếu rạp trên toàn quốc @DateTime.Now.ToString("dd/MM/yyyy"). Xem
+                        lịch chiếu phim, giá vé tiện lợi, đặt vé nhanh chỉ với 1 bước!
+                    </text>
                 }
             </p>
 
@@ -43,12 +47,12 @@
             <div class="movie-tabs mt-4">
                 <div class="btn-group" role="group" aria-label="Movie tabs">
                     <a href="@Url.Action("MovieList", "Movie")"
-                        class="btn @(!isComingSoon ? "btn-primary" : "btn-outline-primary")">
+                       class="btn @(!isComingSoon ? "btn-primary" : "btn-outline-primary")">
                         <i class="fas fa-play me-2"></i>
                         Phim Đang Chiếu
                     </a>
                     <a href="@Url.Action("ComingSoon", "Movie")"
-                        class="btn @(isComingSoon ? "btn-primary" : "btn-outline-primary")">
+                       class="btn @(isComingSoon ? "btn-primary" : "btn-outline-primary")">
                         <i class="fas fa-clock me-2"></i>
                         Phim Sắp Chiếu
                     </a>
@@ -65,8 +69,8 @@
             <div class="filter-sidebar">
                 <!-- Filter Form -->
                 <form method="get"
-                    action="@(isComingSoon? Url.Action("ComingSoon", "Movie") : Url.Action("MovieList", "Movie"))"
-                    id="filterForm">
+                      action="@(isComingSoon? Url.Action("ComingSoon", "Movie") : Url.Action("MovieList", "Movie"))"
+                      id="filterForm">
                     <input type="hidden" name="pageNumber" value="1" />
                     <input type="hidden" name="pageSize" value="@pageSize" />
 
@@ -82,7 +86,7 @@
                                 @foreach (var genre in ViewBag.Genres)
                                 {
                                     <option value="@genre.Value"
-                                        selected="@(currentGenreId?.ToString() == genre.Value ? "selected" : null)">
+                                            selected="@(currentGenreId?.ToString() == genre.Value ? "selected" : null)">
                                         @genre.Text
                                     </option>
                                 }
@@ -102,7 +106,7 @@
                                 @foreach (var year in ViewBag.Years)
                                 {
                                     <option value="@year.Value"
-                                        selected="@(currentYear?.ToString() == year.Value ? "selected" : null)">
+                                            selected="@(currentYear?.ToString() == year.Value ? "selected" : null)">
                                         @year.Text
                                     </option>
                                 }
@@ -122,7 +126,7 @@
                                 foreach (var genre in topGenres)
                                 {
                                     <span class="genre-badge @(currentGenreId?.ToString() == genre.Value ? "active" : "")"
-                                        onclick="selectGenre('@genre.Value')">@genre.Text</span>
+                                          onclick="selectGenre('@genre.Value')">@genre.Text</span>
                                 }
                             }
                         }
@@ -137,7 +141,7 @@
                                     foreach (var genre in genres.Take(5))
                                     {
                                         <span class="genre-badge @(currentGenreId?.ToString() == genre.Value ? "active" : "")"
-                                            onclick="selectGenre('@genre.Value')">@genre.Text</span>
+                                              onclick="selectGenre('@genre.Value')">@genre.Text</span>
                                     }
                                 }
                             }
@@ -148,7 +152,7 @@
                 <!-- Reset Filters Button -->
                 <div class="mt-4">
                     <a href="@(isComingSoon? Url.Action("ComingSoon", "Movie") : Url.Action("MovieList", "Movie"))"
-                        class="btn btn-outline-light btn-sm">
+                       class="btn btn-outline-light btn-sm">
                         <i class="fas fa-undo me-2"></i>
                         Đặt lại bộ lọc
                     </a>
@@ -188,7 +192,7 @@
                             <div class="movie-card">
                                 <div class="movie-poster">
                                     <img src="@movie.PosterUrl"
-                                        alt="@movie.Title" onerror="this.src='/images/no-image.jpg'">
+                                         alt="@movie.Title" onerror="this.src='/images/no-image.jpg'">
                                     <div class="movie-actions">
                                         <button class="action-btn" data-movie-id="@movie.Id" title="Thêm vào yêu thích">
                                             <i class="far fa-heart"></i>
@@ -214,8 +218,8 @@
                                 </div>
                                 <div class="movie-info">
                                     <h3 class="movie-title">
-                                        <a href="@Url.Action("Index", "Movie", new { id = movie.Id })"
-                                            class="text-decoration-none">
+                                        <a href="@Url.Action("Details", "Movie", new { id = movie.Id })"
+                                           class="text-decoration-none">
                                             @movie.Title
                                         </a>
                                     </h3>
@@ -245,7 +249,7 @@
                                         @if (isComingSoon)
                                         {
                                             <a href="@Url.Action("Details", "Movie", new { id = movie.Id })"
-                                                class="btn btn-outline-primary btn-sm">
+                                               class="btn btn-outline-primary btn-sm">
                                                 <i class="fas fa-clock me-1"></i>
                                                 Sắp chiếu
                                             </a>
@@ -253,7 +257,7 @@
                                         else
                                         {
                                             <a href="@Url.Action("Details", "Movie", new { id = movie.Id })"
-                                                class="btn btn-primary btn-sm">
+                                               class="btn btn-primary btn-sm">
                                                 <i class="fas fa-ticket-alt me-1"></i>
                                                 Đặt vé
                                             </a>
@@ -310,8 +314,8 @@
                                         });
                                     }
                                     <a class="page-link" href="@(currentPage > 1 ? prevUrl : "#")"
-                                        tabindex="@(currentPage <= 1 ? "-1" : "")"
-                                        aria-disabled="@(currentPage <= 1 ? "true" : "false")">
+                                       tabindex="@(currentPage <= 1 ? "-1" : "")"
+                                       aria-disabled="@(currentPage <= 1 ? "true" : "false")">
                                         <i class="fas fa-chevron-left"></i>
                                         <span class="d-none d-sm-inline ms-1">Trước</span>
                                     </a>
