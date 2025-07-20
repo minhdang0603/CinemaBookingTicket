@@ -101,7 +101,7 @@ namespace Web.Areas.Admin.Controllers
                 ViewBag.Genres = await LoadGenreDropdown();
                 return View(model);
             }
-            var token = HttpContext.Session.GetString(Constant.SessionToken);
+            var token = HttpContext.Request.Cookies[Constant.AccessToken];
             var response = await _movieService.CreateMovieAsync<APIResponse>(model, token);
             if (response == null || !response.IsSuccess)
             {
@@ -168,7 +168,7 @@ namespace Web.Areas.Admin.Controllers
                 return View(model);
             }
 
-            var token = HttpContext.Session.GetString(Constant.SessionToken);
+            var token = HttpContext.Request.Cookies[Constant.AccessToken];
             var response = await _movieService.UpdateMovieAsync<APIResponse>(model, token);
 
             if (response == null || !response.IsSuccess)
@@ -189,7 +189,7 @@ namespace Web.Areas.Admin.Controllers
         public async Task<IActionResult> Delete(int id)
         {
             _logger.LogInformation("Received request to delete movie with ID: {Id}", id);
-            var token = HttpContext.Session.GetString(Constant.SessionToken);
+            var token = HttpContext.Request.Cookies[Constant.AccessToken];
             var response = await _movieService.DeleteMovieAsync<APIResponse>(id, token);
             if (response == null || !response.IsSuccess)
             {

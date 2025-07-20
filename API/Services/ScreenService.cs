@@ -60,7 +60,6 @@ namespace API.Services
 
         public async Task UpdateScreenAsync(int id, ScreenUpdateDTO dto)
         {
-
             // Lấy screen hiện tại kèm theo danh sách ghế
             var screen = await _unitOfWork.Screen.GetAsync(
                 s => s.Id == id,
@@ -75,6 +74,34 @@ namespace API.Services
             // Cập nhật screen 
             await _unitOfWork.Screen.UpdateAsync(screen);
             await _unitOfWork.SaveAsync();
+
+            // Update seat status if seats are provided in the DTO
+            if (dto.Seats != null && dto.Seats.Count > 0)
+            {
+                foreach (var seatDto in dto.Seats)
+                {
+                    var existingSeat = screen.Seats.FirstOrDefault(s => s.Id == seatDto.Id);
+
+                    if (existingSeat != null)
+                    {
+                        // Update seat type and active status
+                        existingSeat.SeatTypeId = seatDto.SeatTypeId;
+
+                        // Explicitly set IsActive property
+                        existingSeat.IsActive = seatDto.IsActive;
+
+                        // Update the modification timestamp
+                        existingSeat.LastUpdatedAt = DateTime.UtcNow;
+
+                        // Log the change
+                        Console.WriteLine($"Updating seat {existingSeat.SeatRow}{existingSeat.SeatNumber}: Type={seatDto.SeatTypeId}, IsActive={seatDto.IsActive}");
+
+                        await _unitOfWork.Seat.UpdateAsync(existingSeat);
+                    }
+                }
+
+                await _unitOfWork.SaveAsync();
+            }
         }
 
         public async Task DeleteScreenAsync(int id)

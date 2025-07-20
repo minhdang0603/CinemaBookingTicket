@@ -397,13 +397,14 @@ namespace API.Services
 			var result = _mapper.Map<ShowTimeSeatStatusDTO>(showtime);
 
 			// Map seats and add booking status information
+			// Lấy tất cả ghế, cả active và inactive
 			var seatsList = showtime.Screen.Seats
-				.Where(s => s.IsActive)
 				.Select(seat =>
 				{
 					var seatDTO = _mapper.Map<SeatBookingStatusDTO>(seat);
 					seatDTO.Price = showtime.BasePrice * seat.SeatType.PriceMultiplier;
 					seatDTO.IsBooked = bookedSeatIds.Contains(seat.Id);
+					seatDTO.IsActive = seat.IsActive; // Include the IsActive property
 					return seatDTO;
 				})
 				.OrderBy(s => s.SeatRow)

@@ -93,11 +93,19 @@ namespace Web.Areas.Public.Controllers
                                 identity.AddClaim(new Claim(ClaimTypes.Role, roleClaim.Value));
                             }
 
-                            identity.AddClaim(new Claim("access_token", loginResponse.Token));
+                            identity.AddClaim(new Claim(Constant.AccessToken, loginResponse.Token));
                             var principal = new ClaimsPrincipal(identity);
                             await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
 
-                            HttpContext.Session.SetString(Constant.SessionToken, loginResponse.Token);
+                            // Add token to cookies with expiration matching the JWT expiration
+                            var cookieOptions = new CookieOptions
+                            {
+                                Expires = jwt.ValidTo,
+                                HttpOnly = true,
+                                Secure = Request.IsHttps,
+                                SameSite = SameSiteMode.Lax
+                            };
+                            Response.Cookies.Append(Constant.AccessToken, loginResponse.Token, cookieOptions);
                             return RedirectToAction("Index", "Home");
                         }
                     }
@@ -169,7 +177,15 @@ namespace Web.Areas.Public.Controllers
                 var principal = new ClaimsPrincipal(identity);
                 await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
 
-                HttpContext.Session.SetString(Constant.SessionToken, loginResponse.Token);
+                // Add token to cookies with expiration matching the JWT expiration
+                var cookieOptions = new CookieOptions
+                {
+                    Expires = jwt.ValidTo,
+                    HttpOnly = true,
+                    Secure = Request.IsHttps,
+                    SameSite = SameSiteMode.Lax
+                };
+                Response.Cookies.Append(Constant.AccessToken, loginResponse.Token, cookieOptions);
                 return RedirectToAction("Index", "Home");
             }
             else
@@ -185,7 +201,44 @@ namespace Web.Areas.Public.Controllers
         {
             await HttpContext.SignOutAsync();
             HttpContext.Session.SetString(Constant.SessionToken, "");
+
+            // Clear the authentication cookie
+            Response.Cookies.Delete(Constant.AccessToken);
+
             return RedirectToAction("Index", "Home");
+        }
+
+        [HttpGet]
+        public IActionResult CheckTokenStatus()
+        {
+            if (User.Identity?.IsAuthenticated != true)
+            {
+                return Json(new { isAuthenticated = false });
+            }
+
+            // Kiểm tra token trong cookies
+            if (!Request.Cookies.TryGetValue(Constant.AccessToken, out string? token) || string.IsNullOrEmpty(token))
+            {
+                return Json(new { isAuthenticated = false, reason = "token_not_found" });
+            }
+
+            try
+            {
+                var handler = new JwtSecurityTokenHandler();
+                var jwt = handler.ReadJwtToken(token);
+
+                // Kiểm tra thời gian hết hạn
+                if (jwt.ValidTo < DateTime.UtcNow)
+                {
+                    return Json(new { isAuthenticated = false, reason = "token_expired" });
+                }
+
+                return Json(new { isAuthenticated = true });
+            }
+            catch (Exception)
+            {
+                return Json(new { isAuthenticated = false, reason = "token_invalid" });
+            }
         }
     }
 }

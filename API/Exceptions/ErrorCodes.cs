@@ -1,5 +1,6 @@
 ﻿using System.Net;
 using API.Exceptions;
+using Utility;
 
 namespace API.Exceptions
 {
@@ -47,5 +48,9 @@ namespace API.Exceptions
 
         // General errors
         public static Error InternalServerError(string message = "An unexpected error occurred. Please try again later.") => new(message, HttpStatusCode.InternalServerError);
-    }
+
+        public static Error MaxTicketPerCustomerExceeded() 
+            => new($"Bạn chỉ có thể đặt tối đa {Constant.Max_Ticket_Per_Customer} vé mỗi suất chiếu.", HttpStatusCode.BadRequest);
+
+	}
 }

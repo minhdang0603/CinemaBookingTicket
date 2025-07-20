@@ -74,7 +74,19 @@ namespace Web.Areas.Admin.Controllers
                 return View(model);
             }
 
-            var token = HttpContext.Session.GetString(Constant.SessionToken);
+            // Get token from cookies with a fallback to session
+            var token = HttpContext.Request.Cookies[Constant.AccessToken] ?? HttpContext.Session.GetString(Constant.SessionToken);
+
+            // Log token status for debugging
+            if (string.IsNullOrEmpty(token))
+            {
+                _logger.LogWarning("No authentication token found in cookies or session");
+            }
+            else
+            {
+                _logger.LogInformation("Authentication token found, length: {TokenLength}", token.Length);
+            }
+
             var response = await _screenService.CreateScreenAsync<APIResponse>(model, token);
 
             if (response != null && response.IsSuccess)
@@ -128,7 +140,19 @@ namespace Web.Areas.Admin.Controllers
                 return View(model);
             }
 
-            var token = HttpContext.Session.GetString(Constant.SessionToken);
+            // Get token from cookies with a fallback to session
+            var token = HttpContext.Request.Cookies[Constant.AccessToken] ?? HttpContext.Session.GetString(Constant.SessionToken);
+
+            // Log token status for debugging
+            if (string.IsNullOrEmpty(token))
+            {
+                _logger.LogWarning("No authentication token found in cookies or session");
+            }
+            else
+            {
+                _logger.LogInformation("Authentication token found, length: {TokenLength}", token.Length);
+            }
+
             var response = await _screenService.UpdateScreenAsync<APIResponse>(model, token);
 
             if (response != null && response.IsSuccess)
@@ -197,7 +221,15 @@ namespace Web.Areas.Admin.Controllers
                 TempData["error"] = "Invalid screen ID.";
                 return Json(new { });
             }
-            var token = HttpContext.Session.GetString(Constant.SessionToken);
+            // Get token from cookies with a fallback to session
+            var token = HttpContext.Request.Cookies[Constant.AccessToken] ?? HttpContext.Session.GetString(Constant.SessionToken);
+
+            // Log token status for debugging
+            if (string.IsNullOrEmpty(token))
+            {
+                _logger.LogWarning("No authentication token found in cookies or session");
+            }
+
             var response = await _screenService.DeleteScreenAsync<APIResponse>(id, token);
             if (response != null && response.IsSuccess)
             {

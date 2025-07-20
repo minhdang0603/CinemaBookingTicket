@@ -50,8 +50,8 @@ namespace Web
             app.UseSession();
 
             app.UseAuthentication();
-            // Đăng ký middleware đồng bộ token vào session
-            app.UseMiddleware<TokenSyncMiddleware>();
+            // Đăng ký middleware đồng bộ và xác thực token
+            app.UseTokenSync();
             app.UseAuthorization();
             app.MapControllerRoute(
                 name: "default",

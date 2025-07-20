@@ -96,13 +96,13 @@
 
                 if (rows > 0 && seatsPerRow > 0) {
                     $('#seatConfigContainer').html(`
-                            <div class="loading-container">
-                                <div class="spinner-border text-primary" role="status">
-                                    <span class="visually-hidden">Loading...</span>
+                                <div class="loading-container">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                    <p class="mt-2">Loading seat configuration...</p>
                                 </div>
-                                <p class="mt-2">Loading seat configuration...</p>
-                            </div>
-                        `);
+                            `);
 
                     $.ajax({
                         url: seatConfigurationUrl,
@@ -118,11 +118,11 @@
                         },
                         error: function (xhr, status, error) {
                             $('#seatConfigContainer').html(`
-                                    <div class="alert alert-danger">
-                                        <i class="fas fa-exclamation-triangle me-2"></i>
-                                        Failed to load seat configuration. Please try again.
-                                    </div>
-                                `);
+                                        <div class="alert alert-danger">
+                                            <i class="fas fa-exclamation-triangle me-2"></i>
+                                            Failed to load seat configuration. Please try again.
+                                        </div>
+                                    `);
                         }
                     });
                 }
@@ -182,17 +182,24 @@
         }
 
         function applySeatType($seat, seatTypeId, seatTypeColor) {
-            var rowIndex = $seat.data('row');
-            var colIndex = $seat.data('col');
+            var rowIndex = parseInt($seat.data('row'));
+            var colIndex = parseInt($seat.data('col'));
             var seatsPerRow = parseInt($('#SeatsPerRow').val());
             var seatIndex = rowIndex * seatsPerRow + colIndex;
+
+            // Check if seat is active (not having the 'inactive' class)
+            var isActive = !$seat.hasClass('inactive');
 
             // Update the hidden input for this seat
             $('input[name="Seats[' + seatIndex + '].SeatTypeId"]').val(seatTypeId);
 
-            // Update visual appearance
-            $seat.css('background-color', seatTypeColor);
-            $seat.data('seat-type-id', seatTypeId);
+            // Update visual appearance - only change color if the seat is active
+            if (isActive) {
+                $seat.css('background-color', seatTypeColor);
+            }
+
+            // Always update the data attribute
+            $seat.attr('data-seat-type-id', seatTypeId);
         }
 
         function updateSelectionCounter() {

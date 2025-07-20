@@ -6,7 +6,7 @@ namespace Web.Services.IServices
     public interface IPaymentService
     {
         Task<T> CreateVNPayPaymentAsync<T>(VNPayRequestDTO request, string token);
-        Task<T> VNPayCheckAsync<T>(string queryString);
+        Task<T> VNPayCheckAsync<T>(string queryString, string? token = null);
         Task<T> GetPaymentByBookingIdAsync<T>(int bookingId, string token);
         Task<T> GetPaymentStatusAsync<T>(string paymentId);
     }

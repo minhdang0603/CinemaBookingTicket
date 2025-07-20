@@ -54,7 +54,7 @@ namespace Web.Areas.Admin.Controllers
                 return View(model);
             }
 
-            var token = HttpContext.Session.GetString(Constant.SessionToken);
+            var token = HttpContext.Request.Cookies[Constant.AccessToken];
             var response = await _provinceService.CreateProvinceAsync<APIResponse>(model, token);
 
             if (response != null && response.IsSuccess)
@@ -93,7 +93,7 @@ namespace Web.Areas.Admin.Controllers
                 return View(model);
             }
 
-            var token = HttpContext.Session.GetString(Constant.SessionToken);
+            var token = HttpContext.Request.Cookies[Constant.AccessToken];
             var response = await _provinceService.UpdateProvinceAsync<APIResponse>(id, model, token);
 
             if (response != null && response.IsSuccess)
@@ -110,7 +110,7 @@ namespace Web.Areas.Admin.Controllers
         [HttpDelete]
         public async Task<IActionResult> Delete(int id)
         {
-            var token = HttpContext.Session.GetString(Constant.SessionToken);
+            var token = HttpContext.Request.Cookies[Constant.AccessToken];
             var response = await _provinceService.DeleteProvinceAsync<APIResponse>(id, token);
 
             if (response != null && response.IsSuccess)

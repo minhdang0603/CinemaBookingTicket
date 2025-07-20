@@ -4,7 +4,7 @@
     <div class="screen-bar mb-4">
         <i class="fas fa-tv me-2"></i> Screen
     </div>
-    
+
     <div class="seat-grid">
         @{
             var seatIndex = 0;
@@ -15,12 +15,12 @@
                 <div class="row-selector" data-row="@row">
                     @((char)('A' + row))
                 </div>
-                
+
                 @for (int col = 0; col < Model.SeatsPerRow; col++)
                 {
-                    var existingSeat = Model.ExistingSeats.FirstOrDefault(s => 
-                        s.SeatRow == ((char)('A' + row)).ToString() && 
-                        s.SeatNumber == col + 1);
+                    var existingSeat = Model.ExistingSeats.FirstOrDefault(s =>
+                    s.SeatRow == ((char)('A' + row)).ToString() &&
+                    s.SeatNumber == col + 1);
                     var seatTypeId = existingSeat?.SeatType.Id ?? 1; // Default to Standard if no existing seat
                     var seatColor = existingSeat?.SeatType.Color ?? "#6c757d";
                     var seatId = existingSeat?.Id ?? 0;
@@ -30,14 +30,16 @@
                     <input type="hidden" name="Seats[@seatIndex].Id" value="@seatId" />
                     <input type="hidden" name="Seats[@seatIndex].SeatRow" value="@seatRow" />
                     <input type="hidden" name="Seats[@seatIndex].SeatNumber" value="@seatNumber" />
-                    <input type="hidden" name="Seats[@seatIndex].SeatTypeId" value="@seatTypeId" class="seat-type-input" data-row="@row" data-col="@col" />
+                    <input type="hidden" name="Seats[@seatIndex].SeatTypeId" value="@seatTypeId" class="seat-type-input"
+                        data-row="@row" data-col="@col" />
+                    <input type="hidden" name="Seats[@seatIndex].IsActive"
+                        value="@((existingSeat?.IsActive ?? true).ToString().ToLower())" class="seat-active-input"
+                        data-row="@row" data-col="@col" />
 
-                    <div class="seat-item" 
-                         data-row="@row" 
-                         data-col="@col" 
-                         data-seat-id="@seatId"
-                         data-seat-type-id="@seatTypeId"
-                         style="background-color: @seatColor">
+                    <div class="seat-item @(existingSeat?.IsActive == false ? "inactive" : "")" data-row="@row" data-col="@col"
+                        data-seat-id="@seatId" data-seat-type-id="@seatTypeId"
+                        data-is-active="@((existingSeat?.IsActive ?? true).ToString().ToLower())"
+                        style="background-color: @(existingSeat?.IsActive == false ? "#444444" : seatColor)">
                         @((char)('A' + row))@(col + 1)
                     </div>
                     seatIndex++;
@@ -45,7 +47,7 @@
             </div>
         }
     </div>
-    
+
     <div class="mt-4">
         <div class="seat-actions mb-3">
             <button type="button" class="btn btn-sm btn-primary me-2" id="selectAllSeats">
@@ -54,8 +56,11 @@
             <button type="button" class="btn btn-sm btn-secondary me-2" id="clearSelection">
                 <i class="fas fa-times"></i> Bỏ chọn
             </button>
+            <button type="button" class="btn btn-sm btn-danger me-2" id="toggleSeatStatus">
+                <i class="fas fa-power-off"></i> Bật/Tắt trạng thái ghế
+            </button>
         </div>
-        
+
         <div class="seat-type-selector">
             <p class="mb-2">Chọn loại ghế cho (các) ghế được chọn:</p>
             <div class="d-flex flex-wrap gap-2">
@@ -65,10 +70,8 @@
                     {
                         var color = seatType.Color ?? "#6c757d";
                         var priceMultiplier = seatType.PriceMultiplier.ToString("0.##");
-                        <div class="seat-type-option" 
-                             data-seat-type-id="@seatType.Id"
-                             data-color="@color"
-                             style="background-color: @color">
+                        <div class="seat-type-option" data-seat-type-id="@seatType.Id" data-color="@color"
+                            style="background-color: @color">
                             @seatType.Name (x @seatType.PriceMultiplier.ToString("0.##"))
                         </div>
                     }
@@ -79,9 +82,9 @@
 </div>
 
 <script>
-    $(document).ready(function() {
+    $(document).ready(function () {
         // Handle select all seats
-        $('#selectAllSeats').click(function() {
+        $('#selectAllSeats').click(function () {
             $('.seat-item').addClass('selected');
             if (typeof updateSelectionCounter === 'function') {
                 updateSelectionCounter();
@@ -89,11 +92,72 @@
         });
 
         // Handle clear selection
-        $('#clearSelection').click(function() {
+        $('#clearSelection').click(function () {
             $('.seat-item').removeClass('selected');
             if (typeof updateSelectionCounter === 'function') {
                 updateSelectionCounter();
             }
+        });
+
+        // Handle toggle seat status
+        $('#toggleSeatStatus').click(function () {
+            var selectedSeats = $('.seat-item.selected');
+
+            if (selectedSeats.length === 0) {
+                alert('Vui lòng chọn ghế trước khi thay đổi trạng thái!');
+                return;
+            }
+
+            selectedSeats.each(function () {
+                var $seat = $(this);
+                var row = parseInt($seat.data('row'));
+                var col = parseInt($seat.data('col'));
+                // Correctly determine the current active state by checking if the 'inactive' class exists
+                // This is more reliable than checking data attributes
+                var isActive = !$seat.hasClass('inactive');
+                var seatsPerRow = parseInt($('#SeatsPerRow').val());
+
+                // Calculate the seat index for the form
+                var seatIndex = row * seatsPerRow + col;
+
+                // Find the seat type ID and its original color
+                var seatTypeId = $seat.data('seat-type-id');
+                var originalColor = $('div.seat-type-option[data-seat-type-id="' + seatTypeId + '"]').data('color');
+
+                // Toggle the active state (flip the current state)
+                isActive = !isActive;
+
+                // Find the form input for this seat's active status
+                var $input = $('input.seat-active-input[data-row="' + row + '"][data-col="' + col + '"]');
+
+                if ($input.length === 0) {
+                    console.error("Could not find input for seat at row", row, "col", col);
+                    return;
+                }
+
+                // Update the hidden input with the new active state
+                $input.val(isActive.toString().toLowerCase());
+
+                // Force update the data attribute to match the new state
+                $seat.attr('data-is-active', isActive);
+
+                // Update visual appearance - first remove the class
+                if (isActive) {
+                    // If now active, remove inactive class and restore original color
+                    $seat.removeClass('inactive');
+                    $seat.css('background-color', originalColor);
+                    console.log("Seat activated:", row, col, "Color:", originalColor);
+                } else {
+                    // If now inactive, add inactive class and set to dark gray
+                    $seat.addClass('inactive');
+                    $seat.css('background-color', "#444444");
+                    console.log("Seat deactivated:", row, col);
+                }
+            });
+
+            // Clear selection after applying
+            selectedSeats.removeClass('selected');
+            updateSelectionCounter();
         });
 
         // Initialize seat selector if the function exists

@@ -6,4 +6,5 @@ public class SeatDTO
     public string SeatRow { get; set; } = null!;
     public int SeatNumber { get; set; }
     public SeatTypeDTO SeatType { get; set; }
+    public bool IsActive { get; set; } = true;
 }

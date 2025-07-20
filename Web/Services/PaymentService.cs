@@ -32,13 +32,21 @@ namespace Web.Services
         }
 
         // GET /api/payment/vnpay-check (AllowAnonymous)
-        public Task<T> VNPayCheckAsync<T>(string queryString)
+        public Task<T> VNPayCheckAsync<T>(string queryString, string? token = null)
         {
-			return SendAsync<T>(new APIRequest
+            var request = new APIRequest
             {
                 ApiType = Constant.ApiType.GET,
-                Url = $"{_baseUrl}/api/payment/vnpay-check{queryString}",
-            });
+                Url = $"{_baseUrl}/api/payment/vnpay-check{queryString}"
+            };
+            
+            // Only set token if not null or empty
+            if (!string.IsNullOrEmpty(token))
+            {
+                request.Token = token;
+            }
+            
+            return SendAsync<T>(request);
         }
 
         // GET /api/payment/by-booking/{bookingId} (Authorize)

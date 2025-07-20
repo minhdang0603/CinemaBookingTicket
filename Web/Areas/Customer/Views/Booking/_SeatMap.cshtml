@@ -31,8 +31,10 @@
                         }
                     }
 
-                    string seatStatus = (seat.IsBooked && !isCurrentUserSeat) ? "unavailable" : "";
-                    bool isDisabled = seat.IsBooked && !isCurrentUserSeat;
+                    // Mark inactive seats as "inactive" in the UI and disable them
+                    string seatStatus = !seat.IsActive ? "inactive" :
+                    (seat.IsBooked && !isCurrentUserSeat) ? "unavailable" : "";
+                    bool isDisabled = !seat.IsActive || (seat.IsBooked && !isCurrentUserSeat);
 
                     <button class="seat @seatTypeClass @seatStatus" @(isDisabled ? "disabled" : "") data-seat-id="@seat.Id"
                         data-price="@seat.Price" data-seat-code="@seat.SeatCode" style="border: 2.5px solid @seat.SeatType.Color">

@@ -61,6 +61,14 @@
     box-sizing: border-box;
 }
 
+/* Inactive seats styling */
+.seat-configuration .seat-item.inactive {
+    background-color: #444444 !important;
+    color: #aaa;
+    text-decoration: line-through;
+    opacity: 0.7;
+}
+
 .seat-configuration .seat-item::before {
     content: '';
     position: absolute;

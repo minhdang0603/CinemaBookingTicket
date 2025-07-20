@@ -79,7 +79,7 @@ namespace Web.Areas.Admin.Controllers
                 return View(model);
             }
 
-            var token = HttpContext.Session.GetString(Constant.SessionToken);
+            var token = HttpContext.Request.Cookies[Constant.AccessToken];
             var response = await _showtimeService.AddShowTimeAsync<APIResponse>(model, token);
 
             if (response == null || !response.IsSuccess)
@@ -113,7 +113,7 @@ namespace Web.Areas.Admin.Controllers
 
             _logger.LogInformation("Received bulk creation request for {Count} showtimes", showtimes.Count);
 
-            var token = HttpContext.Session.GetString(Constant.SessionToken);
+            var token = HttpContext.Request.Cookies[Constant.AccessToken];
             var response = await _showtimeService.AddShowTimesAsync<APIResponse>(showtimes, token);
 
             if (response == null)
@@ -122,10 +122,10 @@ namespace Web.Areas.Admin.Controllers
                 return Json(new { isSuccess = false, errorMessages = new[] { "No response from server. Please try again." } });
             }
 
-			var result = JsonConvert.DeserializeObject<ShowTimeBulkResultDTO>(Convert.ToString(response.Result));
+            var result = JsonConvert.DeserializeObject<ShowTimeBulkResultDTO>(Convert.ToString(response.Result));
 
-			if (response.StatusCode == System.Net.HttpStatusCode.OK)
-			{
+            if (response.StatusCode == System.Net.HttpStatusCode.OK)
+            {
                 _logger.LogInformation("All showtimes created successfully");
 
                 return Json(new
@@ -133,8 +133,8 @@ namespace Web.Areas.Admin.Controllers
                     isSuccess = true,
                     message = "All showtimes created successfully"
                 });
-			} 
-            else if(response.StatusCode == System.Net.HttpStatusCode.MultiStatus)
+            }
+            else if (response.StatusCode == System.Net.HttpStatusCode.MultiStatus)
             {
                 _logger.LogWarning("Some showtimes failed to create");
                 return Json(new
@@ -142,16 +142,16 @@ namespace Web.Areas.Admin.Controllers
                     isSuccess = true,
                     message = $"Create {result.SuccessfulShowTimes.Count} showtimes successfully!",
                     errorMessage = result.FailedShowTimes
-				});
-			} 
+                });
+            }
             else
             {
                 return Json(new
                 {
                     isSuccess = false,
-					errorMessage = response.ErrorMessages
-				});
-			}
+                    errorMessage = response.ErrorMessages
+                });
+            }
         }
 
         public async Task<ActionResult> Edit(int id)
@@ -181,7 +181,7 @@ namespace Web.Areas.Admin.Controllers
                 return View(model);
             }
 
-            var token = HttpContext.Session.GetString(Constant.SessionToken);
+            var token = HttpContext.Request.Cookies[Constant.AccessToken];
             var response = await _showtimeService.UpdateShowTimeAsync<APIResponse>(model.Id, model, token);
 
             if (response == null || !response.IsSuccess)
@@ -207,7 +207,7 @@ namespace Web.Areas.Admin.Controllers
                 TempData["error"] = "Invalid showtime ID.";
                 return Json(new { });
             }
-            var token = HttpContext.Session.GetString(Constant.SessionToken);
+            var token = HttpContext.Request.Cookies[Constant.AccessToken];
             var response = await _showtimeService.DeleteShowTimeAsync<APIResponse>(id, token);
             if (response != null && response.IsSuccess)
             {

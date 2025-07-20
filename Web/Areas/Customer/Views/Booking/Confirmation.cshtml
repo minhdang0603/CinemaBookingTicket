@@ -1,11 +1,10 @@
 @{
     ViewData["Title"] = "Kết quả thanh toán";
+    Layout = ViewData["Layout"] as string ?? "_Layout";
 }
 
-@section Styles {
-    <link rel="stylesheet" href="~/css/customer/booking/confirmation.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/css/customer/booking/payment-result.css" asp-append-version="true" />
-}
+<link rel="stylesheet" href="~/css/customer/booking/confirmation.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/customer/booking/payment-result.css" asp-append-version="true" />
 
 <!-- Main Content -->
 <div class="container booking-content">
@@ -144,18 +143,16 @@
 </div>
 </div>
 
-@section Scripts {
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            // Auto-scroll to content on mobile
-            if (window.innerWidth <= 768) {
-                setTimeout(() => {
-                    document.querySelector('.ticket-info-section').scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'start'
-                    });
-                }, 500);
-            }
-        });
-    </script>
-}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Auto-scroll to content on mobile
+        if (window.innerWidth <= 768) {
+            setTimeout(() => {
+                document.querySelector('.ticket-info-section').scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }, 500);
+        }
+    });
+</script>

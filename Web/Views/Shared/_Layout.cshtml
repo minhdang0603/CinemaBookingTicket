@@ -1,6 +1,6 @@
-﻿@using Utility
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -143,6 +143,31 @@
                 });
             }
         });
+        
+        // Kiểm tra trạng thái token
+        @if (User.Identity?.IsAuthenticated == true)
+        {
+            <text>
+            // Kiểm tra token định kỳ
+            function checkTokenStatus() {
+                fetch('/Public/Auth/CheckTokenStatus')
+                    .then(response => response.json())
+                    .then(data => {
+                        if (!data.isAuthenticated) {
+                            console.log('Token invalid or expired. Redirecting to login...');
+                            window.location.href = '/Public/Auth/Login';
+                        }
+                    })
+                    .catch(err => console.error('Error checking token status:', err));
+            }
+            
+            // Kiểm tra mỗi phút
+            setInterval(checkTokenStatus, 60000);
+            
+            // Kiểm tra khi trang được load
+            document.addEventListener('DOMContentLoaded', checkTokenStatus);
+            </text>
+        }
     </script>
     <partial name="_Notification" />
     @await RenderSectionAsync("Scripts", required: false)

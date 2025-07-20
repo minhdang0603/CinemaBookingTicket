@@ -9,13 +9,14 @@ public class SeatBookingStatusDTO
     public SeatTypeDTO SeatType { get; set; } = null!;
     public decimal Price { get; set; }
     public bool IsBooked { get; set; }
+    public bool IsActive { get; set; }
 }
 
 public class ShowTimeSeatStatusDTO
 {
     public int ShowTimeId { get; set; }
     public int MovieId { get; set; }
-	public string MovieTitle { get; set; } = string.Empty;
+    public string MovieTitle { get; set; } = string.Empty;
     public DateOnly ShowDate { get; set; }
     public TimeOnly StartTime { get; set; }
     public string ScreenName { get; set; } = string.Empty;

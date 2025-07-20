@@ -277,6 +277,12 @@ body {
         pointer-events: none;
         border-width: 0px !important;
     }
+    
+    .seat.inactive {
+        visibility: hidden;
+        cursor: default;
+        pointer-events: none;
+    }
 
 /* Legend */
 .legend {

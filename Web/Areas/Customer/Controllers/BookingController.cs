@@ -177,6 +177,7 @@ namespace Web.Areas.Customer.Controllers
 			}
 		}
 
+		[AllowAnonymous] // Allow anonymous access to confirmation page
 		public async Task<IActionResult> Confirmation()
 		{
 			try
@@ -189,12 +190,16 @@ namespace Web.Areas.Customer.Controllers
 					var vnPayResponse = await ProcessVNPayCheckResponseAsync(queryString);
 					if (vnPayResponse != null)
 					{
+						// Sử dụng layout độc lập
+						ViewData["Layout"] = "_ConfirmationLayout";
 						return View();
 					}
 				}
 
 				// Fall back to manual confirmation with data from TempData
 				ProcessManualConfirmation();
+				// Sử dụng layout độc lập
+				ViewData["Layout"] = "_ConfirmationLayout";
 				return View();
 			}
 			catch (Exception ex)
@@ -202,6 +207,8 @@ namespace Web.Areas.Customer.Controllers
 				_logger.LogError(ex, "Error processing payment confirmation");
 				ViewBag.PaymentStatus = "failed";
 				ViewBag.PaymentMessage = "Đã xảy ra lỗi khi xử lý xác nhận thanh toán.";
+				// Sử dụng layout độc lập
+				ViewData["Layout"] = "_ConfirmationLayout";
 				return View();
 			}
 		}
@@ -216,19 +223,30 @@ namespace Web.Areas.Customer.Controllers
 				string token = GetUserToken();
 				if (string.IsNullOrEmpty(token))
 				{
-					return Json(new { success = false, message = "User not authenticated" });
+					return Json(new { success = false, message = "Người dùng chưa đăng nhập" });
 				}
 
 				if (!IsValidBookingData(bookingCreateDTO))
 				{
-					return Json(new { success = false, message = "Invalid booking data" });
+					return Json(new { success = false, message = "Dữ liệu đặt vé không hợp lệ" });
 				}
 
 				// Create the booking
 				var bookingResult = await CreateBookingInDatabaseAsync(bookingCreateDTO, token);
 				if (bookingResult == null)
 				{
-					return Json(new { success = false, message = "Failed to create booking" });
+					// Lấy thông báo lỗi cụ thể từ API (đã được lưu trong HttpContext.Items)
+					string errorMessage = "Không thể tạo đặt vé. Vui lòng thử lại sau.";
+					if (HttpContext.Items.ContainsKey("BookingError") && HttpContext.Items["BookingError"] != null)
+					{
+						var bookingError = HttpContext.Items["BookingError"];
+						if (bookingError != null)
+						{
+							errorMessage = bookingError.ToString() ?? errorMessage;
+						}
+					}
+						
+					return Json(new { success = false, message = errorMessage });
 				}
 
 				// Save booking info to session
@@ -237,7 +255,7 @@ namespace Web.Areas.Customer.Controllers
 				return Json(new
 				{
 					success = true,
-					message = "Booking created successfully",
+					message = "Đặt vé thành công",
 					bookingId = bookingResult.Id,
 					redirect = Url.Action("Concession", "Booking", new { area = "Customer" }),
 					expiryMinutes = BOOKING_EXPIRY_MINUTES
@@ -246,7 +264,7 @@ namespace Web.Areas.Customer.Controllers
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, "Error creating booking");
-				return Json(new { success = false, message = "An unexpected error occurred" });
+				return Json(new { success = false, message = $"Đã xảy ra lỗi: {ex.Message}" });
 			}
 		}
 
@@ -390,7 +408,7 @@ namespace Web.Areas.Customer.Controllers
 		#region Helper Methods
 		private string GetUserToken()
 		{
-			return HttpContext.Session.GetString(Constant.SessionToken) ?? "";
+			return HttpContext.Request.Cookies[Constant.AccessToken] ?? string.Empty;
 		}
 
 		private async Task<(BookingDTO? ExistingBooking, DateTime? ExpiryTime)> GetExistingBookingInfoAsync(int showTimeId, string token)
@@ -443,7 +461,16 @@ namespace Web.Areas.Customer.Controllers
 			if (seatStatusResponse == null || !seatStatusResponse.IsSuccess)
 			{
 				_logger.LogError("Failed to retrieve seat status.");
-				TempData["error"] = seatStatusResponse?.ErrorMessages?.FirstOrDefault() ?? "Failed to retrieve seat status.";
+				
+				// Hiển thị toàn bộ lỗi từ API
+				if (seatStatusResponse?.ErrorMessages != null && seatStatusResponse.ErrorMessages.Any())
+				{
+					TempData["error"] = string.Join("<br/>", seatStatusResponse.ErrorMessages);
+				}
+				else
+				{
+					TempData["error"] = "Không thể tải trạng thái ghế. Vui lòng thử lại sau.";
+				}
 				return null;
 			}
 
@@ -452,7 +479,7 @@ namespace Web.Areas.Customer.Controllers
 			if (showTimeWithSeatStatus == null)
 			{
 				_logger.LogError("Seat status data is invalid.");
-				TempData["error"] = "Seat status data is invalid.";
+				TempData["error"] = "Dữ liệu ghế không hợp lệ.";
 				return null;
 			}
 
@@ -531,7 +558,16 @@ namespace Web.Areas.Customer.Controllers
 			if (bookingResponse == null || !bookingResponse.IsSuccess)
 			{
 				_logger.LogError("Failed to retrieve booking details.");
-				TempData["error"] = bookingResponse?.ErrorMessages?.FirstOrDefault() ?? "Failed to retrieve booking details.";
+				
+				// Hiển thị toàn bộ lỗi từ API
+				if (bookingResponse?.ErrorMessages != null && bookingResponse.ErrorMessages.Any())
+				{
+					TempData["error"] = string.Join("<br/>", bookingResponse.ErrorMessages);
+				}
+				else
+				{
+					TempData["error"] = "Không thể tải thông tin đặt vé. Vui lòng thử lại sau.";
+				}
 				return null;
 			}
 
@@ -540,7 +576,7 @@ namespace Web.Areas.Customer.Controllers
 			if (booking == null)
 			{
 				_logger.LogError("Booking data is invalid.");
-				TempData["error"] = "Booking data is invalid.";
+				TempData["error"] = "Dữ liệu đặt vé không hợp lệ.";
 				return null;
 			}
 
@@ -554,7 +590,16 @@ namespace Web.Areas.Customer.Controllers
 			if (concessionResponse == null || !concessionResponse.IsSuccess)
 			{
 				_logger.LogError("Failed to retrieve concession list.");
-				TempData["error"] = concessionResponse?.ErrorMessages?.FirstOrDefault() ?? "Failed to retrieve concession list.";
+				
+				// Hiển thị toàn bộ lỗi từ API
+				if (concessionResponse?.ErrorMessages != null && concessionResponse.ErrorMessages.Any())
+				{
+					TempData["error"] = string.Join("<br/>", concessionResponse.ErrorMessages);
+				}
+				else
+				{
+					TempData["error"] = "Không thể tải danh sách đồ ăn. Vui lòng thử lại sau.";
+				}
 				return null;
 			}
 
@@ -563,7 +608,7 @@ namespace Web.Areas.Customer.Controllers
 			if (concessions == null)
 			{
 				_logger.LogError("Concession data is invalid.");
-				TempData["error"] = "Concession data is invalid.";
+				TempData["error"] = "Dữ liệu đồ ăn không hợp lệ.";
 				return null;
 			}
 
@@ -645,60 +690,92 @@ namespace Web.Areas.Customer.Controllers
 
 			if (paymentResponse == null || !paymentResponse.IsSuccess)
 			{
-				return (false,
-					paymentResponse?.ErrorMessages?.FirstOrDefault() ?? "Failed to create payment.",
-					string.Empty);
+				// Hiển thị toàn bộ lỗi từ API
+				string errorMessage;
+				if (paymentResponse?.ErrorMessages != null && paymentResponse.ErrorMessages.Any())
+				{
+					errorMessage = string.Join("<br/>", paymentResponse.ErrorMessages);
+				}
+				else
+				{
+					errorMessage = "Không thể tạo thanh toán. Vui lòng thử lại sau.";
+				}
+				
+				return (false, errorMessage, string.Empty);
 			}
 
 			var paymentUrl = paymentResponse.Result?.ToString() ?? string.Empty;
 
 			if (string.IsNullOrEmpty(paymentUrl))
 			{
-				return (false, "Failed to generate payment URL.", string.Empty);
+				return (false, "Không thể tạo URL thanh toán. Vui lòng thử lại sau.", string.Empty);
 			}
 
 			return (true, string.Empty, paymentUrl);
 		}
 
-		private async Task<VNPayResponseDTO?> ProcessVNPayCheckResponseAsync(string queryString)
+	private async Task<VNPayResponseDTO?> ProcessVNPayCheckResponseAsync(string queryString)
+	{
+		VNPayResponseDTO? vnPayResponse = null;
+		
+		try
 		{
-			var vnPayCheckResponse = await _paymentService.VNPayCheckAsync<APIResponse>(queryString);
+			// Lấy token nếu có, không báo lỗi nếu không tìm thấy
+			string? token = null;
+			if (HttpContext.Request.Cookies.ContainsKey(Constant.AccessToken))
+			{
+				token = HttpContext.Request.Cookies[Constant.AccessToken];
+			}
+			
+			// Gọi API để kiểm tra kết quả thanh toán VNPay, truyền token nếu có
+			// API này được cấu hình AllowAnonymous nên có thể gọi mà không cần token
+			var vnPayCheckResponse = await _paymentService.VNPayCheckAsync<APIResponse>(queryString, token);
 
 			if (vnPayCheckResponse == null || !vnPayCheckResponse.IsSuccess)
 			{
+				_logger.LogWarning("VNPay check failed: {Error}", 
+				   vnPayCheckResponse?.ErrorMessages != null 
+				   ? string.Join(", ", vnPayCheckResponse.ErrorMessages) 
+				   : "Unknown error");
 				return null;
+			}				vnPayResponse = JsonConvert.DeserializeObject<VNPayResponseDTO>(vnPayCheckResponse.Result?.ToString() ?? "{}");
+	
+				if (vnPayResponse == null)
+				{
+					_logger.LogWarning("Failed to deserialize VNPay response");
+					return null;
+				}
+				
+				// Thiết lập các giá trị cho ViewBag
+				ViewBag.PaymentStatus = vnPayResponse.Success ? "success" : "failed";
+				ViewBag.PaymentMessage = vnPayResponse.Message;
+	
+				ViewBag.BookingId = vnPayResponse.OrderId;
+				ViewBag.BookingCode = vnPayResponse.BookingCode;
+				ViewBag.TransactionId = vnPayResponse.TransactionId;
+				ViewBag.TotalAmount = vnPayResponse.Amount.ToString("N0");
+				ViewBag.PaymentMethod = "VNPAY";
+	
+				if (!string.IsNullOrEmpty(vnPayResponse.MovieTitle))
+				{
+					ViewBag.MovieTitle = vnPayResponse.MovieTitle;
+					ViewBag.TheaterName = vnPayResponse.TheaterName;
+					ViewBag.ScreenName = vnPayResponse.ScreenName;
+					ViewBag.ShowDate = vnPayResponse.ShowDate;
+					ViewBag.ShowTime = vnPayResponse.ShowTime;
+					ViewBag.SelectedSeats = string.Join(", ", vnPayResponse.SeatNames);
+					ViewBag.CustomerName = vnPayResponse.CustomerName;
+				}
+	
+				if (vnPayResponse.Success)
+				{
+					ClearBookingSession();
+				}
 			}
-
-			var vnPayResponse = JsonConvert.DeserializeObject<VNPayResponseDTO>(vnPayCheckResponse.Result?.ToString() ?? "{}");
-
-			if (vnPayResponse == null)
+			catch (Exception ex)
 			{
+				_logger.LogError(ex, "Error processing VNPay check response");
 				return null;
-			}
-
-			ViewBag.PaymentStatus = vnPayResponse.Success ? "success" : "failed";
-			ViewBag.PaymentMessage = vnPayResponse.Message;
-
-			ViewBag.BookingId = vnPayResponse.OrderId;
-			ViewBag.BookingCode = vnPayResponse.BookingCode;
-			ViewBag.TransactionId = vnPayResponse.TransactionId;
-			ViewBag.TotalAmount = vnPayResponse.Amount.ToString("N0");
-			ViewBag.PaymentMethod = "VNPAY";
-
-			if (!string.IsNullOrEmpty(vnPayResponse.MovieTitle))
-			{
-				ViewBag.MovieTitle = vnPayResponse.MovieTitle;
-				ViewBag.TheaterName = vnPayResponse.TheaterName;
-				ViewBag.ScreenName = vnPayResponse.ScreenName;
-				ViewBag.ShowDate = vnPayResponse.ShowDate;
-				ViewBag.ShowTime = vnPayResponse.ShowTime;
-				ViewBag.SelectedSeats = string.Join(", ", vnPayResponse.SeatNames);
-				ViewBag.CustomerName = vnPayResponse.CustomerName;
-			}
-
-			if (vnPayResponse.Success)
-			{
-				ClearBookingSession();
 			}
 
 			return vnPayResponse;
@@ -765,8 +842,19 @@ namespace Web.Areas.Customer.Controllers
 
 			if (bookingCreateResponse == null || !bookingCreateResponse.IsSuccess)
 			{
-				_logger.LogError("Failed to create booking: {Error}",
-					bookingCreateResponse?.ErrorMessages?.FirstOrDefault() ?? "Unknown error");
+				if (bookingCreateResponse?.ErrorMessages != null && bookingCreateResponse.ErrorMessages.Any())
+				{
+					string errorMessages = string.Join(", ", bookingCreateResponse.ErrorMessages);
+					_logger.LogError("Failed to create booking: {Error}", errorMessages);
+					
+					// Lưu lỗi để hiển thị cho người dùng trong phản hồi JSON
+					HttpContext.Items["BookingError"] = errorMessages;
+				}
+				else
+				{
+					_logger.LogError("Failed to create booking: Unknown error");
+					HttpContext.Items["BookingError"] = "Không thể tạo đặt vé. Vui lòng thử lại sau.";
+				}
 				return null;
 			}
 

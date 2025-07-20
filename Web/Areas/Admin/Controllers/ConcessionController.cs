@@ -82,7 +82,7 @@ namespace Web.Areas.Admin.Controllers
                 return View(model);
             }
 
-            var token = HttpContext.Session.GetString(Constant.SessionToken);
+            var token = HttpContext.Request.Cookies[Constant.AccessToken];
             var response = await _concessionService.CreateConcessionAsync<APIResponse>(model, token);
 
             if (response != null && response.IsSuccess)
@@ -134,7 +134,7 @@ namespace Web.Areas.Admin.Controllers
                 return View(model);
             }
 
-            var token = HttpContext.Session.GetString(Constant.SessionToken);
+            var token = HttpContext.Request.Cookies[Constant.AccessToken];
             var response = await _concessionService.UpdateConcessionAsync<APIResponse>(model, token);
 
             if (response != null && response.IsSuccess)
@@ -160,7 +160,7 @@ namespace Web.Areas.Admin.Controllers
                 TempData["error"] = "Invalid concession ID.";
                 return Json(new { });
             }
-            var token = HttpContext.Session.GetString(Constant.SessionToken);
+            var token = HttpContext.Request.Cookies[Constant.AccessToken];
             var response = await _concessionService.DeleteConcessionAsync<APIResponse>(id, token);
             if (response != null && response.IsSuccess)
             {

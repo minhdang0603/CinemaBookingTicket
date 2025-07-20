@@ -26,7 +26,7 @@ namespace Web.Areas.Customer.Controllers
 
         public async Task<IActionResult> Index()
         {
-            var token = HttpContext.Session.GetString(Constant.SessionToken);
+            var token = HttpContext.Request.Cookies[Constant.AccessToken];
             if (string.IsNullOrEmpty(token))
             {
                 return RedirectToAction("Login", "Auth", new { area = "Public" });
@@ -73,7 +73,7 @@ namespace Web.Areas.Customer.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CancelBooking(int bookingId)
         {
-            var token = HttpContext.Session.GetString(Constant.SessionToken);
+            var token = HttpContext.Request.Cookies[Constant.AccessToken];
             if (string.IsNullOrEmpty(token))
             {
                 return Json(new { success = false, message = "Bạn cần đăng nhập để thực hiện thao tác này" });

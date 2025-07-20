@@ -20,6 +20,7 @@ namespace Utility
             NC17
         }
 
+        public const string AccessToken = "access_token";
         public const string SessionToken = "JWTToken";
 
         public const string Role_Customer = "Customer";
@@ -42,5 +43,7 @@ namespace Utility
         public const string Seat_Type_Standard = "Standard";
         public const string Seat_Type_Premium = "Premium";
         public const string Seat_Type_VIP = "VIP";
-    }
+
+        public const int Max_Ticket_Per_Customer = 10;
+	}
 }

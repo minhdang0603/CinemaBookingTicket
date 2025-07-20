@@ -62,7 +62,7 @@ public class GenreController : Controller
             // Nếu ModelState không hợp lệ, trả về view với model và thông báo lỗi
             return View(model);
         }
-        var token = HttpContext.Session.GetString(Constant.SessionToken);
+        var token = HttpContext.Request.Cookies[Constant.AccessToken];
         var response = await _genreService.CreateGenreAsync<APIResponse>(model, token);
         if (response == null || !response.IsSuccess)
         {
@@ -115,7 +115,7 @@ public class GenreController : Controller
             // Nếu ModelState không hợp lệ, trả về view với model và thông báo lỗi
             return View(model);
         }
-        var token = HttpContext.Session.GetString(Constant.SessionToken);
+        var token = HttpContext.Request.Cookies[Constant.AccessToken];
         var response = await _genreService.UpdateGenreAsync<APIResponse>(model, token);
         if (response == null || !response.IsSuccess)
         {
@@ -132,7 +132,7 @@ public class GenreController : Controller
     {
         _logger.LogInformation("Received request to delete genre with ID: {Id}", id);
 
-        var token = HttpContext.Session.GetString(Constant.SessionToken);
+        var token = HttpContext.Request.Cookies[Constant.AccessToken];
         var response = await _genreService.DeleteGenreAsync<APIResponse>(id, token);
         if (response == null || !response.IsSuccess)
         {

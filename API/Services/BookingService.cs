@@ -241,6 +241,21 @@ public class BookingService : IBookingService
 
 	public async Task<BookingDTO> CreateBookingAsync(BookingCreateDTO bookingCreateDTO)
 	{
+		var userId = _httpContextAccessor.HttpContext?.User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+					  ?? throw new AppException(ErrorCodes.UnauthorizedAccess());
+
+		var bookedTicketCount = (await _unitOfWork.BookingDetail.GetAllAsync(
+			bd => bd.Booking.ShowTimeId == bookingCreateDTO.ShowTimeId &&
+				  bd.Booking.ApplicationUser.Id == userId &&
+				  bd.Booking.BookingStatus != Constant.Booking_Status_Cancelled)).Count();
+
+		if ((bookedTicketCount + bookingCreateDTO.BookingDetails.Count()) >= Constant.Max_Ticket_Per_Customer)
+		{
+			_logger.LogError($"User {userId} has already booked the maximum number of tickets for this showtime.");
+			throw new AppException(ErrorCodes.MaxTicketPerCustomerExceeded());
+		}
+
+
 		// Check seats availability
 		foreach (var detail in bookingCreateDTO.BookingDetails)
 		{

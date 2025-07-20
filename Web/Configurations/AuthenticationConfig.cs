@@ -10,7 +10,9 @@ namespace Web.Configurations
               .AddCookie(options =>
               {
                   options.Cookie.HttpOnly = true;
-                  options.ExpireTimeSpan = TimeSpan.FromMinutes(30);
+                  options.Cookie.SameSite = SameSiteMode.Strict;
+                  options.Cookie.Name = "cinema_auth_token";
+                  options.ExpireTimeSpan = TimeSpan.FromDays(7); // hoặc thời gian bạn muốn
                   options.LoginPath = "/Public/Auth/Login";
                   options.LogoutPath = "/Public/Auth/Logout";
                   options.AccessDeniedPath = "/Public/Auth/AccessDenied";
