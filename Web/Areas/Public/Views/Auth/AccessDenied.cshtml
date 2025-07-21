@@ -1,0 +1,29 @@
+﻿@{
+    ViewData["Title"] = "Access Denied";
+}
+
+@section Styles {
+    <link href="~/css/public/access-denied.css" rel="stylesheet" asp-append-version="true" />
+}
+<div class="access-denied-container">
+    <div class="error-content">
+        <h1 class="error-title">ACCESS DENIED</h1>
+        <h3 class="error-subtitle">Bạn không có quyền truy cập trang này</h3>
+        <div class="error-icons">
+            <i class="fas fa-ban"></i>
+            <i class="fas fa-exclamation-triangle"></i>
+            <i class="fas fa-lock"></i>
+        </div>
+        <div class="error-code">Mã lỗi: 403</div>
+        <div>
+            <a class="back-home-btn" asp-area="public" asp-controller="Home" asp-action="Index">
+                <i class="fas fa-home"></i>
+                Về Trang Chủ
+            </a>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

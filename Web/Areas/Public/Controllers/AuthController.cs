@@ -240,5 +240,11 @@ namespace Web.Areas.Public.Controllers
                 return Json(new { isAuthenticated = false, reason = "token_invalid" });
             }
         }
+
+        [HttpGet]
+        public IActionResult AccessDenied()
+        {
+            return View();
+        }
     }
 }
