@@ -391,7 +391,7 @@ public class PaymentService : IPaymentService
             // Lấy thông tin booking với đầy đủ thông tin liên quan
             var booking = await _unitOfWork.Booking.GetAsync(
                 b => b.Id == bookingId && b.IsActive,
-                includeProperties: "ShowTime,ShowTime.Movie,ShowTime.Movie.MovieGenres,ShowTime.Movie.MovieGenres.Genre,ShowTime.Screen,ShowTime.Screen.Theater,ApplicationUser,BookingDetails");
+                includeProperties: "ShowTime.Movie.MovieGenres.Genre,ShowTime.Screen.Theater,ApplicationUser,BookingDetails");
 
             if (booking == null || booking.ApplicationUser == null)
             {
@@ -432,7 +432,7 @@ public class PaymentService : IPaymentService
                 showTime: showTime,
                 theaterName: theaterName,
                 screenName: screenName,
-                totalAmount: booking.TotalAmount
+                totalAmount: booking.Payment.Amount
             );
         }
         catch (Exception ex)
