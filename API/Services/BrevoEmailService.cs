@@ -117,6 +117,36 @@ namespace API.Services
             await SendEmailAsync(receiverEmail, subject, htmlMessage);
         }
 
+        public async Task SendOrderSuccessThankYouEmailAsync(string receiverEmail, string userName, string bookingCode,
+            string movieTitle, string moviePoster, List<string> genres, decimal moviePrice, List<string> seats,
+            DateTime showTime, string theaterName, string screenName, decimal totalAmount)
+        {
+            string subject = $"🎉 Cảm ơn bạn đã đặt vé - {movieTitle}";
+
+            // Tạo HTML cho danh sách thể loại
+            string genresHtml = string.Join("", genres.Select(genre =>
+                $"<span class=\"genre-tag\">{genre}</span>"));
+
+            // Tạo chuỗi ghế ngồi
+            string seatsString = string.Join(", ", seats);
+
+            string htmlMessage = GetEmailTemplate("OrderSuccessThankYou")
+                .Replace("{{UserName}}", userName)
+                .Replace("{{BookingCode}}", bookingCode)
+                .Replace("{{MovieTitle}}", movieTitle)
+                .Replace("{{MoviePoster}}", moviePoster ?? "https://via.placeholder.com/120x180/e63946/ffffff?text=No+Image")
+                .Replace("{{GenresList}}", genresHtml)
+                .Replace("{{MoviePrice}}", moviePrice.ToString("N0"))
+                .Replace("{{Seats}}", seatsString)
+                .Replace("{{ShowTime}}", showTime.ToString("dd/MM/yyyy HH:mm"))
+                .Replace("{{TheaterName}}", theaterName)
+                .Replace("{{ScreenName}}", screenName)
+                .Replace("{{TotalAmount}}", totalAmount.ToString("N0"))
+                .Replace("{{CurrentYear}}", DateTime.Now.Year.ToString());
+
+            await SendEmailAsync(receiverEmail, subject, htmlMessage);
+        }
+
         private string GetEmailTemplate(string templateName)
         {
             string templatePath = Path.Combine(Directory.GetCurrentDirectory(), "EmailTemplates", $"{templateName}.html");
@@ -141,6 +171,8 @@ namespace API.Services
                 "PasswordReset" => "<div style='font-family: Arial; color: #333; max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 30px; border-radius: 10px; box-shadow: 0 0 20px rgba(0,0,0,0.1);'><div style='text-align: center; margin-bottom: 30px;'><h1 style='color: #dc3545; margin-bottom: 10px;'>🔐 Reset Your Password</h1><div style='width: 50px; height: 3px; background-color: #dc3545; margin: 0 auto;'></div></div><p style='font-size: 18px; margin-bottom: 20px;'>Hello <strong>{{UserName}}</strong>,</p><p style='margin-bottom: 20px;'>We received a request to reset your password for your CinemaBookingTicket account.</p><p style='margin-bottom: 20px;'>If you made this request, click the button below to reset your password:</p><div style='text-align: center; margin: 30px 0;'><a href='{{ResetUrl}}' style='background-color: #ffc107; color: #212529; padding: 15px 30px; text-decoration: none; border-radius: 8px; display: inline-block; font-weight: bold; font-size: 16px; box-shadow: 0 4px 8px rgba(255, 193, 7, 0.3);'>🔑 Reset Password</a></div><div style='background-color: #fff3cd; padding: 20px; border-radius: 8px; margin: 25px 0; border-left: 4px solid #ffc107;'><p style='margin: 0; color: #856404;'><strong>⚠️ Important Security Information:</strong></p><ul style='margin: 10px 0; padding-left: 20px; color: #856404;'><li>This link will expire in <strong>10 minutes</strong></li><li>If you didn't request this reset, please ignore this email</li><li>Your password will remain unchanged unless you click the link above</li><li>Never share this reset link with anyone</li></ul></div><p style='margin-bottom: 20px;'>If the button doesn't work, copy and paste this link into your browser:</p><p style='word-break: break-all; color: #007bff; background-color: #f8f9fa; padding: 10px; border-radius: 5px; border-left: 4px solid #007bff;'>{{ResetUrl}}</p><p style='margin-bottom: 30px;'>Best regards,<br><strong>The CinemaBookingTicket Team</strong> 🎬</p><div style='margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; font-size: 12px; color: #666; text-align: center;'><p>© {{CurrentYear}} CinemaBookingTicket. All rights reserved.</p><p>This is an automated message. Please do not reply to this email.</p></div></div>",
 
                 "BookingConfirmation" => "<div style='font-family: Arial; color: #333;'><h2>Booking Confirmation</h2><p>Hello {{UserName}},</p><p>Your booking has been confirmed!</p><p><strong>Booking Code:</strong> {{BookingCode}}</p><p><strong>Movie:</strong> {{MovieTitle}}</p><p><strong>Date & Time:</strong> {{ShowTime}}</p><p><strong>Seats:</strong> {{Seats}}</p><p><strong>Total Amount:</strong> {{TotalAmount}}</p><p>Thank you for choosing CinemaBookingTicket!</p><p>Best regards,<br>CinemaBookingTicket Team</p><div style='margin-top: 20px; font-size: 12px; color: #666;'>© {{CurrentYear}} CinemaBookingTicket. All rights reserved.</div></div>",
+
+                "OrderSuccessThankYou" => "<div style='font-family: Arial; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #ffffff; border-radius: 10px; box-shadow: 0 0 20px rgba(0,0,0,0.1);'><div style='background: linear-gradient(135deg, #e63946, #f77f00); color: white; text-align: center; padding: 30px 20px; border-radius: 10px 10px 0 0; margin: -20px -20px 30px -20px;'><h1 style='margin: 0; font-size: 24px;'>🎉 Cảm ơn bạn đã đặt vé!</h1><p style='margin: 10px 0 0 0; opacity: 0.9;'>Đặt vé thành công - Chúc bạn xem phim vui vẻ!</p></div><p style='font-size: 16px; margin-bottom: 20px;'>Xin chào <strong>{{UserName}}</strong>,</p><div style='background-color: #e8f5e8; border-left: 4px solid #28a745; padding: 15px; margin: 20px 0; border-radius: 0 8px 8px 0;'><p style='margin: 0;'>🎬 <strong>Cảm ơn bạn đã lựa chọn CinemaBookingTicket!</strong><br>Đơn hàng của bạn đã được xác nhận và thanh toán thành công.</p></div><div style='background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;'><h3 style='color: #e63946; margin: 0 0 15px 0;'>{{MovieTitle}}</h3><p><strong>Mã đặt vé:</strong> {{BookingCode}}</p><p><strong>Ghế ngồi:</strong> {{Seats}}</p><p><strong>Suất chiếu:</strong> {{ShowTime}}</p><p><strong>Tổng tiền:</strong> {{TotalAmount}} VND</p></div><p>Chúc bạn có những phút giây thú vị tại rạp!</p><p>Trân trọng,<br><strong>Đội ngũ CinemaBookingTicket</strong> 🎬</p><div style='margin-top: 20px; font-size: 12px; color: #666; text-align: center;'>© {{CurrentYear}} CinemaBookingTicket. All rights reserved.</div></div>",
 
                 _ => "<div style='font-family: Arial; color: #333;'><h2>CinemaBookingTicket Notification</h2><p>This is an automated message from CinemaBookingTicket.</p></div>"
             };

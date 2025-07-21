@@ -16,6 +16,7 @@ public class PaymentService : IPaymentService
     private readonly IConfiguration _configuration;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
+    private readonly IEmailService _emailService;
 
     // VNPay configuration
     private readonly string _vnpayTmnCode;
@@ -24,11 +25,12 @@ public class PaymentService : IPaymentService
     private readonly string _vnpayReturnUrl;
     private readonly string _frontendUrl;
 
-    public PaymentService(IConfiguration configuration, IUnitOfWork unitOfWork, IMapper mapper)
+    public PaymentService(IConfiguration configuration, IUnitOfWork unitOfWork, IMapper mapper, IEmailService emailService)
     {
         _configuration = configuration;
         _unitOfWork = unitOfWork;
         _mapper = mapper;
+        _emailService = emailService;
 
         // Initialize VNPay configuration
         _vnpayTmnCode = _configuration["VNPay:TmnCode"] ?? "";
@@ -114,6 +116,12 @@ public class PaymentService : IPaymentService
         // Update payment and associated entities
         await UpdatePaymentDetails(payment, paymentStatus, vnpayTranId, isPaymentSuccessful);
         await UpdateBookingDetailsForResponse(payment, bookingStatus, response);
+
+        // Send thank you email if payment is successful
+        if (isPaymentSuccessful && payment.BookingId.HasValue)
+        {
+            await SendThankYouEmailAsync(payment.BookingId.Value);
+        }
 
         // Complete response with appropriate messages and redirect URL
         CompleteVNPayResponse(response, isPaymentSuccessful, vnp_ResponseCode, paymentId);
@@ -373,6 +381,64 @@ public class PaymentService : IPaymentService
                 Message = $"Lỗi hoàn tiền: {ex.Message}",
                 PaymentId = request.PaymentId
             };
+        }
+    }
+
+    private async Task SendThankYouEmailAsync(int bookingId)
+    {
+        try
+        {
+            // Lấy thông tin booking với đầy đủ thông tin liên quan
+            var booking = await _unitOfWork.Booking.GetAsync(
+                b => b.Id == bookingId && b.IsActive,
+                includeProperties: "ShowTime,ShowTime.Movie,ShowTime.Movie.MovieGenres,ShowTime.Movie.MovieGenres.Genre,ShowTime.Screen,ShowTime.Screen.Theater,ApplicationUser,BookingDetails");
+
+            if (booking == null || booking.ApplicationUser == null)
+            {
+                return;
+            }
+
+            // Lấy thông tin movie và genres
+            var movie = booking.ShowTime?.Movie;
+            if (movie == null)
+            {
+                return;
+            }
+
+            // Lấy danh sách thể loại
+            var genres = movie.MovieGenres?.Select(mg => mg.Genre?.Name ?? "").Where(g => !string.IsNullOrEmpty(g)).ToList() ?? new List<string>();
+
+            // Lấy danh sách ghế
+            var seats = booking.BookingDetails?.Select(bd => bd.SeatName).ToList() ?? new List<string>();
+
+            // Tính giá vé phim (không bao gồm đồ ăn)
+            decimal moviePrice = booking.TotalAmount;
+
+            // Thông tin suất chiếu
+            var showTime = booking.ShowTime?.ShowDate.ToDateTime(booking.ShowTime.StartTime) ?? DateTime.Now;
+            var theaterName = booking.ShowTime?.Screen?.Theater?.Name ?? "";
+            var screenName = booking.ShowTime?.Screen?.Name ?? "";
+
+            // Gửi email cảm ơn
+            await _emailService.SendOrderSuccessThankYouEmailAsync(
+                receiverEmail: booking.ApplicationUser.Email ?? "",
+                userName: booking.ApplicationUser.UserName ?? "",
+                bookingCode: booking.BookingCode,
+                movieTitle: movie.Title,
+                moviePoster: movie.PosterUrl ?? "",
+                genres: genres,
+                moviePrice: moviePrice,
+                seats: seats,
+                showTime: showTime,
+                theaterName: theaterName,
+                screenName: screenName,
+                totalAmount: booking.TotalAmount
+            );
+        }
+        catch (Exception ex)
+        {
+            // Log lỗi nhưng không throw để không ảnh hưởng đến flow chính
+            Console.WriteLine($"Failed to send thank you email for booking {bookingId}: {ex.Message}");
         }
     }
 }

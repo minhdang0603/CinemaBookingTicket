@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Cảm ơn bạn đã đặt vé</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 650px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #e63946, #f77f00);
+            color: white;
+            text-align: center;
+            padding: 30px 20px;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .header p {
+            margin: 10px 0 0 0;
+            font-size: 16px;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .greeting {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: #2c3e50;
+        }
+
+        .thank-you-message {
+            background-color: #e8f5e8;
+            border-left: 4px solid #28a745;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .movie-section {
+            display: flex;
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 25px 0;
+            align-items: flex-start;
+            gap: 20px;
+        }
+
+        .movie-poster {
+            flex-shrink: 0;
+        }
+
+        .movie-poster img {
+            width: 120px;
+            height: 180px;
+            object-fit: cover;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .movie-details {
+            flex: 1;
+        }
+
+        .movie-title {
+            font-size: 22px;
+            font-weight: bold;
+            color: #e63946;
+            margin: 0 0 15px 0;
+        }
+
+        .movie-info {
+            margin-bottom: 10px;
+        }
+
+        .movie-info strong {
+            color: #2c3e50;
+            display: inline-block;
+            width: 80px;
+        }
+
+        .genres {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .genre-tag {
+            background-color: #e63946;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .booking-details {
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 25px 0;
+        }
+
+        .booking-details h3 {
+            color: #856404;
+            margin: 0 0 15px 0;
+            font-size: 18px;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .detail-row:last-child {
+            border-bottom: none;
+            font-weight: bold;
+            font-size: 16px;
+            color: #e63946;
+        }
+
+        .detail-label {
+            font-weight: 500;
+            color: #2c3e50;
+        }
+
+        .detail-value {
+            color: #495057;
+        }
+
+        .seats {
+            background-color: #e3f2fd;
+            padding: 10px;
+            border-radius: 6px;
+            font-weight: 500;
+            color: #1976d2;
+        }
+
+        .footer {
+            background-color: #2c3e50;
+            color: white;
+            text-align: center;
+            padding: 25px 20px;
+        }
+
+        .footer p {
+            margin: 5px 0;
+        }
+
+        .footer .company-name {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .enjoy-message {
+            background-color: #fff8e1;
+            border-left: 4px solid #ffa726;
+            padding: 20px;
+            margin: 25px 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .enjoy-message h3 {
+            color: #ef6c00;
+            margin: 0 0 10px 0;
+        }
+
+        @media (max-width: 600px) {
+            .movie-section {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .movie-poster img {
+                width: 100px;
+                height: 150px;
+            }
+
+            .detail-row {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 5px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🎉 Cảm ơn bạn đã đặt vé!</h1>
+            <p>Đặt vé thành công - Chúc bạn xem phim vui vẻ!</p>
+        </div>
+
+        <!-- Content -->
+        <div class="content">
+            <div class="greeting">
+                Xin chào <strong>{{UserName}}</strong>,
+            </div>
+
+            <div class="thank-you-message">
+                <p style="margin: 0; font-size: 16px;">
+                    🎬 <strong>Cảm ơn bạn đã lựa chọn CinemaBookingTicket!</strong><br>
+                    Đơn hàng của bạn đã được xác nhận và thanh toán thành công. Chúng tôi rất vui được phục vụ bạn!
+                </p>
+            </div>
+
+            <!-- Movie Information -->
+            <div class="movie-section">
+                <div class="movie-poster">
+                    <img src="{{MoviePoster}}" alt="{{MovieTitle}}"
+                        onerror="this.src='https://via.placeholder.com/120x180/e63946/ffffff?text=No+Image'">
+                </div>
+                <div class="movie-details">
+                    <h2 class="movie-title">{{MovieTitle}}</h2>
+                    <div class="movie-info">
+                        <strong>Giá vé:</strong> {{MoviePrice}} VND
+                    </div>
+                    <div class="movie-info">
+                        <strong>Thể loại:</strong>
+                        <div class="genres">
+                            {{GenresList}}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Booking Details -->
+            <div class="booking-details">
+                <h3>📋 Chi tiết đặt vé</h3>
+                <div class="detail-row">
+                    <span class="detail-label">Mã đặt vé:</span>
+                    <span class="detail-value"><strong>{{BookingCode}}</strong></span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Rạp chiếu:</span>
+                    <span class="detail-value">{{TheaterName}}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Phòng chiếu:</span>
+                    <span class="detail-value">{{ScreenName}}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Suất chiếu:</span>
+                    <span class="detail-value">{{ShowTime}}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Ghế ngồi:</span>
+                    <span class="detail-value seats">{{Seats}}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Tổng tiền:</span>
+                    <span class="detail-value">{{TotalAmount}} VND</span>
+                </div>
+            </div>
+
+            <!-- Enjoy Message -->
+            <div class="enjoy-message">
+                <h3>🍿 Lưu ý quan trọng</h3>
+                <ul style="margin: 10px 0; padding-left: 20px;">
+                    <li>Vui lòng đến rạp trước giờ chiếu 15-30 phút</li>
+                    <li>Mang theo mã đặt vé <strong>{{BookingCode}}</strong> để làm thủ tục</li>
+                    <li>Vé đã thanh toán không thể hoàn trả</li>
+                    <li>Chúc bạn có những phút giây thú vị tại rạp!</li>
+                </ul>
+            </div>
+
+            <p style="margin-top: 30px; font-size: 16px;">
+                Một lần nữa, cảm ơn bạn đã tin tưởng và lựa chọn dịch vụ của chúng tôi. Chúng tôi luôn nỗ lực để mang
+                đến cho bạn những trải nghiệm tuyệt vời nhất!
+            </p>
+
+            <p style="margin-top: 20px;">
+                Trân trọng,<br>
+                <strong>Đội ngũ CinemaBookingTicket</strong> 🎬
+            </p>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <div class="company-name">CinemaBookingTicket</div>
+            <p>© {{CurrentYear}} CinemaBookingTicket. All rights reserved.</p>
+            <p style="font-size: 12px; opacity: 0.8;">
+                Đây là email tự động, vui lòng không reply email này.
+            </p>
+        </div>
+    </div>
+</body>
+
+</html>
