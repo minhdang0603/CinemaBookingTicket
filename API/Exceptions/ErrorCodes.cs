@@ -21,6 +21,7 @@ namespace API.Exceptions
 
         // Authentication errors
         public static Error InvalidCredentials() => new("Invalid email or password.", HttpStatusCode.Unauthorized);
+        public static Error EmailNotConfirmed() => new("Please confirm your email address before logging in. Check your email for the confirmation link.", HttpStatusCode.Unauthorized);
         public static Error UnauthorizedAccess() => new("You do not have permission to access this resource.", HttpStatusCode.Forbidden);
 
         // Payment errors - special case for payment of a booking
@@ -49,8 +50,8 @@ namespace API.Exceptions
         // General errors
         public static Error InternalServerError(string message = "An unexpected error occurred. Please try again later.") => new(message, HttpStatusCode.InternalServerError);
 
-        public static Error MaxTicketPerCustomerExceeded() 
+        public static Error MaxTicketPerCustomerExceeded()
             => new($"Bạn chỉ có thể đặt tối đa {Constant.Max_Ticket_Per_Customer} vé mỗi suất chiếu.", HttpStatusCode.BadRequest);
 
-	}
+    }
 }

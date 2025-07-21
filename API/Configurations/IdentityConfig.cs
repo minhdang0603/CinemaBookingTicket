@@ -19,7 +19,8 @@ namespace API.Configurations
                 options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
                 options.Lockout.MaxFailedAccessAttempts = 5;
             })
-               .AddEntityFrameworkStores<ApplicationDbContext>();
+               .AddEntityFrameworkStores<ApplicationDbContext>()
+               .AddDefaultTokenProviders(); // Add token providers for email confirmation
         }
     }
 }

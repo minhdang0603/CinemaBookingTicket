@@ -9,6 +9,7 @@ using API.Exceptions;
 using API.Services.IServices;
 using AutoMapper;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Utility;
 
@@ -44,13 +45,24 @@ public class AuthService : IAuthService
 
     public async Task<LoginResponseDTO> LoginAsync(LoginRequestDTO loginRequest)
     {
-        var user = _dbContext.Users.SingleOrDefault(u => u.Email.ToLower() == loginRequest.Email.ToLower());
+        if (string.IsNullOrEmpty(loginRequest.Email) || string.IsNullOrEmpty(loginRequest.Password))
+        {
+            throw new AppException(ErrorCodes.InvalidCredentials());
+        }
 
-        var isValid = await _userManager.CheckPasswordAsync(user, loginRequest.Password);
+        var user = _dbContext.Users.SingleOrDefault(u => u.Email != null && u.Email.ToLower() == loginRequest.Email.ToLower());
+
+        var isValid = user != null && await _userManager.CheckPasswordAsync(user, loginRequest.Password);
 
         if (user == null || !isValid)
         {
             throw new AppException(ErrorCodes.InvalidCredentials());
+        }
+
+        // Check if email is confirmed
+        if (!user.EmailConfirmed)
+        {
+            throw new AppException(ErrorCodes.EmailNotConfirmed());
         }
 
         // Generate JWT token
@@ -64,8 +76,14 @@ public class AuthService : IAuthService
         };
     }
 
-    public async Task<LoginResponseDTO> RegisterAsync(UserCreateDTO userCreateDTO)
+    public async Task<string> RegisterAsync(UserCreateDTO userCreateDTO)
     {
+        // Validate input
+        if (string.IsNullOrEmpty(userCreateDTO.Email) || string.IsNullOrEmpty(userCreateDTO.Password) || string.IsNullOrEmpty(userCreateDTO.Name))
+        {
+            throw new AppException(ErrorCodes.UserCreationFailed());
+        }
+
         // Check if user already exists
         var existingUser = await _userManager.FindByEmailAsync(userCreateDTO.Email);
         if (existingUser != null)
@@ -79,7 +97,7 @@ public class AuthService : IAuthService
             Email = userCreateDTO.Email,
             NormalizedEmail = userCreateDTO.Email.ToUpper(),
             Name = userCreateDTO.Name,
-            EmailConfirmed = false,
+            EmailConfirmed = false, // Set to false initially
             PhoneNumber = userCreateDTO.PhoneNumber
         };
 
@@ -91,14 +109,39 @@ public class AuthService : IAuthService
 
         await _userManager.AddToRoleAsync(user, Constant.Role_Customer);
 
-        // Send confirmation email
-        await _emailService.SendWelcomeEmailAsync(user.Email, user.Name);
+        // Generate email confirmation token using Identity
+        var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
 
-        return new LoginResponseDTO
+        // Send confirmation email with userId and token
+        await _emailService.SendEmailConfirmationAsync(user.Email, user.Name, $"{user.Id}:{token}");
+
+        return "Registration successful! Please check your email to verify your account.";
+    }
+
+    public async Task<bool> VerifyEmailAsync(string userId, string token)
+    {
+        try
         {
-            Token = await GenerateJwtToken(user, DateTime.UtcNow.AddMinutes(tokenExpirationInMinutes)),
-            Expiration = DateTime.UtcNow.AddMinutes(tokenExpirationInMinutes)
-        };
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                return false;
+            }
+
+            var result = await _userManager.ConfirmEmailAsync(user, token);
+
+            if (result.Succeeded)
+            {
+                // Send welcome email after successful verification
+                await _emailService.SendWelcomeEmailAsync(user.Email!, user.Name!);
+            }
+
+            return result.Succeeded;
+        }
+        catch
+        {
+            return false;
+        }
     }
 
     private async Task<string> GenerateJwtToken(ApplicationUser user, DateTime expiration)
@@ -110,8 +153,8 @@ public class AuthService : IAuthService
         var claims = new List<Claim>
         {
             new Claim(ClaimTypes.NameIdentifier, user.Id),
-            new Claim(ClaimTypes.Name, user.Name.ToString()),
-            new Claim(ClaimTypes.Role, roles.FirstOrDefault()),
+            new Claim(ClaimTypes.Name, user.Name ?? ""),
+            new Claim(ClaimTypes.Role, roles.FirstOrDefault() ?? ""),
         };
 
         var tokenDescriptor = new SecurityTokenDescriptor

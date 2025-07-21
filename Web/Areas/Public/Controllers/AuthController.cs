@@ -62,56 +62,9 @@ namespace Web.Areas.Public.Controllers
 
             if (response != null && response.IsSuccess)
             {
-                // Registration successful
-                if (response.Result != null)
-                {
-                    var resultStr = Convert.ToString(response.Result);
-                    if (!string.IsNullOrEmpty(resultStr))
-                    {
-                        var loginResponse = JsonConvert.DeserializeObject<LoginResponseDTO>(resultStr);
-
-                        if (loginResponse != null && !string.IsNullOrEmpty(loginResponse.Token))
-                        {
-                            _logger.LogInformation($"User {model.Email} registered successfully.");
-
-                            // Automatically log the user in after successful registration
-                            var handler = new JwtSecurityTokenHandler();
-                            var jwt = handler.ReadJwtToken(loginResponse.Token);
-
-                            var identity = new ClaimsIdentity(CookieAuthenticationDefaults.AuthenticationScheme);
-
-                            var uniqueNameClaim = jwt.Claims.FirstOrDefault(u => u.Type == "unique_name");
-                            var roleClaim = jwt.Claims.FirstOrDefault(u => u.Type == "role");
-
-                            if (uniqueNameClaim != null)
-                            {
-                                identity.AddClaim(new Claim(ClaimTypes.Name, uniqueNameClaim.Value));
-                            }
-
-                            if (roleClaim != null)
-                            {
-                                identity.AddClaim(new Claim(ClaimTypes.Role, roleClaim.Value));
-                            }
-
-                            identity.AddClaim(new Claim(Constant.AccessToken, loginResponse.Token));
-                            var principal = new ClaimsPrincipal(identity);
-                            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
-
-                            // Add token to cookies with expiration matching the JWT expiration
-                            var cookieOptions = new CookieOptions
-                            {
-                                Expires = jwt.ValidTo,
-                                HttpOnly = true,
-                                Secure = Request.IsHttps,
-                                SameSite = SameSiteMode.Lax
-                            };
-                            Response.Cookies.Append(Constant.AccessToken, loginResponse.Token, cookieOptions);
-                            return RedirectToAction("Index", "Home");
-                        }
-                    }
-                }
-
-                TempData["success"] = "Registration successful! Please login.";
+                // Registration successful - redirect to login with success message
+                _logger.LogInformation($"User {model.Email} registered successfully.");
+                TempData["success"] = "Registration successful! Please check your email to verify your account before logging in.";
                 return RedirectToAction(nameof(Login));
             }
             else
@@ -245,6 +198,31 @@ namespace Web.Areas.Public.Controllers
         public IActionResult AccessDenied()
         {
             return View();
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> VerifyEmail(string userId, string token)
+        {
+            if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(token))
+            {
+                TempData["error"] = "Invalid verification link.";
+                return RedirectToAction(nameof(Login));
+            }
+
+            var response = await _authService.VerifyEmailAsync<APIResponse>(userId, token);
+
+            if (response != null && response.IsSuccess)
+            {
+                TempData["success"] = "Email verified successfully! You can now log in.";
+                _logger.LogInformation("Email verification successful for userId: {UserId}", userId);
+            }
+            else
+            {
+                TempData["error"] = response?.ErrorMessages?.FirstOrDefault() ?? "Email verification failed. The link may be invalid or expired.";
+                _logger.LogWarning("Email verification failed for userId: {UserId}", userId);
+            }
+
+            return RedirectToAction(nameof(Login));
         }
     }
 }

@@ -6,5 +6,6 @@ namespace API.Services.IServices;
 public interface IAuthService
 {
     Task<LoginResponseDTO> LoginAsync(LoginRequestDTO loginRequest);
-    Task<LoginResponseDTO> RegisterAsync(UserCreateDTO userCreateDTO);
+    Task<string> RegisterAsync(UserCreateDTO userCreateDTO);
+    Task<bool> VerifyEmailAsync(string userId, string token);
 }

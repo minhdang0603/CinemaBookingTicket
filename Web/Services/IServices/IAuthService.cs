@@ -7,6 +7,7 @@ namespace Web.Services.IServices
         Task<T> LoginAsync<T>(LoginRequestDTO loginRequest);
         Task LogoutAsync();
         Task<T> RegisterAsync<T>(UserCreateDTO registerRequest);
+        Task<T> VerifyEmailAsync<T>(string userId, string token);
         // Task<bool> IsUserAuthenticatedAsync();
         // Task<string> GetCurrentUserNameAsync();
         // Task<string> GetCurrentUserRoleAsync();

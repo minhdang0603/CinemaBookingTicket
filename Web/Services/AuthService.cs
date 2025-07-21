@@ -41,5 +41,14 @@ namespace Web.Services
                 Url = _baseUrl + "/api/Auth/Register"
             });
         }
+
+        public Task<T> VerifyEmailAsync<T>(string userId, string token)
+        {
+            return SendAsync<T>(new APIRequest()
+            {
+                ApiType = Constant.ApiType.POST,
+                Url = _baseUrl + $"/api/Auth/verify-email?userId={userId}&token={Uri.EscapeDataString(token)}"
+            });
+        }
     }
 }

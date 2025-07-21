@@ -31,13 +31,43 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("register")]
-    public async Task<ActionResult<APIResponse<LoginResponseDTO>>> Register([FromBody] UserCreateDTO userCreateDTO)
+    public async Task<ActionResult<APIResponse<string>>> Register([FromBody] UserCreateDTO userCreateDTO)
     {
         var response = await _authService.RegisterAsync(userCreateDTO);
 
-        return CreatedAtAction(nameof(Login), new { email = userCreateDTO.Email }, APIResponse<LoginResponseDTO>.Builder()
+        return CreatedAtAction(nameof(Login), new { email = userCreateDTO.Email }, APIResponse<string>.Builder()
             .WithResult(response)
             .WithStatusCode(HttpStatusCode.Created)
+            .WithSuccess(true)
+            .Build());
+    }
+
+    [HttpPost("verify-email")]
+    public async Task<ActionResult<APIResponse<string>>> VerifyEmail([FromQuery] string userId, [FromQuery] string token)
+    {
+        if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(token))
+        {
+            return BadRequest(APIResponse<string>.Builder()
+                .WithErrorMessages(new List<string> { "UserId and token are required." })
+                .WithStatusCode(HttpStatusCode.BadRequest)
+                .WithSuccess(false)
+                .Build());
+        }
+
+        var isVerified = await _authService.VerifyEmailAsync(userId, token);
+
+        if (!isVerified)
+        {
+            return BadRequest(APIResponse<string>.Builder()
+                .WithErrorMessages(new List<string> { "Invalid or expired verification token." })
+                .WithStatusCode(HttpStatusCode.BadRequest)
+                .WithSuccess(false)
+                .Build());
+        }
+
+        return Ok(APIResponse<string>.Builder()
+            .WithResult("Email verified successfully. You can now log in.")
+            .WithStatusCode(HttpStatusCode.OK)
             .WithSuccess(true)
             .Build());
     }
