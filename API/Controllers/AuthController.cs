@@ -72,4 +72,37 @@ public class AuthController : ControllerBase
             .Build());
     }
 
+    [HttpPost("forgot-password")]
+    public async Task<ActionResult<APIResponse<string>>> ForgotPassword([FromBody] ForgotPasswordRequestDTO request)
+    {
+        var response = await _authService.ForgotPasswordAsync(request);
+
+        return Ok(APIResponse<string>.Builder()
+            .WithResult(response)
+            .WithStatusCode(HttpStatusCode.OK)
+            .WithSuccess(true)
+            .Build());
+    }
+
+    [HttpPost("reset-password")]
+    public async Task<ActionResult<APIResponse<string>>> ResetPassword([FromBody] ResetPasswordRequestDTO request)
+    {
+        var isReset = await _authService.ResetPasswordAsync(request);
+
+        if (!isReset)
+        {
+            return BadRequest(APIResponse<string>.Builder()
+                .WithErrorMessages(new List<string> { "Invalid or expired reset token, or password reset failed." })
+                .WithStatusCode(HttpStatusCode.BadRequest)
+                .WithSuccess(false)
+                .Build());
+        }
+
+        return Ok(APIResponse<string>.Builder()
+            .WithResult("Password reset successfully. You can now log in with your new password.")
+            .WithStatusCode(HttpStatusCode.OK)
+            .WithSuccess(true)
+            .Build());
+    }
+
 }

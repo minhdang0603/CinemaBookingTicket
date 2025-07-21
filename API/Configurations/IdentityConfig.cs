@@ -15,12 +15,22 @@ namespace API.Configurations
                 options.Password.RequireUppercase = true;
                 options.Password.RequireNonAlphanumeric = false;
                 options.User.RequireUniqueEmail = true;
+
                 // Lockout settings
                 options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
                 options.Lockout.MaxFailedAccessAttempts = 5;
+
+                // Token settings - password reset token expires in 10 minutes
+                options.Tokens.PasswordResetTokenProvider = TokenOptions.DefaultProvider;
             })
                .AddEntityFrameworkStores<ApplicationDbContext>()
-               .AddDefaultTokenProviders(); // Add token providers for email confirmation
+               .AddDefaultTokenProviders(); // Add token providers for email confirmation and password reset
+
+            // Configure token lifespan for password reset (10 minutes)
+            services.Configure<DataProtectionTokenProviderOptions>(options =>
+            {
+                options.TokenLifespan = TimeSpan.FromMinutes(10);
+            });
         }
     }
 }

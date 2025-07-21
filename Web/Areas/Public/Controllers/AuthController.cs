@@ -224,5 +224,92 @@ namespace Web.Areas.Public.Controllers
 
             return RedirectToAction(nameof(Login));
         }
+
+        [HttpGet]
+        public IActionResult ForgotPassword()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ForgotPassword(ForgotPasswordViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var requestDTO = new ForgotPasswordRequestDTO
+            {
+                Email = model.Email
+            };
+
+            var response = await _authService.ForgotPasswordAsync<APIResponse>(requestDTO);
+
+            if (response != null && response.IsSuccess)
+            {
+                TempData["success"] = response.Result?.ToString() ?? "If your email is registered with us, you will receive a password reset link shortly.";
+                return RedirectToAction(nameof(Login));
+            }
+            else
+            {
+                TempData["error"] = response?.ErrorMessages?.FirstOrDefault() ?? "An error occurred. Please try again.";
+                return View(model);
+            }
+        }
+
+        [HttpGet]
+        public IActionResult ResetPassword(string email, string token)
+        {
+            if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(token))
+            {
+                TempData["error"] = "Invalid password reset link.";
+                return RedirectToAction(nameof(Login));
+            }
+
+            var model = new ResetPasswordViewModel
+            {
+                Email = email,
+                Token = token
+            };
+
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ResetPassword(ResetPasswordViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                model.NewPassword = string.Empty;
+                model.ConfirmPassword = string.Empty;
+                return View(model);
+            }
+
+            var requestDTO = new ResetPasswordRequestDTO
+            {
+                Email = model.Email,
+                Token = model.Token,
+                NewPassword = model.NewPassword,
+                ConfirmPassword = model.ConfirmPassword
+            };
+
+            var response = await _authService.ResetPasswordAsync<APIResponse>(requestDTO);
+
+            if (response != null && response.IsSuccess)
+            {
+                TempData["success"] = "Password reset successfully! You can now log in with your new password.";
+                return RedirectToAction(nameof(Login));
+            }
+            else
+            {
+                TempData["error"] = response?.ErrorMessages?.FirstOrDefault() ?? "Password reset failed. The link may be invalid or expired.";
+                model.NewPassword = string.Empty;
+                model.ConfirmPassword = string.Empty;
+                return View(model);
+            }
+        }
     }
 }

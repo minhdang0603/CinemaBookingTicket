@@ -50,5 +50,25 @@ namespace Web.Services
                 Url = _baseUrl + $"/api/Auth/verify-email?userId={userId}&token={Uri.EscapeDataString(token)}"
             });
         }
+
+        public Task<T> ForgotPasswordAsync<T>(ForgotPasswordRequestDTO request)
+        {
+            return SendAsync<T>(new APIRequest()
+            {
+                ApiType = Constant.ApiType.POST,
+                Data = request,
+                Url = _baseUrl + "/api/Auth/forgot-password"
+            });
+        }
+
+        public Task<T> ResetPasswordAsync<T>(ResetPasswordRequestDTO request)
+        {
+            return SendAsync<T>(new APIRequest()
+            {
+                ApiType = Constant.ApiType.POST,
+                Data = request,
+                Url = _baseUrl + "/api/Auth/reset-password"
+            });
+        }
     }
 }

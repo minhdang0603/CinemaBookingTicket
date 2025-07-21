@@ -144,6 +144,54 @@ public class AuthService : IAuthService
         }
     }
 
+    public async Task<string> ForgotPasswordAsync(ForgotPasswordRequestDTO request)
+    {
+        if (string.IsNullOrEmpty(request.Email))
+        {
+            throw new AppException(ErrorCodes.InvalidCredentials());
+        }
+
+        var user = await _userManager.FindByEmailAsync(request.Email);
+        if (user == null)
+        {
+            // Don't reveal that the user doesn't exist for security reasons
+            return "If your email is registered with us, you will receive a password reset link shortly.";
+        }
+
+        // Check if user's email is confirmed
+        if (!user.EmailConfirmed)
+        {
+            throw new AppException(ErrorCodes.EmailNotConfirmed());
+        }
+
+        // Generate password reset token using Identity (expires in 10 minutes as configured)
+        var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+
+        // Send password reset email
+        await _emailService.SendPasswordResetEmailAsync(user.Email!, user.Name!, token);
+
+        return "If your email is registered with us, you will receive a password reset link shortly.";
+    }
+
+    public async Task<bool> ResetPasswordAsync(ResetPasswordRequestDTO request)
+    {
+        if (string.IsNullOrEmpty(request.Email) || string.IsNullOrEmpty(request.Token) || string.IsNullOrEmpty(request.NewPassword))
+        {
+            return false;
+        }
+
+        var user = await _userManager.FindByEmailAsync(request.Email);
+        if (user == null)
+        {
+            return false;
+        }
+
+        // Reset the password using Identity's built-in method
+        var result = await _userManager.ResetPasswordAsync(user, request.Token, request.NewPassword);
+
+        return result.Succeeded;
+    }
+
     private async Task<string> GenerateJwtToken(ApplicationUser user, DateTime expiration)
     {
         var roles = await _userManager.GetRolesAsync(user);

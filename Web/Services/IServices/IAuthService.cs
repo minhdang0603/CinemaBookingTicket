@@ -8,6 +8,8 @@ namespace Web.Services.IServices
         Task LogoutAsync();
         Task<T> RegisterAsync<T>(UserCreateDTO registerRequest);
         Task<T> VerifyEmailAsync<T>(string userId, string token);
+        Task<T> ForgotPasswordAsync<T>(ForgotPasswordRequestDTO request);
+        Task<T> ResetPasswordAsync<T>(ResetPasswordRequestDTO request);
         // Task<bool> IsUserAuthenticatedAsync();
         // Task<string> GetCurrentUserNameAsync();
         // Task<string> GetCurrentUserRoleAsync();
